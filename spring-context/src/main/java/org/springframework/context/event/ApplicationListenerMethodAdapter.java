@@ -1,19 +1,3 @@
-/*
- * Copyright 2002-2023 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.springframework.context.event;
 
 import java.lang.reflect.InvocationTargetException;
@@ -53,14 +37,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
- * {@link GenericApplicationListener} adapter that delegates the processing of
- * an event to an {@link EventListener} annotated method.
- *
- * <p>Delegates to {@link #processEvent(ApplicationEvent)} to give subclasses
- * a chance to deviate from the default. Unwraps the content of a
- * {@link PayloadApplicationEvent} if necessary to allow a method declaration
- * to define any arbitrary event type. If a condition is defined, it is
- * evaluated prior to invoking the underlying method.
+ * 事件监听器方法适配器：用于代理带有EventListener注解的方法处理事件
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
@@ -100,19 +77,13 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	private EventExpressionEvaluator evaluator;
 
 
-	/**
-	 * Construct a new ApplicationListenerMethodAdapter.
-	 * @param beanName the name of the bean to invoke the listener method on
-	 * @param targetClass the target class that the method is declared on
-	 * @param method the listener method to invoke
-	 */
+	/** 构造方法 */
 	public ApplicationListenerMethodAdapter(String beanName, Class<?> targetClass, Method method) {
 		this.beanName = beanName;
 		this.method = BridgeMethodResolver.findBridgedMethod(method);
 		this.targetMethod = (!Proxy.isProxyClass(targetClass) ?
 				AopUtils.getMostSpecificMethod(method, targetClass) : this.method);
 		this.methodKey = new AnnotatedElementKey(this.targetMethod, targetClass);
-
 		EventListener ann = AnnotatedElementUtils.findMergedAnnotation(this.targetMethod, EventListener.class);
 		this.declaredEventTypes = resolveDeclaredEventTypes(method, ann);
 		this.condition = (ann != null ? ann.condition() : null);

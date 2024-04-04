@@ -1,19 +1,3 @@
-/*
- * Copyright 2002-2023 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.springframework.context.support;
 
 import java.io.IOException;
@@ -89,33 +73,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Abstract implementation of the {@link org.springframework.context.ApplicationContext}
- * interface. Doesn't mandate the type of storage used for configuration; simply
- * implements common context functionality. Uses the Template Method design pattern,
- * requiring concrete subclasses to implement abstract methods.
- *
- * <p>In contrast to a plain BeanFactory, an ApplicationContext is supposed
- * to detect special beans defined in its internal bean factory:
- * Therefore, this class automatically registers
- * {@link org.springframework.beans.factory.config.BeanFactoryPostProcessor BeanFactoryPostProcessors},
- * {@link org.springframework.beans.factory.config.BeanPostProcessor BeanPostProcessors},
- * and {@link org.springframework.context.ApplicationListener ApplicationListeners}
- * which are defined as beans in the context.
- *
- * <p>A {@link org.springframework.context.MessageSource} may also be supplied
- * as a bean in the context, with the name "messageSource"; otherwise, message
- * resolution is delegated to the parent context. Furthermore, a multicaster
- * for application events can be supplied as an "applicationEventMulticaster" bean
- * of type {@link org.springframework.context.event.ApplicationEventMulticaster}
- * in the context; otherwise, a default multicaster of type
- * {@link org.springframework.context.event.SimpleApplicationEventMulticaster} will be used.
- *
- * <p>Implements resource loading by extending
- * {@link org.springframework.core.io.DefaultResourceLoader}.
- * Consequently treats non-URL resource paths as class path resources
- * (supporting full class path resource names that include the package path,
- * e.g. "mypackage/myresource.dat"), unless the {@link #getResourceByPath}
- * method is overridden in a subclass.
+ * 应用上下文容器基类
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -125,13 +83,6 @@ import org.springframework.util.ReflectionUtils;
  * @author Sebastien Deleuze
  * @author Brian Clozel
  * @since January 21, 2001
- * @see #refreshBeanFactory
- * @see #getBeanFactory
- * @see org.springframework.beans.factory.config.BeanFactoryPostProcessor
- * @see org.springframework.beans.factory.config.BeanPostProcessor
- * @see org.springframework.context.event.ApplicationEventMulticaster
- * @see org.springframework.context.ApplicationListener
- * @see org.springframework.context.MessageSource
  */
 public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		implements ConfigurableApplicationContext {
@@ -229,15 +180,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	@Nullable
 	private MessageSource messageSource;
 
-	/** Helper class used in event publishing. */
-	@Nullable
-	private ApplicationEventMulticaster applicationEventMulticaster;
-
 	/** Application startup metrics. **/
 	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
-
-	/** Statically specified listeners. */
-	private final Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<>();
 
 	/** Local listeners registered before refresh. */
 	@Nullable
@@ -373,43 +317,20 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return this.startupDate;
 	}
 
-	/**
-	 * Publish the given event to all listeners.
-	 * <p>Note: Listeners get initialized after the MessageSource, to be able
-	 * to access it within listener implementations. Thus, MessageSource
-	 * implementations cannot publish events.
-	 * @param event the event to publish (may be application-specific or a
-	 * standard framework event)
-	 */
+	/********************************************* 事件驱动模式相关（start） *********************************************/
+	/** 发布事件 */
 	@Override
 	public void publishEvent(ApplicationEvent event) {
 		publishEvent(event, null);
 	}
-
-	/**
-	 * Publish the given event to all listeners.
-	 * <p>Note: Listeners get initialized after the MessageSource, to be able
-	 * to access it within listener implementations. Thus, MessageSource
-	 * implementations cannot publish events.
-	 * @param event the event to publish (may be an {@link ApplicationEvent}
-	 * or a payload object to be turned into a {@link PayloadApplicationEvent})
-	 */
 	@Override
 	public void publishEvent(Object event) {
 		publishEvent(event, null);
 	}
-
-	/**
-	 * Publish the given event to all listeners.
-	 * @param event the event to publish (may be an {@link ApplicationEvent}
-	 * or a payload object to be turned into a {@link PayloadApplicationEvent})
-	 * @param eventType the resolved event type, if known
-	 * @since 4.2
-	 */
 	protected void publishEvent(Object event, @Nullable ResolvableType eventType) {
 		Assert.notNull(event, "Event must not be null");
 
-		// Decorate event as an ApplicationEvent if necessary
+		// 应用事件包装
 		ApplicationEvent applicationEvent;
 		if (event instanceof ApplicationEvent) {
 			applicationEvent = (ApplicationEvent) event;
@@ -421,7 +342,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 		}
 
-		// Multicast right now if possible - or lazily once the multicaster is initialized
+		// 应用启动期间，一旦注册监听器完成，则earlyApplicationEvents重置为null，表示立即组播该应用事件，否则放入early应用事件集合中等待注册监听器完成后组播
 		if (this.earlyApplicationEvents != null) {
 			this.earlyApplicationEvents.add(applicationEvent);
 		}
@@ -429,7 +350,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			getApplicationEventMulticaster().multicastEvent(applicationEvent, eventType);
 		}
 
-		// Publish event via parent context as well...
+		// 父容器发布事件
 		if (this.parent != null) {
 			if (this.parent instanceof AbstractApplicationContext) {
 				((AbstractApplicationContext) this.parent).publishEvent(event, eventType);
@@ -440,11 +361,29 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 	}
 
-	/**
-	 * Return the internal ApplicationEventMulticaster used by the context.
-	 * @return the internal ApplicationEventMulticaster (never {@code null})
-	 * @throws IllegalStateException if the context has not been initialized yet
-	 */
+	/** 应用事件组播器 */
+	@Nullable
+	private ApplicationEventMulticaster applicationEventMulticaster;
+	/** 初始化应用事件组播器，默认为SimpleApplicationEventMulticaster */
+	protected void initApplicationEventMulticaster() {
+		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+		if (beanFactory.containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
+			this.applicationEventMulticaster =
+					beanFactory.getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
+			if (logger.isTraceEnabled()) {
+				logger.trace("Using ApplicationEventMulticaster [" + this.applicationEventMulticaster + "]");
+			}
+		}
+		else {
+			this.applicationEventMulticaster = new SimpleApplicationEventMulticaster(beanFactory);
+			beanFactory.registerSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, this.applicationEventMulticaster);
+			if (logger.isTraceEnabled()) {
+				logger.trace("No '" + APPLICATION_EVENT_MULTICASTER_BEAN_NAME + "' bean, using " +
+						"[" + this.applicationEventMulticaster.getClass().getSimpleName() + "]");
+			}
+		}
+	}
+	/** 获取应用事件组播器 */
 	ApplicationEventMulticaster getApplicationEventMulticaster() throws IllegalStateException {
 		if (this.applicationEventMulticaster == null) {
 			throw new IllegalStateException("ApplicationEventMulticaster not initialized - " +
@@ -452,6 +391,47 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 		return this.applicationEventMulticaster;
 	}
+
+	/** 应用监听器集合 */
+	private final Set<ApplicationListener<?>> applicationListeners = new LinkedHashSet<>();
+	/** 添加应用监听器 */
+	@Override
+	public void addApplicationListener(ApplicationListener<?> listener) {
+		Assert.notNull(listener, "ApplicationListener must not be null");
+		if (this.applicationEventMulticaster != null) {
+			this.applicationEventMulticaster.addApplicationListener(listener);
+		}
+		this.applicationListeners.add(listener);
+	}
+	/** 获取应用监听器集合 */
+	public Collection<ApplicationListener<?>> getApplicationListeners() {
+		return this.applicationListeners;
+	}
+	/** 检查注册应用监听器 */
+	protected void registerListeners() {
+
+		// 添加应用监听器实例
+		for (ApplicationListener<?> listener : getApplicationListeners()) {
+			getApplicationEventMulticaster().addApplicationListener(listener);
+		}
+
+		// 添加应用监听器Bean名称
+		String[] listenerBeanNames = getBeanNamesForType(ApplicationListener.class, true, false);
+		for (String listenerBeanName : listenerBeanNames) {
+			getApplicationEventMulticaster().addApplicationListenerBean(listenerBeanName);
+		}
+
+		// 组播early应用事件
+		Set<ApplicationEvent> earlyEventsToProcess = this.earlyApplicationEvents;
+		this.earlyApplicationEvents = null;
+		if (!CollectionUtils.isEmpty(earlyEventsToProcess)) {
+			for (ApplicationEvent earlyEvent : earlyEventsToProcess) {
+				getApplicationEventMulticaster().multicastEvent(earlyEvent);
+			}
+		}
+
+	}
+	/********************************************* 事件驱动模式相关（end） *********************************************/
 
 	@Override
 	public void setApplicationStartup(ApplicationStartup applicationStartup) {
@@ -533,21 +513,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		return this.beanFactoryPostProcessors;
 	}
 
-	@Override
-	public void addApplicationListener(ApplicationListener<?> listener) {
-		Assert.notNull(listener, "ApplicationListener must not be null");
-		if (this.applicationEventMulticaster != null) {
-			this.applicationEventMulticaster.addApplicationListener(listener);
-		}
-		this.applicationListeners.add(listener);
-	}
-
-	/**
-	 * Return the list of statically specified ApplicationListeners.
-	 */
-	public Collection<ApplicationListener<?>> getApplicationListeners() {
-		return this.applicationListeners;
-	}
 
 	@Override
 	public void refresh() throws BeansException, IllegalStateException {
@@ -806,29 +771,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 	}
 
-	/**
-	 * Initialize the ApplicationEventMulticaster.
-	 * Uses SimpleApplicationEventMulticaster if none defined in the context.
-	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
-	 */
-	protected void initApplicationEventMulticaster() {
-		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
-		if (beanFactory.containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
-			this.applicationEventMulticaster =
-					beanFactory.getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
-			if (logger.isTraceEnabled()) {
-				logger.trace("Using ApplicationEventMulticaster [" + this.applicationEventMulticaster + "]");
-			}
-		}
-		else {
-			this.applicationEventMulticaster = new SimpleApplicationEventMulticaster(beanFactory);
-			beanFactory.registerSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, this.applicationEventMulticaster);
-			if (logger.isTraceEnabled()) {
-				logger.trace("No '" + APPLICATION_EVENT_MULTICASTER_BEAN_NAME + "' bean, using " +
-						"[" + this.applicationEventMulticaster.getClass().getSimpleName() + "]");
-			}
-		}
-	}
 
 	/**
 	 * Initialize the LifecycleProcessor.
@@ -867,32 +809,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// For subclasses: do nothing by default.
 	}
 
-	/**
-	 * Add beans that implement ApplicationListener as listeners.
-	 * Doesn't affect other listeners, which can be added without being beans.
-	 */
-	protected void registerListeners() {
-		// Register statically specified listeners first.
-		for (ApplicationListener<?> listener : getApplicationListeners()) {
-			getApplicationEventMulticaster().addApplicationListener(listener);
-		}
 
-		// Do not initialize FactoryBeans here: We need to leave all regular beans
-		// uninitialized to let post-processors apply to them!
-		String[] listenerBeanNames = getBeanNamesForType(ApplicationListener.class, true, false);
-		for (String listenerBeanName : listenerBeanNames) {
-			getApplicationEventMulticaster().addApplicationListenerBean(listenerBeanName);
-		}
-
-		// Publish early application events now that we finally have a multicaster...
-		Set<ApplicationEvent> earlyEventsToProcess = this.earlyApplicationEvents;
-		this.earlyApplicationEvents = null;
-		if (!CollectionUtils.isEmpty(earlyEventsToProcess)) {
-			for (ApplicationEvent earlyEvent : earlyEventsToProcess) {
-				getApplicationEventMulticaster().multicastEvent(earlyEvent);
-			}
-		}
-	}
 
 	/**
 	 * Finish the initialization of this context's bean factory,

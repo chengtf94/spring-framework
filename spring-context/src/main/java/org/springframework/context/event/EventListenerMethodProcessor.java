@@ -1,19 +1,3 @@
-/*
- * Copyright 2002-2020 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.springframework.context.event;
 
 import java.lang.reflect.Method;
@@ -51,50 +35,34 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Registers {@link EventListener} methods as individual {@link ApplicationListener} instances.
- * Implements {@link BeanFactoryPostProcessor} (as of 5.1) primarily for early retrieval,
- * avoiding AOP checks for this processor bean and its {@link EventListenerFactory} delegates.
+ * 事件监听器注解处理器：用于注册带有EventListener注解的方法作为应用监听器实例
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
  * @since 4.2
- * @see EventListenerFactory
- * @see DefaultEventListenerFactory
  */
 public class EventListenerMethodProcessor
 		implements SmartInitializingSingleton, ApplicationContextAware, BeanFactoryPostProcessor {
-
-	/**
-	 * Boolean flag controlled by a {@code spring.spel.ignore} system property that instructs Spring to
-	 * ignore SpEL, i.e. to not initialize the SpEL infrastructure.
-	 * <p>The default is "false".
-	 */
-	private static final boolean shouldIgnoreSpel = SpringProperties.getFlag("spring.spel.ignore");
-
-
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/** 是否忽略spel、应用上下文容器、应用Bean工厂、事件监听器工厂列表、事件表达式解析 */
+	private static final boolean shouldIgnoreSpel = SpringProperties.getFlag("spring.spel.ignore");
 	@Nullable
 	private ConfigurableApplicationContext applicationContext;
-
 	@Nullable
 	private ConfigurableListableBeanFactory beanFactory;
-
 	@Nullable
 	private List<EventListenerFactory> eventListenerFactories;
-
 	@Nullable
 	private final EventExpressionEvaluator evaluator;
-
 	private final Set<Class<?>> nonAnnotatedClasses = Collections.newSetFromMap(new ConcurrentHashMap<>(64));
 
-
+	/** 构造方法 */
 	public EventListenerMethodProcessor() {
 		if (shouldIgnoreSpel) {
 			this.evaluator = null;
-		}
-		else {
+		} else {
 			this.evaluator = new EventExpressionEvaluator();
 		}
 	}
@@ -109,13 +77,11 @@ public class EventListenerMethodProcessor
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
-
 		Map<String, EventListenerFactory> beans = beanFactory.getBeansOfType(EventListenerFactory.class, false, false);
 		List<EventListenerFactory> factories = new ArrayList<>(beans.values());
 		AnnotationAwareOrderComparator.sort(factories);
 		this.eventListenerFactories = factories;
 	}
-
 
 	@Override
 	public void afterSingletonsInstantiated() {
@@ -127,8 +93,7 @@ public class EventListenerMethodProcessor
 				Class<?> type = null;
 				try {
 					type = AutoProxyUtils.determineTargetClass(beanFactory, beanName);
-				}
-				catch (Throwable ex) {
+				} catch (Throwable ex) {
 					// An unresolvable bean type, probably from a lazy bean - let's ignore it.
 					if (logger.isDebugEnabled()) {
 						logger.debug("Could not resolve target class for bean with name '" + beanName + "'", ex);
@@ -142,8 +107,7 @@ public class EventListenerMethodProcessor
 							if (targetClass != null) {
 								type = targetClass;
 							}
-						}
-						catch (Throwable ex) {
+						} catch (Throwable ex) {
 							// An invalid scoped proxy arrangement - let's ignore it.
 							if (logger.isDebugEnabled()) {
 								logger.debug("Could not resolve target bean for scoped proxy '" + beanName + "'", ex);
@@ -152,8 +116,7 @@ public class EventListenerMethodProcessor
 					}
 					try {
 						processBean(beanName, type);
-					}
-					catch (Throwable ex) {
+					} catch (Throwable ex) {
 						throw new BeanInitializationException("Failed to process @EventListener " +
 								"annotation on bean with name '" + beanName + "'", ex);
 					}
@@ -166,7 +129,7 @@ public class EventListenerMethodProcessor
 		if (!this.nonAnnotatedClasses.contains(targetType) &&
 				AnnotationUtils.isCandidateClass(targetType, EventListener.class) &&
 				!isSpringContainerClass(targetType)) {
-
+			// 带有EventListener注解
 			Map<Method, EventListener> annotatedMethods = null;
 			try {
 				annotatedMethods = MethodIntrospector.selectMethods(targetType,
@@ -185,8 +148,7 @@ public class EventListenerMethodProcessor
 				if (logger.isTraceEnabled()) {
 					logger.trace("No @EventListener annotations found on bean class: " + targetType.getName());
 				}
-			}
-			else {
+			} else {
 				// Non-empty set of methods
 				ConfigurableApplicationContext context = this.applicationContext;
 				Assert.state(context != null, "No ApplicationContext set");
@@ -195,6 +157,7 @@ public class EventListenerMethodProcessor
 				for (Method method : annotatedMethods.keySet()) {
 					for (EventListenerFactory factory : factories) {
 						if (factory.supportsMethod(method)) {
+							/** 创建应用监听器 */
 							Method methodToUse = AopUtils.selectInvocableMethod(method, context.getType(beanName));
 							ApplicationListener<?> applicationListener =
 									factory.createApplicationListener(beanName, targetType, methodToUse);
@@ -214,12 +177,6 @@ public class EventListenerMethodProcessor
 		}
 	}
 
-	/**
-	 * Determine whether the given class is an {@code org.springframework}
-	 * bean class that is not annotated as a user or test {@link Component}...
-	 * which indicates that there is no {@link EventListener} to be found there.
-	 * @since 5.1
-	 */
 	private static boolean isSpringContainerClass(Class<?> clazz) {
 		return (clazz.getName().startsWith("org.springframework.") &&
 				!AnnotatedElementUtils.isAnnotated(ClassUtils.getUserClass(clazz), Component.class));
