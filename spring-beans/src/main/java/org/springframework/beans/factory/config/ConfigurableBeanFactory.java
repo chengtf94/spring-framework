@@ -32,67 +32,35 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
 /**
+ * 可继承的BeanFactory：
  * Configuration interface to be implemented by most bean factories. Provides
  * facilities to configure a bean factory, in addition to the bean factory
- * client methods in the {@link org.springframework.beans.factory.BeanFactory}
- * interface.
- *
- * <p>This bean factory interface is not meant to be used in normal application
- * code: Stick to {@link org.springframework.beans.factory.BeanFactory} or
- * {@link org.springframework.beans.factory.ListableBeanFactory} for typical
- * needs. This extended interface is just meant to allow for framework-internal
- * plug'n'play and for special access to bean factory configuration methods.
+ * client methods in the {@link org.springframework.beans.factory.BeanFactory} interface.
  *
  * @author Juergen Hoeller
  * @since 03.11.2003
- * @see org.springframework.beans.factory.BeanFactory
- * @see org.springframework.beans.factory.ListableBeanFactory
- * @see ConfigurableListableBeanFactory
  */
 public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, SingletonBeanRegistry {
 
 	/**
-	 * Scope identifier for the standard singleton scope: {@value}.
-	 * <p>Custom scopes can be added via {@code registerScope}.
-	 * @see #registerScope
+	 * 作用域标识：scope用于声明Bean对象应该处的限定场景 或 存活时间，内置不允许自定义注册
 	 */
 	String SCOPE_SINGLETON = "singleton";
-
-	/**
-	 * Scope identifier for the standard prototype scope: {@value}.
-	 * <p>Custom scopes can be added via {@code registerScope}.
-	 * @see #registerScope
-	 */
 	String SCOPE_PROTOTYPE = "prototype";
-
 
 	/**
 	 * Set the parent of this bean factory.
-	 * <p>Note that the parent cannot be changed: It should only be set outside
-	 * a constructor if it isn't available at the time of factory instantiation.
-	 * @param parentBeanFactory the parent BeanFactory
-	 * @throws IllegalStateException if this factory is already associated with
-	 * a parent BeanFactory
-	 * @see #getParentBeanFactory()
 	 */
 	void setParentBeanFactory(BeanFactory parentBeanFactory) throws IllegalStateException;
 
 	/**
 	 * Set the class loader to use for loading bean classes.
 	 * Default is the thread context class loader.
-	 * <p>Note that this class loader will only apply to bean definitions
-	 * that do not carry a resolved bean class yet. This is the case as of
-	 * Spring 2.0 by default: Bean definitions only carry bean class names,
-	 * to be resolved once the factory processes the bean definition.
-	 * @param beanClassLoader the class loader to use,
-	 * or {@code null} to suggest the default class loader
 	 */
 	void setBeanClassLoader(@Nullable ClassLoader beanClassLoader);
 
 	/**
-	 * Return this factory's class loader for loading bean classes
-	 * (only {@code null} if even the system ClassLoader isn't accessible).
-	 * @see org.springframework.util.ClassUtils#forName(String, ClassLoader)
+	 * Return this factory's class loader for loading bean classes (only {@code null} if even the system ClassLoader isn't accessible).
 	 */
 	@Nullable
 	ClassLoader getBeanClassLoader();
@@ -100,17 +68,12 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	/**
 	 * Specify a temporary ClassLoader to use for type matching purposes.
 	 * Default is none, simply using the standard bean ClassLoader.
-	 * <p>A temporary ClassLoader is usually just specified if
-	 * <i>load-time weaving</i> is involved, to make sure that actual bean
-	 * classes are loaded as lazily as possible. The temporary loader is
-	 * then removed once the BeanFactory completes its bootstrap phase.
 	 * @since 2.5
 	 */
 	void setTempClassLoader(@Nullable ClassLoader tempClassLoader);
 
 	/**
-	 * Return the temporary ClassLoader to use for type matching purposes,
-	 * if any.
+	 * Return the temporary ClassLoader to use for type matching purposes, if any.
 	 * @since 2.5
 	 */
 	@Nullable
@@ -251,28 +214,17 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	int getBeanPostProcessorCount();
 
 	/**
-	 * Register the given scope, backed by the given Scope implementation.
-	 * @param scopeName the scope identifier
-	 * @param scope the backing Scope implementation
+	 * 注册Scope
 	 */
 	void registerScope(String scopeName, Scope scope);
 
 	/**
 	 * Return the names of all currently registered scopes.
-	 * <p>This will only return the names of explicitly registered scopes.
-	 * Built-in scopes such as "singleton" and "prototype" won't be exposed.
-	 * @return the array of scope names, or an empty array if none
-	 * @see #registerScope
 	 */
 	String[] getRegisteredScopeNames();
 
 	/**
 	 * Return the Scope implementation for the given scope name, if any.
-	 * <p>This will only return explicitly registered scopes.
-	 * Built-in scopes such as "singleton" and "prototype" won't be exposed.
-	 * @param scopeName the name of the scope
-	 * @return the registered Scope implementation, or {@code null} if none
-	 * @see #registerScope
 	 */
 	@Nullable
 	Scope getRegisteredScope(String scopeName);
