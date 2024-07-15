@@ -132,9 +132,15 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
 	private boolean lenientConstructorResolution = true;
 
+	/**
+	 * 工厂方法所在的工厂类实例：一般与factoryMethodName结合使用
+	 */
 	@Nullable
 	private String factoryBeanName;
 
+	/**
+	 * 工厂方法名称：结合beanClass 或 factoryBeanName，容器调用该工厂方法，并返回方法调用后的结果作为Bean实例
+	 */
 	@Nullable
 	private String factoryMethodName;
 
