@@ -23,14 +23,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * setter注入的属性
  * Object to hold information and value for an individual bean property.
  * Using an object here, rather than just storing all properties in
  * a map keyed by property name, allows for more flexibility, and the
  * ability to handle indexed properties etc in an optimized way.
- *
- * <p>Note that the value doesn't need to be the final required type:
- * A {@link BeanWrapper} implementation should handle any necessary conversion,
- * as this object doesn't know anything about the objects it will be applied to.
  *
  * @author Rod Johnson
  * @author Rob Harrop
@@ -42,8 +39,14 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("serial")
 public class PropertyValue extends BeanMetadataAttributeAccessor implements Serializable {
 
+	/**
+	 * 属性名
+	 */
 	private final String name;
 
+	/**
+	 * 属性值
+	 */
 	@Nullable
 	private final Object value;
 
@@ -62,11 +65,8 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 	@Nullable
 	transient volatile Object resolvedTokens;
 
-
 	/**
-	 * Create a new PropertyValue instance.
-	 * @param name the name of the property (never {@code null})
-	 * @param value the value of the property (possibly before type conversion)
+	 * 构造方法
 	 */
 	public PropertyValue(String name, @Nullable Object value) {
 		Assert.notNull(name, "Name must not be null");
@@ -74,10 +74,6 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 		this.value = value;
 	}
 
-	/**
-	 * Copy constructor.
-	 * @param original the PropertyValue to copy (never {@code null})
-	 */
 	public PropertyValue(PropertyValue original) {
 		Assert.notNull(original, "Original must not be null");
 		this.name = original.getName();
@@ -91,12 +87,6 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 		copyAttributesFrom(original);
 	}
 
-	/**
-	 * Constructor that exposes a new value for an original value holder.
-	 * The original holder will be exposed as source of the new holder.
-	 * @param original the PropertyValue to link to (never {@code null})
-	 * @param newValue the new value to apply
-	 */
 	public PropertyValue(PropertyValue original, @Nullable Object newValue) {
 		Assert.notNull(original, "Original must not be null");
 		this.name = original.getName();
@@ -108,30 +98,15 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 		copyAttributesFrom(original);
 	}
 
-
-	/**
-	 * Return the name of the property.
-	 */
 	public String getName() {
 		return this.name;
 	}
 
-	/**
-	 * Return the value of the property.
-	 * <p>Note that type conversion will <i>not</i> have occurred here.
-	 * It is the responsibility of the BeanWrapper implementation to
-	 * perform type conversion.
-	 */
 	@Nullable
 	public Object getValue() {
 		return this.value;
 	}
 
-	/**
-	 * Return the original PropertyValue instance for this value holder.
-	 * @return the original PropertyValue (either a source of this
-	 * value holder or this value holder itself).
-	 */
 	public PropertyValue getOriginalPropertyValue() {
 		PropertyValue original = this;
 		Object source = getSource();
@@ -142,50 +117,27 @@ public class PropertyValue extends BeanMetadataAttributeAccessor implements Seri
 		return original;
 	}
 
-	/**
-	 * Set whether this is an optional value, that is, to be ignored
-	 * when no corresponding property exists on the target class.
-	 * @since 3.0
-	 */
 	public void setOptional(boolean optional) {
 		this.optional = optional;
 	}
 
-	/**
-	 * Return whether this is an optional value, that is, to be ignored
-	 * when no corresponding property exists on the target class.
-	 * @since 3.0
-	 */
 	public boolean isOptional() {
 		return this.optional;
 	}
 
-	/**
-	 * Return whether this holder contains a converted value already ({@code true}),
-	 * or whether the value still needs to be converted ({@code false}).
-	 */
 	public synchronized boolean isConverted() {
 		return this.converted;
 	}
 
-	/**
-	 * Set the converted value of this property value,
-	 * after processed type conversion.
-	 */
 	public synchronized void setConvertedValue(@Nullable Object value) {
 		this.converted = true;
 		this.convertedValue = value;
 	}
 
-	/**
-	 * Return the converted value of this property value,
-	 * after processed type conversion.
-	 */
 	@Nullable
 	public synchronized Object getConvertedValue() {
 		return this.convertedValue;
 	}
-
 
 	@Override
 	public boolean equals(@Nullable Object other) {

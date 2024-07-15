@@ -32,6 +32,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
+ * setter注入的属性列表
  * The default implementation of the {@link PropertyValues} interface.
  * Allows simple manipulation of properties, and provides constructors
  * to support deep copy and construction from a Map.
@@ -44,6 +45,9 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public class MutablePropertyValues implements PropertyValues, Serializable {
 
+	/**
+	 * setter注入的的属性列表
+	 */
 	private final List<PropertyValue> propertyValueList;
 
 	@Nullable
@@ -53,21 +57,12 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 
 
 	/**
-	 * Creates a new empty MutablePropertyValues object.
-	 * <p>Property values can be added with the {@code add} method.
-	 * @see #add(String, Object)
+	 * 构造方法
 	 */
 	public MutablePropertyValues() {
 		this.propertyValueList = new ArrayList<>(0);
 	}
 
-	/**
-	 * Deep copy constructor. Guarantees PropertyValue references
-	 * are independent, although it can't deep copy objects currently
-	 * referenced by individual PropertyValue objects.
-	 * @param original the PropertyValues to copy
-	 * @see #addPropertyValues(PropertyValues)
-	 */
 	public MutablePropertyValues(@Nullable PropertyValues original) {
 		// We can optimize this because it's all new:
 		// There is no replacement of existing property values.
@@ -83,11 +78,6 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		}
 	}
 
-	/**
-	 * Construct a new MutablePropertyValues object from a Map.
-	 * @param original a Map with property values keyed by property name Strings
-	 * @see #addPropertyValues(Map)
-	 */
 	public MutablePropertyValues(@Nullable Map<?, ?> original) {
 		// We can optimize this because it's all new:
 		// There is no replacement of existing property values.
@@ -95,49 +85,24 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 			this.propertyValueList = new ArrayList<>(original.size());
 			original.forEach((attrName, attrValue) -> this.propertyValueList.add(
 					new PropertyValue(attrName.toString(), attrValue)));
-		}
-		else {
+		} else {
 			this.propertyValueList = new ArrayList<>(0);
 		}
 	}
 
-	/**
-	 * Construct a new MutablePropertyValues object using the given List of
-	 * PropertyValue objects as-is.
-	 * <p>This is a constructor for advanced usage scenarios.
-	 * It is not intended for typical programmatic use.
-	 * @param propertyValueList a List of PropertyValue objects
-	 */
 	public MutablePropertyValues(@Nullable List<PropertyValue> propertyValueList) {
 		this.propertyValueList =
 				(propertyValueList != null ? propertyValueList : new ArrayList<>());
 	}
 
-
-	/**
-	 * Return the underlying List of PropertyValue objects in its raw form.
-	 * The returned List can be modified directly, although this is not recommended.
-	 * <p>This is an accessor for optimized access to all PropertyValue objects.
-	 * It is not intended for typical programmatic use.
-	 */
 	public List<PropertyValue> getPropertyValueList() {
 		return this.propertyValueList;
 	}
 
-	/**
-	 * Return the number of PropertyValue entries in the list.
-	 */
 	public int size() {
 		return this.propertyValueList.size();
 	}
 
-	/**
-	 * Copy all given PropertyValues into this object. Guarantees PropertyValue
-	 * references are independent, although it can't deep copy objects currently
-	 * referenced by individual PropertyValue objects.
-	 * @param other the PropertyValues to copy
-	 * @return this in order to allow for adding multiple property values in a chain
-	 */
 	public MutablePropertyValues addPropertyValues(@Nullable PropertyValues other) {
 		if (other != null) {
 			PropertyValue[] pvs = other.getPropertyValues();
@@ -162,12 +127,6 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		return this;
 	}
 
-	/**
-	 * Add a PropertyValue object, replacing any existing one for the
-	 * corresponding property or getting merged with it (if applicable).
-	 * @param pv the PropertyValue object to add
-	 * @return this in order to allow for adding multiple property values in a chain
-	 */
 	public MutablePropertyValues addPropertyValue(PropertyValue pv) {
 		for (int i = 0; i < this.propertyValueList.size(); i++) {
 			PropertyValue currentPv = this.propertyValueList.get(i);
@@ -181,26 +140,10 @@ public class MutablePropertyValues implements PropertyValues, Serializable {
 		return this;
 	}
 
-	/**
-	 * Overloaded version of {@code addPropertyValue} that takes
-	 * a property name and a property value.
-	 * <p>Note: As of Spring 3.0, we recommend using the more concise
-	 * and chaining-capable variant {@link #add}.
-	 * @param propertyName name of the property
-	 * @param propertyValue value of the property
-	 * @see #addPropertyValue(PropertyValue)
-	 */
 	public void addPropertyValue(String propertyName, Object propertyValue) {
 		addPropertyValue(new PropertyValue(propertyName, propertyValue));
 	}
 
-	/**
-	 * Add a PropertyValue object, replacing any existing one for the
-	 * corresponding property or getting merged with it (if applicable).
-	 * @param propertyName name of the property
-	 * @param propertyValue value of the property
-	 * @return this in order to allow for adding multiple property values in a chain
-	 */
 	public MutablePropertyValues add(String propertyName, @Nullable Object propertyValue) {
 		addPropertyValue(new PropertyValue(propertyName, propertyValue));
 		return this;
