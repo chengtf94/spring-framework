@@ -41,12 +41,6 @@ import org.springframework.util.Assert;
  * typically registered as {@link GenericBeanDefinition GenericBeanDefinitions}.
  * A root bean definition is essentially the 'unified' bean definition view at runtime.
  *
- * <p>Root bean definitions may also be used for registering individual bean definitions
- * in the configuration phase. However, since Spring 2.5, the preferred way to register
- * bean definitions programmatically is the {@link GenericBeanDefinition} class.
- * GenericBeanDefinition has the advantage that it allows to dynamically define
- * parent dependencies, not 'hard-coding' the role as a root bean definition.
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sam Brannen
@@ -131,52 +125,23 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 
 
 	/**
-	 * Create a new RootBeanDefinition, to be configured through its bean
-	 * properties and configuration methods.
-	 * @see #setBeanClass
-	 * @see #setScope
-	 * @see #setConstructorArgumentValues
-	 * @see #setPropertyValues
+	 * 构造方法
 	 */
 	public RootBeanDefinition() {
 		super();
 	}
 
-	/**
-	 * Create a new RootBeanDefinition for a singleton.
-	 * @param beanClass the class of the bean to instantiate
-	 * @see #setBeanClass
-	 */
 	public RootBeanDefinition(@Nullable Class<?> beanClass) {
 		super();
 		setBeanClass(beanClass);
 	}
 
-	/**
-	 * Create a new RootBeanDefinition for a singleton bean, constructing each instance
-	 * through calling the given supplier (possibly a lambda or method reference).
-	 * @param beanClass the class of the bean to instantiate
-	 * @param instanceSupplier the supplier to construct a bean instance,
-	 * as an alternative to a declaratively specified factory method
-	 * @since 5.0
-	 * @see #setInstanceSupplier
-	 */
 	public <T> RootBeanDefinition(@Nullable Class<T> beanClass, @Nullable Supplier<T> instanceSupplier) {
 		super();
 		setBeanClass(beanClass);
 		setInstanceSupplier(instanceSupplier);
 	}
 
-	/**
-	 * Create a new RootBeanDefinition for a scoped bean, constructing each instance
-	 * through calling the given supplier (possibly a lambda or method reference).
-	 * @param beanClass the class of the bean to instantiate
-	 * @param scope the name of the corresponding scope
-	 * @param instanceSupplier the supplier to construct a bean instance,
-	 * as an alternative to a declaratively specified factory method
-	 * @since 5.0
-	 * @see #setInstanceSupplier
-	 */
 	public <T> RootBeanDefinition(@Nullable Class<T> beanClass, String scope, @Nullable Supplier<T> instanceSupplier) {
 		super();
 		setBeanClass(beanClass);
