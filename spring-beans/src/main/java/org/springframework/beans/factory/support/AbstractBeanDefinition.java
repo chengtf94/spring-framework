@@ -76,18 +76,18 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	private String scope = SCOPE_DEFAULT;
 
 	/**
-	 * 是否抽象类
+	 * 是否抽象类：abstractFlag = true 表示该Bean不需要实例化
 	 */
 	private boolean abstractFlag = false;
 
 	/**
-	 * 是否延迟初始化
+	 * 是否延迟初始化：ApplicationContext#refresh容器启动时会默认进行Bean实例化，lazyInit=true则跳过该Bean的默认实例化
 	 */
 	@Nullable
 	private Boolean lazyInit;
 
 	/**
-	 * 自动绑定模式：默认为no
+	 * 自动绑定模式：默认为no（不自动绑定）
 	 */
 	public static final int AUTOWIRE_NO = AutowireCapableBeanFactory.AUTOWIRE_NO;
 	public static final int AUTOWIRE_BY_NAME = AutowireCapableBeanFactory.AUTOWIRE_BY_NAME;
@@ -98,29 +98,15 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	private int autowireMode = AUTOWIRE_NO;
 
 	/**
-	 * Constant that indicates no dependency check at all.
-	 * @see #setDependencyCheck
+	 * 依赖检查模式：默认为no（不检查）
+	 * 1）none：不做依赖检查
+	 * 2）object：只对对象引用类型的依赖进行检查
+	 * 3）simple：对简单属性类型、以及对应的collection进行依赖检查，对象引用类型的依赖不检查
+	 * 4）all：结合 object 和 simple，都检查
 	 */
 	public static final int DEPENDENCY_CHECK_NONE = 0;
-
-	/**
-	 * Constant that indicates dependency checking for object references.
-	 * @see #setDependencyCheck
-	 */
 	public static final int DEPENDENCY_CHECK_OBJECTS = 1;
-
-	/**
-	 * Constant that indicates dependency checking for "simple" properties.
-	 * @see #setDependencyCheck
-	 * @see org.springframework.beans.BeanUtils#isSimpleProperty
-	 */
 	public static final int DEPENDENCY_CHECK_SIMPLE = 2;
-
-	/**
-	 * Constant that indicates dependency checking for all properties
-	 * (object references as well as "simple" properties).
-	 * @see #setDependencyCheck
-	 */
 	public static final int DEPENDENCY_CHECK_ALL = 3;
 	private int dependencyCheck = DEPENDENCY_CHECK_NONE;
 
