@@ -28,14 +28,7 @@ import org.springframework.core.metrics.ApplicationStartup;
 import org.springframework.lang.Nullable;
 
 /**
- * SPI interface to be implemented by most if not all application contexts.
- * Provides facilities to configure an application context in addition
- * to the application context client methods in the
- * {@link org.springframework.context.ApplicationContext} interface.
- *
- * <p>Configuration and lifecycle methods are encapsulated here to avoid
- * making them obvious to ApplicationContext client code. The present
- * methods should only be used by startup and shutdown code.
+ * ConfigurableApplicationContext：可配置的应用上下文容器接口
  *
  * @author Juergen Hoeller
  * @author Chris Beams
@@ -47,9 +40,6 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	/**
 	 * Any number of these characters are considered delimiters between
 	 * multiple context config paths in a single String value.
-	 * @see org.springframework.context.support.AbstractXmlApplicationContext#setConfigLocation
-	 * @see org.springframework.web.context.ContextLoader#CONFIG_LOCATION_PARAM
-	 * @see org.springframework.web.servlet.FrameworkServlet#setContextConfigLocation
 	 */
 	String CONFIG_LOCATION_DELIMITERS = ",; \t\n";
 
