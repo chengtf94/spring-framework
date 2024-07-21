@@ -26,8 +26,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Utility methods that are useful for bean definition reader implementations.
- * Mainly intended for internal use.
+ * BeanDefinitionReaderUtils：Bean定义读取工具类
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -71,34 +70,18 @@ public abstract class BeanDefinitionReaderUtils {
 	}
 
 	/**
-	 * Generate a bean name for the given top-level bean definition,
-	 * unique within the given bean factory.
-	 * @param beanDefinition the bean definition to generate a bean name for
-	 * @param registry the bean factory that the definition is going to be
-	 * registered with (to check for existing bean names)
-	 * @return the generated bean name
-	 * @throws BeanDefinitionStoreException if no unique name can be generated
-	 * for the given bean definition
-	 * @see #generateBeanName(BeanDefinition, BeanDefinitionRegistry, boolean)
+	 * Generate a bean name for the given top-level bean definition, unique within the given bean factory.
 	 */
 	public static String generateBeanName(BeanDefinition beanDefinition, BeanDefinitionRegistry registry)
 			throws BeanDefinitionStoreException {
-
 		return generateBeanName(beanDefinition, registry, false);
 	}
 
 	/**
 	 * Generate a bean name for the given bean definition, unique within the
 	 * given bean factory.
-	 * @param definition the bean definition to generate a bean name for
-	 * @param registry the bean factory that the definition is going to be
-	 * registered with (to check for existing bean names)
-	 * @param isInnerBean whether the given bean definition will be registered
-	 * as inner bean or as top-level bean (allowing for special name generation
-	 * for inner beans versus top-level beans)
-	 * @return the generated bean name
-	 * @throws BeanDefinitionStoreException if no unique name can be generated
-	 * for the given bean definition
+	 * @param isInnerBean whether the given bean definition will be registered as inner bean
+	 *                       or as top-level bean (allowing for special name generation or inner beans versus top-level beans)
 	 */
 	public static String generateBeanName(
 			BeanDefinition definition, BeanDefinitionRegistry registry, boolean isInnerBean)
@@ -128,13 +111,7 @@ public abstract class BeanDefinitionReaderUtils {
 	}
 
 	/**
-	 * Turn the given bean name into a unique bean name for the given bean factory,
-	 * appending a unique counter as suffix if necessary.
-	 * @param beanName the original bean name
-	 * @param registry the bean factory that the definition is going to be
-	 * registered with (to check for existing bean names)
-	 * @return the unique bean name to use
-	 * @since 5.1
+	 * Turn the given bean name into a unique bean name for the given bean factory, appending a unique counter as suffix if necessary.
 	 */
 	public static String uniqueBeanName(String beanName, BeanDefinitionRegistry registry) {
 		String id = beanName;
