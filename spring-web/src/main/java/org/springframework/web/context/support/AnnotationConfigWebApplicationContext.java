@@ -34,69 +34,15 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.ContextLoader;
 
 /**
- * {@link org.springframework.web.context.WebApplicationContext WebApplicationContext}
- * implementation which accepts <em>component classes</em> as input &mdash; in particular
- * {@link org.springframework.context.annotation.Configuration @Configuration}
- * classes, but also plain {@link org.springframework.stereotype.Component @Component}
- * classes as well as JSR-330 compliant classes using {@code javax.inject} annotations.
- *
- * <p>Allows for registering classes one by one (specifying class names as config
- * locations) as well as via classpath scanning (specifying base packages as config
- * locations).
- *
- * <p>This is essentially the equivalent of
- * {@link org.springframework.context.annotation.AnnotationConfigApplicationContext
- * AnnotationConfigApplicationContext} for a web environment. However, in contrast to
- * {@code AnnotationConfigApplicationContext}, this class does not extend
- * {@link org.springframework.context.support.GenericApplicationContext
- * GenericApplicationContext} and therefore does not provide some of the convenient
- * {@code registerBean(...)} methods available in a {@code GenericApplicationContext}.
- * If you wish to register annotated <em>component classes</em> with a
- * {@code GenericApplicationContext} in a web environment, you may use a
- * {@code GenericWebApplicationContext} with an
- * {@link org.springframework.context.annotation.AnnotatedBeanDefinitionReader
- * AnnotatedBeanDefinitionReader}. See the Javadoc for {@link GenericWebApplicationContext}
- * for details and an example.
- *
- * <p>To make use of this application context, the
- * {@linkplain ContextLoader#CONTEXT_CLASS_PARAM "contextClass"} context-param for
- * ContextLoader and/or "contextClass" init-param for FrameworkServlet must be set to
- * the fully-qualified name of this class.
- *
- * <p>As of Spring 3.1, this class may also be directly instantiated and injected into
- * Spring's {@code DispatcherServlet} or {@code ContextLoaderListener} when using the
- * {@link org.springframework.web.WebApplicationInitializer WebApplicationInitializer}
- * code-based alternative to {@code web.xml}. See its Javadoc for details and usage examples.
- *
- * <p>Unlike {@link XmlWebApplicationContext}, no default configuration class locations
- * are assumed. Rather, it is a requirement to set the
- * {@linkplain ContextLoader#CONFIG_LOCATION_PARAM "contextConfigLocation"}
- * context-param for {@link ContextLoader} and/or "contextConfigLocation" init-param for
- * FrameworkServlet.  The param-value may contain both fully-qualified
- * class names and base packages to scan for components. See {@link #loadBeanDefinitions}
- * for exact details on how these locations are processed.
- *
- * <p>As an alternative to setting the "contextConfigLocation" parameter, users may
- * implement an {@link org.springframework.context.ApplicationContextInitializer
- * ApplicationContextInitializer} and set the
- * {@linkplain ContextLoader#CONTEXT_INITIALIZER_CLASSES_PARAM "contextInitializerClasses"}
- * context-param / init-param. In such cases, users should favor the {@link #refresh()}
- * and {@link #scan(String...)} methods over the {@link #setConfigLocation(String)}
- * method, which is primarily for use by {@code ContextLoader}.
- *
- * <p>Note: In case of multiple {@code @Configuration} classes, later {@code @Bean}
- * definitions will override ones defined in earlier loaded files. This can be leveraged
- * to deliberately override certain bean definitions via an extra {@code @Configuration}
- * class.
+ * AnnotationConfigWebApplicationContext：基于注解配置的WebApplicationContext
  *
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 3.0
- * @see org.springframework.context.annotation.AnnotationConfigApplicationContext
- * @see org.springframework.web.context.support.GenericWebApplicationContext
  */
-public class AnnotationConfigWebApplicationContext extends AbstractRefreshableWebApplicationContext
+public class AnnotationConfigWebApplicationContext
+		extends AbstractRefreshableWebApplicationContext
 		implements AnnotationConfigRegistry {
 
 	@Nullable
