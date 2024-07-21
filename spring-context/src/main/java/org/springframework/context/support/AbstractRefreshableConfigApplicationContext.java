@@ -34,13 +34,12 @@ public abstract class AbstractRefreshableConfigApplicationContext
 		implements BeanNameAware, InitializingBean {
 
 	/**
-	 * 配置路径数组
+	 * 配置位置数组
 	 */
 	@Nullable
 	private String[] configLocations;
 
 	private boolean setIdCalled = false;
-
 
 	/**
 	 * 构造方法
@@ -53,14 +52,14 @@ public abstract class AbstractRefreshableConfigApplicationContext
 	}
 
 	/**
-	 * 设置配置路径
+	 * 设置配置位置
 	 */
 	public void setConfigLocation(String location) {
 		setConfigLocations(StringUtils.tokenizeToStringArray(location, CONFIG_LOCATION_DELIMITERS));
 	}
 
 	/**
-	 * 设置配置路径
+	 * 设置配置位置
 	 */
 	public void setConfigLocations(@Nullable String... locations) {
 		if (locations != null) {
@@ -75,7 +74,7 @@ public abstract class AbstractRefreshableConfigApplicationContext
 	}
 
 	/**
-	 * Resolve the given path, replacing placeholders with corresponding
+	 * 解析指定的路径：Resolve the given path, replacing placeholders with corresponding
 	 */
 	protected String resolvePath(String path) {
 		return getEnvironment().resolveRequiredPlaceholders(path);
@@ -108,6 +107,7 @@ public abstract class AbstractRefreshableConfigApplicationContext
 	@Override
 	public void afterPropertiesSet() {
 		if (!isActive()) {
+			// 刷新容器
 			refresh();
 		}
 	}

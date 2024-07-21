@@ -52,7 +52,6 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	@Nullable
 	private volatile DefaultListableBeanFactory beanFactory;
 
-
 	/**
 	 * 构造方法
 	 */
