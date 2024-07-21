@@ -114,7 +114,6 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		}
 	}
 
-
 	private final Set<String> ignoredResourceTypes = new HashSet<>(1);
 
 	private boolean fallbackToDefaultTypeMatch = true;
@@ -135,77 +134,36 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 	private final transient Map<String, InjectionMetadata> injectionMetadataCache = new ConcurrentHashMap<>(256);
 
-
 	/**
-	 * Create a new CommonAnnotationBeanPostProcessor,
-	 * with the init and destroy annotation types set to
-	 * {@link javax.annotation.PostConstruct} and {@link javax.annotation.PreDestroy},
-	 * respectively.
+	 * 构造方法
 	 */
 	public CommonAnnotationBeanPostProcessor() {
 		setOrder(Ordered.LOWEST_PRECEDENCE - 3);
 		setInitAnnotationType(PostConstruct.class);
 		setDestroyAnnotationType(PreDestroy.class);
 		ignoreResourceType("javax.xml.ws.WebServiceContext");
-
 		// java.naming module present on JDK 9+?
 		if (jndiPresent) {
 			this.jndiFactory = new SimpleJndiBeanFactory();
 		}
 	}
 
-
 	/**
-	 * Ignore the given resource type when resolving {@code @Resource}
-	 * annotations.
-	 * <p>By default, the {@code javax.xml.ws.WebServiceContext} interface
-	 * will be ignored, since it will be resolved by the JAX-WS runtime.
-	 * @param resourceType the resource type to ignore
+	 * Ignore the given resource type when resolving {@code @Resource} annotations.
 	 */
 	public void ignoreResourceType(String resourceType) {
 		Assert.notNull(resourceType, "Ignored resource type must not be null");
 		this.ignoredResourceTypes.add(resourceType);
 	}
 
-	/**
-	 * Set whether to allow a fallback to a type match if no explicit name has been
-	 * specified. The default name (i.e. the field name or bean property name) will
-	 * still be checked first; if a bean of that name exists, it will be taken.
-	 * However, if no bean of that name exists, a by-type resolution of the
-	 * dependency will be attempted if this flag is "true".
-	 * <p>Default is "true". Switch this flag to "false" in order to enforce a
-	 * by-name lookup in all cases, throwing an exception in case of no name match.
-	 * @see org.springframework.beans.factory.config.AutowireCapableBeanFactory#resolveDependency
-	 */
 	public void setFallbackToDefaultTypeMatch(boolean fallbackToDefaultTypeMatch) {
 		this.fallbackToDefaultTypeMatch = fallbackToDefaultTypeMatch;
 	}
 
-	/**
-	 * Set whether to always use JNDI lookups equivalent to standard Java EE 5 resource
-	 * injection, <b>even for {@code name} attributes and default names</b>.
-	 * <p>Default is "false": Resource names are used for Spring bean lookups in the
-	 * containing BeanFactory; only {@code mappedName} attributes point directly
-	 * into JNDI. Switch this flag to "true" for enforcing Java EE style JNDI lookups
-	 * in any case, even for {@code name} attributes and default names.
-	 * @see #setJndiFactory
-	 * @see #setResourceFactory
-	 */
 	public void setAlwaysUseJndiLookup(boolean alwaysUseJndiLookup) {
 		this.alwaysUseJndiLookup = alwaysUseJndiLookup;
 	}
 
-	/**
-	 * Specify the factory for objects to be injected into {@code @Resource} /
-	 * {@code @WebServiceRef} / {@code @EJB} annotated fields and setter methods,
-	 * <b>for {@code mappedName} attributes that point directly into JNDI</b>.
-	 * This factory will also be used if "alwaysUseJndiLookup" is set to "true" in order
-	 * to enforce JNDI lookups even for {@code name} attributes and default names.
-	 * <p>The default is a {@link org.springframework.jndi.support.SimpleJndiBeanFactory}
-	 * for JNDI lookup behavior equivalent to standard Java EE 5 resource injection.
-	 * @see #setResourceFactory
-	 * @see #setAlwaysUseJndiLookup
-	 */
 	public void setJndiFactory(BeanFactory jndiFactory) {
 		Assert.notNull(jndiFactory, "BeanFactory must not be null");
 		this.jndiFactory = jndiFactory;

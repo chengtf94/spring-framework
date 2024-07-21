@@ -51,6 +51,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
 /**
+ * EventListenerMethodProcessor：负责处理@EventListener注解
  * Registers {@link EventListener} methods as individual {@link ApplicationListener} instances.
  * Implements {@link BeanFactoryPostProcessor} (as of 5.1) primarily for early retrieval,
  * avoiding AOP checks for this processor bean and its {@link EventListenerFactory} delegates.
@@ -59,11 +60,14 @@ import org.springframework.util.CollectionUtils;
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
  * @since 4.2
+ * @see EventListener
  * @see EventListenerFactory
  * @see DefaultEventListenerFactory
  */
-public class EventListenerMethodProcessor
-		implements SmartInitializingSingleton, ApplicationContextAware, BeanFactoryPostProcessor {
+public class EventListenerMethodProcessor implements
+		SmartInitializingSingleton,
+		ApplicationContextAware,
+		BeanFactoryPostProcessor {
 
 	/**
 	 * Boolean flag controlled by a {@code spring.spel.ignore} system property that instructs Spring to
