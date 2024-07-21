@@ -19,7 +19,7 @@ package org.springframework.beans.factory;
 import org.springframework.beans.BeansException;
 
 /**
- * ObjectFactory：用于Bean延迟依赖查找
+ * ObjectFactory：提供延迟依赖查找的能力，仅关注一个或一种类型的Bean依赖查找，并且自身不具备依赖差汇总的能力，能力则由BeanFactory输出
  * Defines a factory which can return an Object instance (possibly shared or independent) when invoked.
  *
  * @author Colin Sampaleanu
