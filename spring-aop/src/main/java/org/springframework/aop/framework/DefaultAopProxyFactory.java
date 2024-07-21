@@ -24,19 +24,7 @@ import org.springframework.core.NativeDetector;
 import org.springframework.util.ClassUtils;
 
 /**
- * Default {@link AopProxyFactory} implementation, creating either a CGLIB proxy
- * or a JDK dynamic proxy.
- *
- * <p>Creates a CGLIB proxy if one the following is true for a given
- * {@link AdvisedSupport} instance:
- * <ul>
- * <li>the {@code optimize} flag is set
- * <li>the {@code proxyTargetClass} flag is set
- * <li>no proxy interfaces have been specified
- * </ul>
- *
- * <p>In general, specify {@code proxyTargetClass} to enforce a CGLIB proxy,
- * or specify one or more interfaces to use a JDK dynamic proxy.
+ * DefaultAopProxyFactory：默认AOP代理工厂
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

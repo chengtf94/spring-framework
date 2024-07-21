@@ -36,22 +36,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * JDK-based {@link AopProxy} implementation for the Spring AOP framework,
- * based on JDK {@link java.lang.reflect.Proxy dynamic proxies}.
- *
- * <p>Creates a dynamic proxy, implementing the interfaces exposed by
- * the AopProxy. Dynamic proxies <i>cannot</i> be used to proxy methods
- * defined in classes, rather than interfaces.
- *
- * <p>Objects of this type should be obtained through proxy factories,
- * configured by an {@link AdvisedSupport} class. This class is internal
- * to Spring's AOP framework and need not be used directly by client code.
- *
- * <p>Proxies created using this class will be thread-safe if the
- * underlying (target) class is thread-safe.
- *
- * <p>Proxies are serializable so long as all Advisors (including Advices
- * and Pointcuts) and the TargetSource are serializable.
+ * JdkDynamicAopProxy：JDK动态代理
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -64,21 +49,8 @@ import org.springframework.util.ClassUtils;
  */
 final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializable {
 
-	/** use serialVersionUID from Spring 1.2 for interoperability. */
-	private static final long serialVersionUID = 5531744639992436476L;
-
-
-	/*
-	 * NOTE: We could avoid the code duplication between this class and the CGLIB
-	 * proxies by refactoring "invoke" into a template method. However, this approach
-	 * adds at least 10% performance overhead versus a copy-paste solution, so we sacrifice
-	 * elegance for performance (we have a good test suite to ensure that the different
-	 * proxies behave the same :-)).
-	 * This way, we can also more easily take advantage of minor optimizations in each class.
-	 */
-
-	/** We use a static Log to avoid serialization issues. */
 	private static final Log logger = LogFactory.getLog(JdkDynamicAopProxy.class);
+	private static final long serialVersionUID = 5531744639992436476L;
 
 	/** Config used to configure this proxy. */
 	private final AdvisedSupport advised;
@@ -97,10 +69,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 
 
 	/**
-	 * Construct a new JdkDynamicAopProxy for the given AOP configuration.
-	 * @param config the AOP configuration as AdvisedSupport object
-	 * @throws AopConfigException if the config is invalid. We try to throw an informative
-	 * exception in this case, rather than let a mysterious failure happen later.
+	 *构造方法
 	 */
 	public JdkDynamicAopProxy(AdvisedSupport config) throws AopConfigException {
 		Assert.notNull(config, "AdvisedSupport must not be null");
@@ -111,7 +80,6 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		this.proxiedInterfaces = AopProxyUtils.completeProxiedInterfaces(this.advised, true);
 		findDefinedEqualsAndHashCodeMethods(this.proxiedInterfaces);
 	}
-
 
 	@Override
 	public Object getProxy() {
@@ -126,60 +94,6 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		return Proxy.newProxyInstance(determineClassLoader(classLoader), this.proxiedInterfaces, this);
 	}
 
-	/**
-	 * Determine whether the JDK bootstrap or platform loader has been suggested ->
-	 * use higher-level loader which can see Spring infrastructure classes instead.
-	 */
-	private ClassLoader determineClassLoader(@Nullable ClassLoader classLoader) {
-		if (classLoader == null) {
-			// JDK bootstrap loader -> use spring-aop ClassLoader instead.
-			return getClass().getClassLoader();
-		}
-		if (classLoader.getParent() == null) {
-			// Potentially the JDK platform loader on JDK 9+
-			ClassLoader aopClassLoader = getClass().getClassLoader();
-			ClassLoader aopParent = aopClassLoader.getParent();
-			while (aopParent != null) {
-				if (classLoader == aopParent) {
-					// Suggested ClassLoader is ancestor of spring-aop ClassLoader
-					// -> use spring-aop ClassLoader itself instead.
-					return aopClassLoader;
-				}
-				aopParent = aopParent.getParent();
-			}
-		}
-		// Regular case: use suggested ClassLoader as-is.
-		return classLoader;
-	}
-
-	/**
-	 * Finds any {@link #equals} or {@link #hashCode} method that may be defined
-	 * on the supplied set of interfaces.
-	 * @param proxiedInterfaces the interfaces to introspect
-	 */
-	private void findDefinedEqualsAndHashCodeMethods(Class<?>[] proxiedInterfaces) {
-		for (Class<?> proxiedInterface : proxiedInterfaces) {
-			Method[] methods = proxiedInterface.getDeclaredMethods();
-			for (Method method : methods) {
-				if (AopUtils.isEqualsMethod(method)) {
-					this.equalsDefined = true;
-				}
-				if (AopUtils.isHashCodeMethod(method)) {
-					this.hashCodeDefined = true;
-				}
-				if (this.equalsDefined && this.hashCodeDefined) {
-					return;
-				}
-			}
-		}
-	}
-
-
-	/**
-	 * Implementation of {@code InvocationHandler.invoke}.
-	 * <p>Callers will see exactly the exception thrown by the target,
-	 * unless a hook method throws an exception.
-	 */
 	@Override
 	@Nullable
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -269,12 +183,54 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		}
 	}
 
+	/**
+	 * Determine whether the JDK bootstrap or platform loader has been suggested ->
+	 * use higher-level loader which can see Spring infrastructure classes instead.
+	 */
+	private ClassLoader determineClassLoader(@Nullable ClassLoader classLoader) {
+		if (classLoader == null) {
+			// JDK bootstrap loader -> use spring-aop ClassLoader instead.
+			return getClass().getClassLoader();
+		}
+		if (classLoader.getParent() == null) {
+			// Potentially the JDK platform loader on JDK 9+
+			ClassLoader aopClassLoader = getClass().getClassLoader();
+			ClassLoader aopParent = aopClassLoader.getParent();
+			while (aopParent != null) {
+				if (classLoader == aopParent) {
+					// Suggested ClassLoader is ancestor of spring-aop ClassLoader
+					// -> use spring-aop ClassLoader itself instead.
+					return aopClassLoader;
+				}
+				aopParent = aopParent.getParent();
+			}
+		}
+		// Regular case: use suggested ClassLoader as-is.
+		return classLoader;
+	}
 
 	/**
-	 * Equality means interfaces, advisors and TargetSource are equal.
-	 * <p>The compared object may be a JdkDynamicAopProxy instance itself
-	 * or a dynamic proxy wrapping a JdkDynamicAopProxy instance.
+	 * Finds any {@link #equals} or {@link #hashCode} method that may be defined
+	 * on the supplied set of interfaces.
+	 * @param proxiedInterfaces the interfaces to introspect
 	 */
+	private void findDefinedEqualsAndHashCodeMethods(Class<?>[] proxiedInterfaces) {
+		for (Class<?> proxiedInterface : proxiedInterfaces) {
+			Method[] methods = proxiedInterface.getDeclaredMethods();
+			for (Method method : methods) {
+				if (AopUtils.isEqualsMethod(method)) {
+					this.equalsDefined = true;
+				}
+				if (AopUtils.isHashCodeMethod(method)) {
+					this.hashCodeDefined = true;
+				}
+				if (this.equalsDefined && this.hashCodeDefined) {
+					return;
+				}
+			}
+		}
+	}
+
 	@Override
 	public boolean equals(@Nullable Object other) {
 		if (other == this) {
@@ -304,9 +260,6 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		return AopProxyUtils.equalsInProxy(this.advised, otherProxy.advised);
 	}
 
-	/**
-	 * Proxy uses the hash code of the TargetSource.
-	 */
 	@Override
 	public int hashCode() {
 		return JdkDynamicAopProxy.class.hashCode() * 13 + this.advised.getTargetSource().hashCode();
