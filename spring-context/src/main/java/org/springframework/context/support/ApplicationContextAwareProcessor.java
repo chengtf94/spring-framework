@@ -35,18 +35,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
 /**
- * {@link BeanPostProcessor} implementation that supplies the {@code ApplicationContext},
- * {@link org.springframework.core.env.Environment Environment}, or
- * {@link StringValueResolver} for the {@code ApplicationContext} to beans that
- * implement the {@link EnvironmentAware}, {@link EmbeddedValueResolverAware},
- * {@link ResourceLoaderAware}, {@link ApplicationEventPublisherAware},
- * {@link MessageSourceAware}, and/or {@link ApplicationContextAware} interfaces.
- *
- * <p>Implemented interfaces are satisfied in the order in which they are
- * mentioned above.
- *
- * <p>Application contexts will automatically register this with their
- * underlying bean factory. Applications do not use this directly.
+ * ApplicationContextAwareProcessor：负责处理EnvironmentAware、ResourceLoaderAware、ApplicationEcentPublisherAware、ApplicationContextAware等Aware接口的回调
  *
  * @author Juergen Hoeller
  * @author Costin Leau
@@ -62,13 +51,18 @@ import org.springframework.util.StringValueResolver;
  */
 class ApplicationContextAwareProcessor implements BeanPostProcessor {
 
+	/**
+	 * ApplicationContext容器
+	 */
 	private final ConfigurableApplicationContext applicationContext;
 
-	private final StringValueResolver embeddedValueResolver;
-
-
 	/**
-	 * Create a new ApplicationContextAwareProcessor for the given context.
+	 * 内嵌值解析器
+	 */
+	private final StringValueResolver embeddedValueResolver;
+	
+	/**
+	 * 构造方法
 	 */
 	public ApplicationContextAwareProcessor(ConfigurableApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
@@ -85,23 +79,18 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 				bean instanceof ApplicationStartupAware)) {
 			return bean;
 		}
-
 		AccessControlContext acc = null;
-
 		if (System.getSecurityManager() != null) {
 			acc = this.applicationContext.getBeanFactory().getAccessControlContext();
 		}
-
 		if (acc != null) {
 			AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
 				invokeAwareInterfaces(bean);
 				return null;
 			}, acc);
-		}
-		else {
+		} else {
 			invokeAwareInterfaces(bean);
 		}
-
 		return bean;
 	}
 
