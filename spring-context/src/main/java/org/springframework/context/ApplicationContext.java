@@ -24,7 +24,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.lang.Nullable;
 
 /**
- * ApplicationContext：应用上下文容器接口
+ * ApplicationContext：高级IoC容器
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
