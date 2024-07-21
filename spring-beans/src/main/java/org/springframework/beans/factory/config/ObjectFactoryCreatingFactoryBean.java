@@ -25,6 +25,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * ObjectFactoryCreatingFactoryBean：用于创建ObjectFactory的FactoryBean
  * A {@link org.springframework.beans.factory.FactoryBean} implementation that
  * returns a value which is an {@link org.springframework.beans.factory.ObjectFactory}
  * that in turn returns a bean sourced from a {@link org.springframework.beans.factory.BeanFactory}.
@@ -45,9 +46,11 @@ public class ObjectFactoryCreatingFactoryBean extends AbstractFactoryBean<Object
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
-		Assert.hasText(this.targetBeanName, "Property 'targetBeanName' is required");
-		super.afterPropertiesSet();
+	protected ObjectFactory<Object> createInstance() {
+		BeanFactory beanFactory = getBeanFactory();
+		Assert.state(beanFactory != null, "No BeanFactory available");
+		Assert.state(this.targetBeanName != null, "No target bean name specified");
+		return new TargetBeanObjectFactory(beanFactory, this.targetBeanName);
 	}
 
 	@Override
@@ -56,13 +59,10 @@ public class ObjectFactoryCreatingFactoryBean extends AbstractFactoryBean<Object
 	}
 
 	@Override
-	protected ObjectFactory<Object> createInstance() {
-		BeanFactory beanFactory = getBeanFactory();
-		Assert.state(beanFactory != null, "No BeanFactory available");
-		Assert.state(this.targetBeanName != null, "No target bean name specified");
-		return new TargetBeanObjectFactory(beanFactory, this.targetBeanName);
+	public void afterPropertiesSet() throws Exception {
+		Assert.hasText(this.targetBeanName, "Property 'targetBeanName' is required");
+		super.afterPropertiesSet();
 	}
-
 
 	/**
 	 * Independent inner class - for serialization purposes.
@@ -70,8 +70,14 @@ public class ObjectFactoryCreatingFactoryBean extends AbstractFactoryBean<Object
 	@SuppressWarnings("serial")
 	private static class TargetBeanObjectFactory implements ObjectFactory<Object>, Serializable {
 
+		/**
+		 * 内置Bean工厂
+		 */
 		private final BeanFactory beanFactory;
 
+		/**
+		 * 目标Bean名称
+		 */
 		private final String targetBeanName;
 
 		public TargetBeanObjectFactory(BeanFactory beanFactory, String targetBeanName) {
