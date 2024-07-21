@@ -21,8 +21,7 @@ import java.util.ServiceLoader;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 
 /**
- * {@link org.springframework.beans.factory.FactoryBean} that exposes the
- * JDK 1.6 {@link java.util.ServiceLoader} for the configured service class.
+ * ServiceLoaderFactoryBean：基于Java SPI的工厂Bean，属于实例化Bean的方式之一
  *
  * @author Juergen Hoeller
  * @since 2.5
