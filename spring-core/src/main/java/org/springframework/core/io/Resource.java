@@ -27,27 +27,10 @@ import java.nio.channels.ReadableByteChannel;
 import org.springframework.lang.Nullable;
 
 /**
- * Interface for a resource descriptor that abstracts from the actual
- * type of underlying resource, such as a file or class path resource.
- *
- * <p>An InputStream can be opened for every resource if it exists in
- * physical form, but a URL or File handle can just be returned for
- * certain resources. The actual behavior is implementation-specific.
+ * Resource：资源接口
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
- * @see #getInputStream()
- * @see #getURL()
- * @see #getURI()
- * @see #getFile()
- * @see WritableResource
- * @see ContextResource
- * @see UrlResource
- * @see FileUrlResource
- * @see FileSystemResource
- * @see ClassPathResource
- * @see ByteArrayResource
- * @see InputStreamResource
  */
 public interface Resource extends InputStreamSource {
 

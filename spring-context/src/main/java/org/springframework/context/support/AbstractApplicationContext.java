@@ -100,7 +100,8 @@ import org.springframework.util.ReflectionUtils;
  * @author Brian Clozel
  * @since January 21, 2001
  */
-public abstract class AbstractApplicationContext extends DefaultResourceLoader
+public abstract class AbstractApplicationContext
+		extends DefaultResourceLoader
 		implements ConfigurableApplicationContext {
 
 	/**
