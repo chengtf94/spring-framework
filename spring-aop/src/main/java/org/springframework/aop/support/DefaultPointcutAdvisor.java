@@ -24,11 +24,7 @@ import org.springframework.aop.Pointcut;
 import org.springframework.lang.Nullable;
 
 /**
- * Convenient Pointcut-driven Advisor implementation.
- *
- * <p>This is the most commonly used Advisor implementation. It can be used
- * with any pointcut and advice type, except for introductions. There is
- * normally no need to subclass this class, or to implement custom Advisors.
+ * DefaultPointcutAdvisor：默认基于切面的通知
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -38,42 +34,26 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class DefaultPointcutAdvisor extends AbstractGenericPointcutAdvisor implements Serializable {
 
+	/**
+	 * 切点
+	 */
 	private Pointcut pointcut = Pointcut.TRUE;
 
-
 	/**
-	 * Create an empty DefaultPointcutAdvisor.
-	 * <p>Advice must be set before using setter methods.
-	 * Pointcut will normally be set also, but defaults to {@code Pointcut.TRUE}.
+	 * 构造方法
 	 */
 	public DefaultPointcutAdvisor() {
 	}
 
-	/**
-	 * Create a DefaultPointcutAdvisor that matches all methods.
-	 * <p>{@code Pointcut.TRUE} will be used as Pointcut.
-	 * @param advice the Advice to use
-	 */
 	public DefaultPointcutAdvisor(Advice advice) {
 		this(Pointcut.TRUE, advice);
 	}
 
-	/**
-	 * Create a DefaultPointcutAdvisor, specifying Pointcut and Advice.
-	 * @param pointcut the Pointcut targeting the Advice
-	 * @param advice the Advice to run when Pointcut matches
-	 */
 	public DefaultPointcutAdvisor(Pointcut pointcut, Advice advice) {
 		this.pointcut = pointcut;
 		setAdvice(advice);
 	}
 
-
-	/**
-	 * Specify the pointcut targeting the advice.
-	 * <p>Default is {@code Pointcut.TRUE}.
-	 * @see #setAdvice
-	 */
 	public void setPointcut(@Nullable Pointcut pointcut) {
 		this.pointcut = (pointcut != null ? pointcut : Pointcut.TRUE);
 	}

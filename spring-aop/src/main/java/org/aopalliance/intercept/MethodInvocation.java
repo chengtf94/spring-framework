@@ -21,11 +21,7 @@ import java.lang.reflect.Method;
 import javax.annotation.Nonnull;
 
 /**
- * Description of an invocation to a method, given to an interceptor
- * upon method-call.
- *
- * <p>A method invocation is a joinpoint and can be intercepted by a
- * method interceptor.
+ * MethodInvocation：方法调用
  *
  * @author Rod Johnson
  * @see MethodInterceptor

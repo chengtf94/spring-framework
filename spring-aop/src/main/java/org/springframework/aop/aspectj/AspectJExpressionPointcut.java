@@ -79,6 +79,8 @@ public class AspectJExpressionPointcut
 		extends AbstractExpressionPointcut
 		implements ClassFilter, IntroductionAwareMethodMatcher, BeanFactoryAware {
 
+	private static final Log logger = LogFactory.getLog(AspectJExpressionPointcut.class);
+
 	private static final Set<PointcutPrimitive> SUPPORTED_PRIMITIVES = new HashSet<>();
 
 	static {
@@ -93,9 +95,6 @@ public class AspectJExpressionPointcut
 		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_ARGS);
 		SUPPORTED_PRIMITIVES.add(PointcutPrimitive.AT_TARGET);
 	}
-
-
-	private static final Log logger = LogFactory.getLog(AspectJExpressionPointcut.class);
 
 	@Nullable
 	private Class<?> pointcutDeclarationScope;
@@ -117,7 +116,7 @@ public class AspectJExpressionPointcut
 
 
 	/**
-	 * Create a new default AspectJExpressionPointcut.
+	 * 构造方法
 	 */
 	public AspectJExpressionPointcut() {
 	}
