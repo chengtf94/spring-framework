@@ -101,6 +101,9 @@ public class AutowiredAnnotationBeanPostProcessor implements
 
 	private boolean requiredParameterValue = true;
 
+	/**
+	 * 顺序：默认为Ordered.LOWEST_PRECEDENCE - 2，值越小优先级越大
+	 */
 	private int order = Ordered.LOWEST_PRECEDENCE - 2;
 
 	/**
@@ -136,64 +139,6 @@ public class AutowiredAnnotationBeanPostProcessor implements
 		catch (ClassNotFoundException ex) {
 			// JSR-330 API not available - simply skip.
 		}
-	}
-
-	/**
-	 * Set the 'autowired' annotation type, to be used on constructors, fields, setter methods, and arbitrary config methods.
-	 */
-	public void setAutowiredAnnotationType(Class<? extends Annotation> autowiredAnnotationType) {
-		Assert.notNull(autowiredAnnotationType, "'autowiredAnnotationType' must not be null");
-		this.autowiredAnnotationTypes.clear();
-		this.autowiredAnnotationTypes.add(autowiredAnnotationType);
-	}
-
-	/**
-	 * Set the 'autowired' annotation types, to be used on constructors, fields, setter methods, and arbitrary config methods.
-	 */
-	public void setAutowiredAnnotationTypes(Set<Class<? extends Annotation>> autowiredAnnotationTypes) {
-		Assert.notEmpty(autowiredAnnotationTypes, "'autowiredAnnotationTypes' must not be empty");
-		this.autowiredAnnotationTypes.clear();
-		this.autowiredAnnotationTypes.addAll(autowiredAnnotationTypes);
-	}
-
-	public void setRequiredParameterName(String requiredParameterName) {
-		this.requiredParameterName = requiredParameterName;
-	}
-
-	public void setRequiredParameterValue(boolean requiredParameterValue) {
-		this.requiredParameterValue = requiredParameterValue;
-	}
-
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
-	@Override
-	public int getOrder() {
-		return this.order;
-	}
-
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) {
-		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
-			throw new IllegalArgumentException(
-					"AutowiredAnnotationBeanPostProcessor requires a ConfigurableListableBeanFactory: " + beanFactory);
-		}
-		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
-		this.metadataReaderFactory = new SimpleMetadataReaderFactory(this.beanFactory.getBeanClassLoader());
-	}
-
-
-	@Override
-	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
-		InjectionMetadata metadata = findAutowiringMetadata(beanName, beanType, null);
-		metadata.checkConfigMembers(beanDefinition);
-	}
-
-	@Override
-	public void resetBeanDefinition(String beanName) {
-		this.lookupMethodsChecked.remove(beanName);
-		this.injectionMetadataCache.remove(beanName);
 	}
 
 	@Override
@@ -249,7 +194,7 @@ public class AutowiredAnnotationBeanPostProcessor implements
 					catch (Throwable ex) {
 						throw new BeanCreationException(beanName,
 								"Resolution of declared constructors on bean Class [" + beanClass.getName() +
-								"] from ClassLoader [" + beanClass.getClassLoader() + "] failed", ex);
+										"] from ClassLoader [" + beanClass.getClassLoader() + "] failed", ex);
 					}
 					List<Constructor<?>> candidates = new ArrayList<>(rawCandidates.length);
 					Constructor<?> requiredConstructor = null;
@@ -281,16 +226,16 @@ public class AutowiredAnnotationBeanPostProcessor implements
 							if (requiredConstructor != null) {
 								throw new BeanCreationException(beanName,
 										"Invalid autowire-marked constructor: " + candidate +
-										". Found constructor with 'required' Autowired annotation already: " +
-										requiredConstructor);
+												". Found constructor with 'required' Autowired annotation already: " +
+												requiredConstructor);
 							}
 							boolean required = determineRequiredStatus(ann);
 							if (required) {
 								if (!candidates.isEmpty()) {
 									throw new BeanCreationException(beanName,
 											"Invalid autowire-marked constructors: " + candidates +
-											". Found constructor with 'required' Autowired annotation: " +
-											candidate);
+													". Found constructor with 'required' Autowired annotation: " +
+													candidate);
 								}
 								requiredConstructor = candidate;
 							}
@@ -357,6 +302,85 @@ public class AutowiredAnnotationBeanPostProcessor implements
 
 		return postProcessProperties(pvs, bean, beanName);
 	}
+
+
+	@Override
+	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+		// 查找自动注入元数据
+		InjectionMetadata metadata = findAutowiringMetadata(beanName, beanType, null);
+		metadata.checkConfigMembers(beanDefinition);
+	}
+
+	@Override
+	public void resetBeanDefinition(String beanName) {
+		this.lookupMethodsChecked.remove(beanName);
+		this.injectionMetadataCache.remove(beanName);
+	}
+
+	@Override
+	public int getOrder() {
+		return this.order;
+	}
+
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) {
+		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
+			throw new IllegalArgumentException(
+					"AutowiredAnnotationBeanPostProcessor requires a ConfigurableListableBeanFactory: " + beanFactory);
+		}
+		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
+		this.metadataReaderFactory = new SimpleMetadataReaderFactory(this.beanFactory.getBeanClassLoader());
+	}
+
+
+
+
+
+
+
+
+
+
+
+	/**
+	 * Set the 'autowired' annotation type, to be used on constructors, fields, setter methods, and arbitrary config methods.
+	 */
+	public void setAutowiredAnnotationType(Class<? extends Annotation> autowiredAnnotationType) {
+		Assert.notNull(autowiredAnnotationType, "'autowiredAnnotationType' must not be null");
+		this.autowiredAnnotationTypes.clear();
+		this.autowiredAnnotationTypes.add(autowiredAnnotationType);
+	}
+
+	/**
+	 * Set the 'autowired' annotation types, to be used on constructors, fields, setter methods, and arbitrary config methods.
+	 */
+	public void setAutowiredAnnotationTypes(Set<Class<? extends Annotation>> autowiredAnnotationTypes) {
+		Assert.notEmpty(autowiredAnnotationTypes, "'autowiredAnnotationTypes' must not be empty");
+		this.autowiredAnnotationTypes.clear();
+		this.autowiredAnnotationTypes.addAll(autowiredAnnotationTypes);
+	}
+
+	public void setRequiredParameterName(String requiredParameterName) {
+		this.requiredParameterName = requiredParameterName;
+	}
+
+	public void setRequiredParameterValue(boolean requiredParameterValue) {
+		this.requiredParameterValue = requiredParameterValue;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+
+
+
+
+
+
+
+
+
 
 	/**
 	 * 'Native' processing method for direct calls with an arbitrary target instance,
