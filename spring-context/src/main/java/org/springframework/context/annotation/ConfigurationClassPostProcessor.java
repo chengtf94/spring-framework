@@ -70,26 +70,26 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * {@link BeanFactoryPostProcessor} used for bootstrapping processing of
- * {@link Configuration @Configuration} classes.
- *
- * <p>Registered by default when using {@code <context:annotation-config/>} or
- * {@code <context:component-scan/>}. Otherwise, may be declared manually as
- * with any other {@link BeanFactoryPostProcessor}.
- *
- * <p>This post processor is priority-ordered as it is important that any
- * {@link Bean @Bean} methods declared in {@code @Configuration} classes have
- * their corresponding bean definitions registered before any other
- * {@code BeanFactoryPostProcessor} executes.
+ * ConfigurationClassPostProcessor：负责处理@Configuration、@ComponentScan、@Bean、@Import、@ImportResources注解
  *
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Phillip Webb
  * @author Sam Brannen
  * @since 3.0
+ * @see Configuration
+ * @see ComponentScan
+ * @see Bean
+ * @see Import
+ * @see ImportResource
  */
-public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPostProcessor,
-		PriorityOrdered, ResourceLoaderAware, ApplicationStartupAware, BeanClassLoaderAware, EnvironmentAware {
+public class ConfigurationClassPostProcessor implements
+		BeanDefinitionRegistryPostProcessor,
+		PriorityOrdered,
+		ResourceLoaderAware,
+		ApplicationStartupAware,
+		BeanClassLoaderAware,
+		EnvironmentAware {
 
 	/**
 	 * A {@code BeanNameGenerator} using fully qualified class names as default bean names.
@@ -142,11 +142,86 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
 
+	/**
+	 * Prepare the Configuration classes for servicing bean requests at runtime by replacing them with CGLIB-enhanced subclasses.
+	 */
+	@Override
+	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+		int factoryId = System.identityHashCode(beanFactory);
+		if (this.factoriesPostProcessed.contains(factoryId)) {
+			throw new IllegalStateException(
+					"postProcessBeanFactory already called on this post-processor against " + beanFactory);
+		}
+		this.factoriesPostProcessed.add(factoryId);
+		if (!this.registriesPostProcessed.contains(factoryId)) {
+			// BeanDefinitionRegistryPostProcessor hook apparently not supported...
+			// Simply call processConfigurationClasses lazily at this point then.
+			processConfigBeanDefinitions((BeanDefinitionRegistry) beanFactory);
+		}
+		enhanceConfigurationClasses(beanFactory);
+		// 添加ImportAwareBeanPostProcessor
+		beanFactory.addBeanPostProcessor(new ImportAwareBeanPostProcessor(beanFactory));
+	}
+
+	/**
+	 * Derive further bean definitions from the configuration classes in the registry.
+	 */
+	@Override
+	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
+		int registryId = System.identityHashCode(registry);
+		if (this.registriesPostProcessed.contains(registryId)) {
+			throw new IllegalStateException(
+					"postProcessBeanDefinitionRegistry already called on this post-processor against " + registry);
+		}
+		if (this.factoriesPostProcessed.contains(registryId)) {
+			throw new IllegalStateException(
+					"postProcessBeanFactory already called on this post-processor against " + registry);
+		}
+		this.registriesPostProcessed.add(registryId);
+
+		processConfigBeanDefinitions(registry);
+	}
 
 	@Override
 	public int getOrder() {
 		return Ordered.LOWEST_PRECEDENCE;  // within PriorityOrdered
 	}
+
+
+	@Override
+	public void setEnvironment(Environment environment) {
+		Assert.notNull(environment, "Environment must not be null");
+		this.environment = environment;
+	}
+
+	@Override
+	public void setResourceLoader(ResourceLoader resourceLoader) {
+		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
+		this.resourceLoader = resourceLoader;
+		if (!this.setMetadataReaderFactoryCalled) {
+			this.metadataReaderFactory = new CachingMetadataReaderFactory(resourceLoader);
+		}
+	}
+
+	@Override
+	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+		this.beanClassLoader = beanClassLoader;
+		if (!this.setMetadataReaderFactoryCalled) {
+			this.metadataReaderFactory = new CachingMetadataReaderFactory(beanClassLoader);
+		}
+	}
+
+	@Override
+	public void setApplicationStartup(ApplicationStartup applicationStartup) {
+		this.applicationStartup = applicationStartup;
+	}
+
+
+
+
+
+
+
 
 	/**
 	 * Set the {@link SourceExtractor} to use for generated bean definitions
@@ -177,96 +252,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		this.setMetadataReaderFactoryCalled = true;
 	}
 
-	/**
-	 * Set the {@link BeanNameGenerator} to be used when triggering component scanning
-	 * from {@link Configuration} classes and when registering {@link Import}'ed
-	 * configuration classes. The default is a standard {@link AnnotationBeanNameGenerator}
-	 * for scanned components (compatible with the default in {@link ClassPathBeanDefinitionScanner})
-	 * and a variant thereof for imported configuration classes (using unique fully-qualified
-	 * class names instead of standard component overriding).
-	 * <p>Note that this strategy does <em>not</em> apply to {@link Bean} methods.
-	 * <p>This setter is typically only appropriate when configuring the post-processor as a
-	 * standalone bean definition in XML, e.g. not using the dedicated {@code AnnotationConfig*}
-	 * application contexts or the {@code <context:annotation-config>} element. Any bean name
-	 * generator specified against the application context will take precedence over any set here.
-	 * @since 3.1.1
-	 * @see AnnotationConfigApplicationContext#setBeanNameGenerator(BeanNameGenerator)
-	 * @see AnnotationConfigUtils#CONFIGURATION_BEAN_NAME_GENERATOR
-	 */
 	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
 		Assert.notNull(beanNameGenerator, "BeanNameGenerator must not be null");
 		this.localBeanNameGeneratorSet = true;
 		this.componentScanBeanNameGenerator = beanNameGenerator;
 		this.importBeanNameGenerator = beanNameGenerator;
-	}
-
-	@Override
-	public void setEnvironment(Environment environment) {
-		Assert.notNull(environment, "Environment must not be null");
-		this.environment = environment;
-	}
-
-	@Override
-	public void setResourceLoader(ResourceLoader resourceLoader) {
-		Assert.notNull(resourceLoader, "ResourceLoader must not be null");
-		this.resourceLoader = resourceLoader;
-		if (!this.setMetadataReaderFactoryCalled) {
-			this.metadataReaderFactory = new CachingMetadataReaderFactory(resourceLoader);
-		}
-	}
-
-	@Override
-	public void setBeanClassLoader(ClassLoader beanClassLoader) {
-		this.beanClassLoader = beanClassLoader;
-		if (!this.setMetadataReaderFactoryCalled) {
-			this.metadataReaderFactory = new CachingMetadataReaderFactory(beanClassLoader);
-		}
-	}
-
-	@Override
-	public void setApplicationStartup(ApplicationStartup applicationStartup) {
-		this.applicationStartup = applicationStartup;
-	}
-
-	/**
-	 * Derive further bean definitions from the configuration classes in the registry.
-	 */
-	@Override
-	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) {
-		int registryId = System.identityHashCode(registry);
-		if (this.registriesPostProcessed.contains(registryId)) {
-			throw new IllegalStateException(
-					"postProcessBeanDefinitionRegistry already called on this post-processor against " + registry);
-		}
-		if (this.factoriesPostProcessed.contains(registryId)) {
-			throw new IllegalStateException(
-					"postProcessBeanFactory already called on this post-processor against " + registry);
-		}
-		this.registriesPostProcessed.add(registryId);
-
-		processConfigBeanDefinitions(registry);
-	}
-
-	/**
-	 * Prepare the Configuration classes for servicing bean requests at runtime
-	 * by replacing them with CGLIB-enhanced subclasses.
-	 */
-	@Override
-	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
-		int factoryId = System.identityHashCode(beanFactory);
-		if (this.factoriesPostProcessed.contains(factoryId)) {
-			throw new IllegalStateException(
-					"postProcessBeanFactory already called on this post-processor against " + beanFactory);
-		}
-		this.factoriesPostProcessed.add(factoryId);
-		if (!this.registriesPostProcessed.contains(factoryId)) {
-			// BeanDefinitionRegistryPostProcessor hook apparently not supported...
-			// Simply call processConfigurationClasses lazily at this point then.
-			processConfigBeanDefinitions((BeanDefinitionRegistry) beanFactory);
-		}
-
-		enhanceConfigurationClasses(beanFactory);
-		beanFactory.addBeanPostProcessor(new ImportAwareBeanPostProcessor(beanFactory));
 	}
 
 	/**
@@ -457,6 +447,9 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 
+	/**
+	 * ImportAwareBeanPostProcessor：负责处理@Import注解
+	 */
 	private static class ImportAwareBeanPostProcessor implements InstantiationAwareBeanPostProcessor {
 
 		private final BeanFactory beanFactory;

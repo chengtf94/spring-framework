@@ -75,7 +75,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
 /**
- * CommonAnnotationBeanPostProcessor：@Resource、@PostConstructor、@PreDestroy注解 Bean后置处理器
+ * CommonAnnotationBeanPostProcessor：负责处理@Resource、@PostConstructor、@PreDestroy注解
  *
  * @author Juergen Hoeller
  * @author Sam Brannen

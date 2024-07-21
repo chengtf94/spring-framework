@@ -74,7 +74,7 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * AutowiredAnnotationBeanPostProcessor：@Autowired、@Value注解 Bean后置处理器
+ * AutowiredAnnotationBeanPostProcessor：负责处理@Autowired、@Value注解
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
