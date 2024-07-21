@@ -42,9 +42,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Descriptor for a specific dependency that is about to be injected.
- * Wraps a constructor parameter, a method parameter or a field,
- * allowing unified access to their metadata.
+ * DependencyDescriptor：依赖描述符
  *
  * @author Juergen Hoeller
  * @since 2.5
