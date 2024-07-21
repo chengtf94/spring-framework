@@ -28,55 +28,30 @@ import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 
 /**
- * Convenient base class for {@link org.springframework.context.ApplicationContext}
- * implementations, drawing configuration from XML documents containing bean definitions
- * understood by an {@link org.springframework.beans.factory.xml.XmlBeanDefinitionReader}.
- *
- * <p>Subclasses just have to implement the {@link #getConfigResources} and/or
- * the {@link #getConfigLocations} method. Furthermore, they might override
- * the {@link #getResourceByPath} hook to interpret relative paths in an
- * environment-specific fashion, and/or {@link #getResourcePatternResolver}
- * for extended pattern resolution.
+ * AbstractXmlApplicationContext：基于XML配置文件的ApplicationContext抽象基类
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
- * @see #getConfigResources
- * @see #getConfigLocations
- * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
  */
 public abstract class AbstractXmlApplicationContext extends AbstractRefreshableConfigApplicationContext {
 
+	/**
+	 * 是否使用XML验证：whether to use XML validation.
+	 */
 	private boolean validating = true;
 
-
 	/**
-	 * Create a new AbstractXmlApplicationContext with no parent.
+	 * 构造方法
 	 */
 	public AbstractXmlApplicationContext() {
 	}
 
-	/**
-	 * Create a new AbstractXmlApplicationContext with the given parent context.
-	 * @param parent the parent context
-	 */
 	public AbstractXmlApplicationContext(@Nullable ApplicationContext parent) {
 		super(parent);
 	}
 
-
 	/**
-	 * Set whether to use XML validation. Default is {@code true}.
-	 */
-	public void setValidating(boolean validating) {
-		this.validating = validating;
-	}
-
-
-	/**
-	 * Loads the bean definitions via an XmlBeanDefinitionReader.
-	 * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
-	 * @see #initBeanDefinitionReader
-	 * @see #loadBeanDefinitions
+	 * 基于XmlBeanDefinitionReader加载Bean定义
 	 */
 	@Override
 	protected void loadBeanDefinitions(DefaultListableBeanFactory beanFactory) throws BeansException, IOException {
@@ -96,35 +71,22 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 	}
 
 	/**
-	 * Initialize the bean definition reader used for loading the bean definitions
-	 * of this context. The default implementation sets the validating flag.
-	 * <p>Can be overridden in subclasses, e.g. for turning off XML validation
-	 * or using a different {@link BeanDefinitionDocumentReader} implementation.
-	 * @param reader the bean definition reader used by this context
-	 * @see XmlBeanDefinitionReader#setValidating
-	 * @see XmlBeanDefinitionReader#setDocumentReaderClass
+	 * 初始化BeanDefinitionReader
 	 */
 	protected void initBeanDefinitionReader(XmlBeanDefinitionReader reader) {
 		reader.setValidating(this.validating);
 	}
 
 	/**
-	 * Load the bean definitions with the given XmlBeanDefinitionReader.
-	 * <p>The lifecycle of the bean factory is handled by the {@link #refreshBeanFactory}
-	 * method; hence this method is just supposed to load and/or register bean definitions.
-	 * @param reader the XmlBeanDefinitionReader to use
-	 * @throws BeansException in case of bean registration errors
-	 * @throws IOException if the required XML document isn't found
-	 * @see #refreshBeanFactory
-	 * @see #getConfigLocations
-	 * @see #getResources
-	 * @see #getResourcePatternResolver
+	 * 基于XmlBeanDefinitionReader加载Bean定义
 	 */
 	protected void loadBeanDefinitions(XmlBeanDefinitionReader reader) throws BeansException, IOException {
+		// #1 获取配置资源，加载Bean定义
 		Resource[] configResources = getConfigResources();
 		if (configResources != null) {
 			reader.loadBeanDefinitions(configResources);
 		}
+		// #2 获取配置路径，加载Bean定义
 		String[] configLocations = getConfigLocations();
 		if (configLocations != null) {
 			reader.loadBeanDefinitions(configLocations);
@@ -132,16 +94,15 @@ public abstract class AbstractXmlApplicationContext extends AbstractRefreshableC
 	}
 
 	/**
-	 * Return an array of Resource objects, referring to the XML bean definition
-	 * files that this context should be built with.
-	 * <p>The default implementation returns {@code null}. Subclasses can override
-	 * this to provide pre-built Resource objects rather than location Strings.
-	 * @return an array of Resource objects, or {@code null} if none
-	 * @see #getConfigLocations()
+	 * 获取配置资源
 	 */
 	@Nullable
 	protected Resource[] getConfigResources() {
 		return null;
+	}
+
+	public void setValidating(boolean validating) {
+		this.validating = validating;
 	}
 
 }
