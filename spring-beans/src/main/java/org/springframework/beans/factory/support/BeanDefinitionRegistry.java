@@ -22,8 +22,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.core.AliasRegistry;
 
 /**
- * BeanDefinitionRegistry：Bean注册管理接口
- * Interface for registries that hold bean definitions, for example RootBeanDefinition and ChildBeanDefinition instances.
+ * BeanDefinitionRegistry：Bean定义注册中心接口
  *
  * @author Juergen Hoeller
  * @since 26.11.2003
