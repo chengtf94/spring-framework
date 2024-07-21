@@ -24,7 +24,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.lang.Nullable;
 
 /**
- * 可配置、可监听的BeanFactory：
+ * ConfigurableListableBeanFactory：可配置、可列表的BeanFactory
  * Configuration interface to be implemented by most listable bean factories.
  * In addition to {@link ConfigurableBeanFactory}, it provides facilities to
  * analyze and modify bean definitions, and to pre-instantiate singletons.
@@ -32,8 +32,10 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 03.11.2003
  */
-public interface ConfigurableListableBeanFactory
-		extends ListableBeanFactory, AutowireCapableBeanFactory, ConfigurableBeanFactory {
+public interface ConfigurableListableBeanFactory extends
+		ListableBeanFactory,
+		AutowireCapableBeanFactory,
+		ConfigurableBeanFactory {
 
 	/**
 	 * Ignore the given dependency type for autowiring:

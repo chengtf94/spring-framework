@@ -32,7 +32,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
 /**
- * 可配置的BeanFactory：
+ * ConfigurableBeanFactory：可配置的BeanFactory
  * Configuration interface to be implemented by most bean factories. Provides
  * facilities to configure a bean factory, in addition to the bean factory
  * client methods in the {@link org.springframework.beans.factory.BeanFactory} interface.

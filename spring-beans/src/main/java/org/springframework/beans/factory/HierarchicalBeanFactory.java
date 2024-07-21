@@ -19,7 +19,7 @@ package org.springframework.beans.factory;
 import org.springframework.lang.Nullable;
 
 /**
- * 可继承的BeanFactory：Sub-interface implemented by bean factories that can be part of a hierarchy.
+ * HierarchicalBeanFactory：可继承的BeanFactory，Sub-interface implemented by bean factories that can be part of a hierarchy.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
