@@ -19,10 +19,9 @@ package org.springframework.beans.factory.config;
 import org.springframework.beans.BeansException;
 
 /**
- * Bean工厂后置处理器
- * Factory hook that allows for custom modification of an application context's
- * bean definitions, adapting the bean property values of the context's underlying
- * bean factory.
+ * BeanFactoryPostProcessor：Bean工厂后置处理器
+ * Factory hook that allows for custom modification of an application context's bean definitions,
+ * adapting the bean property values of the context's underlying bean factory.
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
