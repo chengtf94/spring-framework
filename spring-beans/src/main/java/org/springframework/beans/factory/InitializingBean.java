@@ -28,7 +28,7 @@ package org.springframework.beans.factory;
 public interface InitializingBean {
 
 	/**
-	 * 初始化Bean
+	 * 初始化Bean：初始化顺序位于@PostConstruct、指定initMethod方法之间
 	 */
 	void afterPropertiesSet() throws Exception;
 

@@ -29,7 +29,7 @@ package org.springframework.beans.factory;
 public interface DisposableBean {
 
 	/**
-	 * 销毁Bean
+	 * 销毁Bean：销毁顺序位于@PreDestroy、指定destroyMethod方法之间
 	 */
 	void destroy() throws Exception;
 
