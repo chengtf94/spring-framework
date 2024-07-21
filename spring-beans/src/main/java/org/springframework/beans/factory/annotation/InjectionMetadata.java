@@ -33,12 +33,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Internal class for managing injection metadata.
- * Not intended for direct use in applications.
- *
- * <p>Used by {@link AutowiredAnnotationBeanPostProcessor},
- * {@link org.springframework.context.annotation.CommonAnnotationBeanPostProcessor} and
- * {@link org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor}.
+ * InjectionMetadata：注入元数据类，用于描述那些哪些属性、方法加了@Autowired注解
+ * <p>Used by {@link AutowiredAnnotationBeanPostProcessor}
  *
  * @author Juergen Hoeller
  * @since 2.5
@@ -64,7 +60,6 @@ public class InjectionMetadata {
 		public void clear(@Nullable PropertyValues pvs) {
 		}
 	};
-
 
 	private final Class<?> targetClass;
 

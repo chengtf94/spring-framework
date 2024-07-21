@@ -590,7 +590,6 @@ public class AutowiredAnnotationBeanPostProcessor implements
 		}
 	}
 
-
 	/**
 	 * Class representing injection information about an annotated field.
 	 */
