@@ -60,7 +60,7 @@ class ApplicationContextAwareProcessor implements BeanPostProcessor {
 	 * 内嵌值解析器
 	 */
 	private final StringValueResolver embeddedValueResolver;
-	
+
 	/**
 	 * 构造方法
 	 */
