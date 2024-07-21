@@ -19,7 +19,8 @@ package org.springframework.beans.factory;
 import org.springframework.beans.BeansException;
 
 /**
- * ObjectFactory：Defines a factory which can return an Object instance (possibly shared or independent) when invoked.
+ * ObjectFactory：用于Bean延迟依赖查找
+ * Defines a factory which can return an Object instance (possibly shared or independent) when invoked.
  *
  * @author Colin Sampaleanu
  * @since 1.0.2

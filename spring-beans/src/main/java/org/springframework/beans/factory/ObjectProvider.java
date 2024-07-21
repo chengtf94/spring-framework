@@ -25,7 +25,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.lang.Nullable;
 
 /**
- * ObjectProvider：可用于Bean延迟查找
+ * ObjectProvider：用于Bean延迟依赖查找
  * A variant of {@link ObjectFactory} designed specifically for injection points,
  * allowing for programmatic optionality and lenient not-unique handling.
  *
