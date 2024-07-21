@@ -85,11 +85,16 @@ import org.springframework.util.StringUtils;
  * @see Autowired
  * @see Value
  */
-public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationAwareBeanPostProcessor,
-		MergedBeanDefinitionPostProcessor, PriorityOrdered, BeanFactoryAware {
-
+public class AutowiredAnnotationBeanPostProcessor implements
+		SmartInstantiationAwareBeanPostProcessor,
+		MergedBeanDefinitionPostProcessor,
+		PriorityOrdered,
+		BeanFactoryAware {
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * 'autowired'注解类型集合
+	 */
 	private final Set<Class<? extends Annotation>> autowiredAnnotationTypes = new LinkedHashSet<>(4);
 
 	private String requiredParameterName = "required";
@@ -98,9 +103,15 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 	private int order = Ordered.LOWEST_PRECEDENCE - 2;
 
+	/**
+	 * Bean工厂
+	 */
 	@Nullable
 	private ConfigurableListableBeanFactory beanFactory;
 
+	/**
+	 * 元数据读取器工厂
+	 */
 	@Nullable
 	private MetadataReaderFactory metadataReaderFactory;
 
@@ -110,12 +121,8 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 
 	private final Map<String, InjectionMetadata> injectionMetadataCache = new ConcurrentHashMap<>(256);
 
-
 	/**
-	 * Create a new {@code AutowiredAnnotationBeanPostProcessor} for Spring's
-	 * standard {@link Autowired @Autowired} and {@link Value @Value} annotations.
-	 * <p>Also supports JSR-330's {@link javax.inject.Inject @Inject} annotation,
-	 * if available.
+	 * 构造方法
 	 */
 	@SuppressWarnings("unchecked")
 	public AutowiredAnnotationBeanPostProcessor() {
@@ -131,16 +138,8 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		}
 	}
 
-
 	/**
-	 * Set the 'autowired' annotation type, to be used on constructors, fields,
-	 * setter methods, and arbitrary config methods.
-	 * <p>The default autowired annotation types are the Spring-provided
-	 * {@link Autowired @Autowired} and {@link Value @Value} annotations as well
-	 * as JSR-330's {@link javax.inject.Inject @Inject} annotation, if available.
-	 * <p>This setter property exists so that developers can provide their own
-	 * (non-Spring-specific) annotation type to indicate that a member is supposed
-	 * to be autowired.
+	 * Set the 'autowired' annotation type, to be used on constructors, fields, setter methods, and arbitrary config methods.
 	 */
 	public void setAutowiredAnnotationType(Class<? extends Annotation> autowiredAnnotationType) {
 		Assert.notNull(autowiredAnnotationType, "'autowiredAnnotationType' must not be null");
@@ -149,14 +148,7 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 	}
 
 	/**
-	 * Set the 'autowired' annotation types, to be used on constructors, fields,
-	 * setter methods, and arbitrary config methods.
-	 * <p>The default autowired annotation types are the Spring-provided
-	 * {@link Autowired @Autowired} and {@link Value @Value} annotations as well
-	 * as JSR-330's {@link javax.inject.Inject @Inject} annotation, if available.
-	 * <p>This setter property exists so that developers can provide their own
-	 * (non-Spring-specific) annotation types to indicate that a member is supposed
-	 * to be autowired.
+	 * Set the 'autowired' annotation types, to be used on constructors, fields, setter methods, and arbitrary config methods.
 	 */
 	public void setAutowiredAnnotationTypes(Set<Class<? extends Annotation>> autowiredAnnotationTypes) {
 		Assert.notEmpty(autowiredAnnotationTypes, "'autowiredAnnotationTypes' must not be empty");
@@ -164,20 +156,10 @@ public class AutowiredAnnotationBeanPostProcessor implements SmartInstantiationA
 		this.autowiredAnnotationTypes.addAll(autowiredAnnotationTypes);
 	}
 
-	/**
-	 * Set the name of an attribute of the annotation that specifies whether it is required.
-	 * @see #setRequiredParameterValue(boolean)
-	 */
 	public void setRequiredParameterName(String requiredParameterName) {
 		this.requiredParameterName = requiredParameterName;
 	}
 
-	/**
-	 * Set the boolean value that marks a dependency as required.
-	 * <p>For example if using 'required=true' (the default), this value should be
-	 * {@code true}; but if using 'optional=false', this value should be {@code false}.
-	 * @see #setRequiredParameterName(String)
-	 */
 	public void setRequiredParameterValue(boolean requiredParameterValue) {
 		this.requiredParameterValue = requiredParameterValue;
 	}
