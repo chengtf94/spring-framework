@@ -34,23 +34,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link BeanNameGenerator} implementation for bean classes annotated with the
- * {@link org.springframework.stereotype.Component @Component} annotation or
- * with another annotation that is itself annotated with {@code @Component} as a
- * meta-annotation. For example, Spring's stereotype annotations (such as
- * {@link org.springframework.stereotype.Repository @Repository}) are
- * themselves annotated with {@code @Component}.
- *
- * <p>Also supports Java EE 6's {@link javax.annotation.ManagedBean} and
- * JSR-330's {@link javax.inject.Named} annotations, if available. Note that
- * Spring component annotations always override such standard annotations.
- *
- * <p>If the annotation's value doesn't indicate a bean name, an appropriate
- * name will be built based on the short name of the class (with the first
- * letter lower-cased), unless the two first letters are uppercase. For example:
- *
- * <pre class="code">com.xyz.FooServiceImpl -&gt; fooServiceImpl</pre>
- * <pre class="code">com.xyz.URLFooServiceImpl -&gt; URLFooServiceImpl</pre>
+ * AnnotationBeanNameGenerator：注解Bean名称生成器
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
@@ -65,16 +49,19 @@ import org.springframework.util.StringUtils;
 public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 
 	/**
-	 * A convenient constant for a default {@code AnnotationBeanNameGenerator} instance,
-	 * as used for component scanning purposes.
-	 * @since 5.2
+	 * 单例
 	 */
 	public static final AnnotationBeanNameGenerator INSTANCE = new AnnotationBeanNameGenerator();
 
+	/**
+	 * @Component注解类名
+	 */
 	private static final String COMPONENT_ANNOTATION_CLASSNAME = "org.springframework.stereotype.Component";
 
+	/**
+	 * 元注解类型缓存Map
+	 */
 	private final Map<String, Set<String>> metaAnnotationTypesCache = new ConcurrentHashMap<>();
-
 
 	@Override
 	public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
@@ -125,12 +112,8 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 	}
 
 	/**
-	 * Check whether the given annotation is a stereotype that is allowed
-	 * to suggest a component name through its annotation {@code value()}.
-	 * @param annotationType the name of the annotation class to check
-	 * @param metaAnnotationTypes the names of meta-annotations on the given annotation
-	 * @param attributes the map of attributes for the given annotation
-	 * @return whether the annotation qualifies as a stereotype with component name
+	 * Check whether the given annotation is a stereotype that is allowed to suggest a component name
+	 * through its annotation {@code value()}.
 	 */
 	protected boolean isStereotypeWithNameValue(String annotationType,
 			Set<String> metaAnnotationTypes, @Nullable Map<String, Object> attributes) {
@@ -145,10 +128,6 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 
 	/**
 	 * Derive a default bean name from the given bean definition.
-	 * <p>The default implementation delegates to {@link #buildDefaultBeanName(BeanDefinition)}.
-	 * @param definition the bean definition to build a bean name for
-	 * @param registry the registry that the given bean definition is being registered with
-	 * @return the default bean name (never {@code null})
 	 */
 	protected String buildDefaultBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
 		return buildDefaultBeanName(definition);
@@ -156,13 +135,6 @@ public class AnnotationBeanNameGenerator implements BeanNameGenerator {
 
 	/**
 	 * Derive a default bean name from the given bean definition.
-	 * <p>The default implementation simply builds a decapitalized version
-	 * of the short class name: e.g. "mypackage.MyJdbcDao" &rarr; "myJdbcDao".
-	 * <p>Note that inner classes will thus have names of the form
-	 * "outerClassName.InnerClassName", which because of the period in the
-	 * name may be an issue if you are autowiring by name.
-	 * @param definition the bean definition to build a bean name for
-	 * @return the default bean name (never {@code null})
 	 */
 	protected String buildDefaultBeanName(BeanDefinition definition) {
 		String beanClassName = definition.getBeanClassName();
