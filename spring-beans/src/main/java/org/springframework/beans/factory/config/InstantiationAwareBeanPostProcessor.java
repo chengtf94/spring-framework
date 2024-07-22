@@ -52,8 +52,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	}
 
 	/**
-	 * Post-process the given property values before the factory applies them to the given bean,
-	 * without any need for property descriptors.
+	 * Post-process the given property values before the factory applies them to the given bean, without any need for property descriptors.
 	 * @since 5.1
 	 * @see #postProcessPropertyValues
 	 */
@@ -62,6 +61,10 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 		return null;
 	}
 
+	/**
+	 * Post-process the given property values before the factory applies them to the given bean.
+	 * @since 5.1
+	 */
 	@Deprecated
 	@Nullable
 	default PropertyValues postProcessPropertyValues(PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
