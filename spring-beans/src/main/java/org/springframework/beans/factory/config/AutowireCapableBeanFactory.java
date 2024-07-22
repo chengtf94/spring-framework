@@ -311,6 +311,7 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	Object resolveBeanByName(String name, DependencyDescriptor descriptor) throws BeansException;
 
 	/**
+	 * 解析依赖：也就是依赖处理过程
 	 * Resolve the specified dependency against the beans defined in this factory.
 	 * @param descriptor the descriptor for the dependency (field/method/constructor)
 	 * @param requestingBeanName the name of the bean which declares the given dependency
@@ -322,9 +323,11 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @see #resolveDependency(DependencyDescriptor, String, Set, TypeConverter)
 	 */
 	@Nullable
-	Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName) throws BeansException;
+	Object resolveDependency(DependencyDescriptor descriptor,
+							 @Nullable String requestingBeanName) throws BeansException;
 
 	/**
+	 * 解析依赖：也就是依赖处理过程
 	 * Resolve the specified dependency against the beans defined in this factory.
 	 * @param descriptor the descriptor for the dependency (field/method/constructor)
 	 * @param requestingBeanName the name of the bean which declares the given dependency
@@ -339,7 +342,9 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	 * @see DependencyDescriptor
 	 */
 	@Nullable
-	Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName,
-			@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException;
+	Object resolveDependency(DependencyDescriptor descriptor,
+							 @Nullable String requestingBeanName,
+							 @Nullable Set<String> autowiredBeanNames,
+							 @Nullable TypeConverter typeConverter) throws BeansException;
 
 }

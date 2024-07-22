@@ -50,55 +50,77 @@ import org.springframework.util.ObjectUtils;
 @SuppressWarnings("serial")
 public class DependencyDescriptor extends InjectionPoint implements Serializable {
 
+	/**
+	 * 声明类
+	 */
 	private final Class<?> declaringClass;
 
+	/**
+	 * 方法名称
+	 */
 	@Nullable
 	private String methodName;
 
+	/**
+	 * 参数类型列表
+	 */
 	@Nullable
 	private Class<?>[] parameterTypes;
 
+	/**
+	 * 参数索引
+	 */
 	private int parameterIndex;
 
+	/**
+	 * 字段名称
+	 */
 	@Nullable
 	private String fieldName;
 
+	/**
+	 * 是否必须的：对应@Autowired解的required
+	 * @see org.springframework.beans.factory.annotation.Autowired
+	 */
 	private final boolean required;
 
+	/**
+	 * 是否饥饿的：对应@Lazy注解的value
+	 */
 	private final boolean eager;
 
+	/**
+	 * 嵌套层次
+	 */
 	private int nestingLevel = 1;
 
+	/**
+	 * 包含类
+	 */
 	@Nullable
 	private Class<?> containingClass;
 
+	/**
+	 * 泛型处理相关
+	 */
 	@Nullable
 	private transient volatile ResolvableType resolvableType;
 
+	/**
+	 * 类型描述符
+	 */
 	@Nullable
 	private transient volatile TypeDescriptor typeDescriptor;
 
-
 	/**
-	 * Create a new descriptor for a method or constructor parameter.
-	 * Considers the dependency as 'eager'.
-	 * @param methodParameter the MethodParameter to wrap
-	 * @param required whether the dependency is required
+	 * 构造方法
 	 */
 	public DependencyDescriptor(MethodParameter methodParameter, boolean required) {
 		this(methodParameter, required, true);
 	}
 
-	/**
-	 * Create a new descriptor for a method or constructor parameter.
-	 * @param methodParameter the MethodParameter to wrap
-	 * @param required whether the dependency is required
-	 * @param eager whether this dependency is 'eager' in the sense of
-	 * eagerly resolving potential target beans for type matching
-	 */
 	public DependencyDescriptor(MethodParameter methodParameter, boolean required, boolean eager) {
 		super(methodParameter);
-
 		this.declaringClass = methodParameter.getDeclaringClass();
 		if (methodParameter.getMethod() != null) {
 			this.methodName = methodParameter.getMethod().getName();
@@ -110,39 +132,20 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 		this.eager = eager;
 	}
 
-	/**
-	 * Create a new descriptor for a field.
-	 * Considers the dependency as 'eager'.
-	 * @param field the field to wrap
-	 * @param required whether the dependency is required
-	 */
 	public DependencyDescriptor(Field field, boolean required) {
 		this(field, required, true);
 	}
 
-	/**
-	 * Create a new descriptor for a field.
-	 * @param field the field to wrap
-	 * @param required whether the dependency is required
-	 * @param eager whether this dependency is 'eager' in the sense of
-	 * eagerly resolving potential target beans for type matching
-	 */
 	public DependencyDescriptor(Field field, boolean required, boolean eager) {
 		super(field);
-
 		this.declaringClass = field.getDeclaringClass();
 		this.fieldName = field.getName();
 		this.required = required;
 		this.eager = eager;
 	}
 
-	/**
-	 * Copy constructor.
-	 * @param original the original descriptor to create a copy from
-	 */
 	public DependencyDescriptor(DependencyDescriptor original) {
 		super(original);
-
 		this.declaringClass = original.declaringClass;
 		this.methodName = original.methodName;
 		this.parameterTypes = original.parameterTypes;
@@ -157,10 +160,6 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 
 	/**
 	 * Return whether this dependency is required.
-	 * <p>Optional semantics are derived from Java 8's {@link java.util.Optional},
-	 * any variant of a parameter-level {@code Nullable} annotation (such as from
-	 * JSR-305 or the FindBugs set of annotations), or a language-level nullable
-	 * type declaration in Kotlin.
 	 */
 	public boolean isRequired() {
 		if (!this.required) {

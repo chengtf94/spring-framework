@@ -48,7 +48,6 @@ public class InjectionPoint {
 	@Nullable
 	private volatile Annotation[] fieldAnnotations;
 
-
 	/**
 	 * Create an injection point descriptor for a method or constructor parameter.
 	 * @param methodParameter the MethodParameter to wrap
@@ -163,12 +162,6 @@ public class InjectionPoint {
 
 	/**
 	 * Return the wrapped annotated element.
-	 * <p>Note: In case of a method/constructor parameter, this exposes
-	 * the annotations declared on the method or constructor itself
-	 * (i.e. at the method/constructor level, not at the parameter level).
-	 * Use {@link #getAnnotations()} to obtain parameter-level annotations in
-	 * such a scenario, transparently with corresponding field annotations.
-	 * @return the Field / Method / Constructor as AnnotatedElement
 	 */
 	public AnnotatedElement getAnnotatedElement() {
 		return (this.field != null ? this.field : obtainMethodParameter().getAnnotatedElement());
