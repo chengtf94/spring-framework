@@ -147,25 +147,58 @@ public class CommonAnnotationBeanPostProcessor
 		}
 	}
 
+	@Override
+	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
+		return null;
+	}
 
+	@Override
+	public boolean postProcessAfterInstantiation(Object bean, String beanName) {
+		return true;
+	}
 
+	@Override
+	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
+		InjectionMetadata metadata = findResourceMetadata(beanName, bean.getClass(), pvs);
+		try {
+			metadata.inject(bean, beanName, pvs);
+		}
+		catch (Throwable ex) {
+			throw new BeanCreationException(beanName, "Injection of resource dependencies failed", ex);
+		}
+		return pvs;
+	}
 
+	@Deprecated
+	@Override
+	public PropertyValues postProcessPropertyValues(
+			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
+		return postProcessProperties(pvs, bean, beanName);
+	}
 
+	@Override
+	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+		super.postProcessMergedBeanDefinition(beanDefinition, beanType, beanName);
+		InjectionMetadata metadata = findResourceMetadata(beanName, beanType, null);
+		metadata.checkConfigMembers(beanDefinition);
+	}
 
+	@Override
+	public void resetBeanDefinition(String beanName) {
+		this.injectionMetadataCache.remove(beanName);
+	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) {
+		Assert.notNull(beanFactory, "BeanFactory must not be null");
+		this.beanFactory = beanFactory;
+		if (this.resourceFactory == null) {
+			this.resourceFactory = beanFactory;
+		}
+		if (beanFactory instanceof ConfigurableBeanFactory) {
+			this.embeddedValueResolver = new EmbeddedValueResolver((ConfigurableBeanFactory) beanFactory);
+		}
+	}
 
 
 
@@ -198,61 +231,6 @@ public class CommonAnnotationBeanPostProcessor
 		Assert.notNull(resourceFactory, "BeanFactory must not be null");
 		this.resourceFactory = resourceFactory;
 	}
-
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) {
-		Assert.notNull(beanFactory, "BeanFactory must not be null");
-		this.beanFactory = beanFactory;
-		if (this.resourceFactory == null) {
-			this.resourceFactory = beanFactory;
-		}
-		if (beanFactory instanceof ConfigurableBeanFactory) {
-			this.embeddedValueResolver = new EmbeddedValueResolver((ConfigurableBeanFactory) beanFactory);
-		}
-	}
-
-
-	@Override
-	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
-		super.postProcessMergedBeanDefinition(beanDefinition, beanType, beanName);
-		InjectionMetadata metadata = findResourceMetadata(beanName, beanType, null);
-		metadata.checkConfigMembers(beanDefinition);
-	}
-
-	@Override
-	public void resetBeanDefinition(String beanName) {
-		this.injectionMetadataCache.remove(beanName);
-	}
-
-	@Override
-	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
-		return null;
-	}
-
-	@Override
-	public boolean postProcessAfterInstantiation(Object bean, String beanName) {
-		return true;
-	}
-
-	@Override
-	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
-		InjectionMetadata metadata = findResourceMetadata(beanName, bean.getClass(), pvs);
-		try {
-			metadata.inject(bean, beanName, pvs);
-		}
-		catch (Throwable ex) {
-			throw new BeanCreationException(beanName, "Injection of resource dependencies failed", ex);
-		}
-		return pvs;
-	}
-
-	@Deprecated
-	@Override
-	public PropertyValues postProcessPropertyValues(
-			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
-		return postProcessProperties(pvs, bean, beanName);
-	}
-
 
 	private InjectionMetadata findResourceMetadata(String beanName, Class<?> clazz, @Nullable PropertyValues pvs) {
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.
@@ -493,53 +471,6 @@ public class CommonAnnotationBeanPostProcessor
 	}
 
 	/**
-	 * Class representing generic injection information about an annotated field
-	 * or setter method, supporting @Resource and related annotations.
-	 */
-	protected abstract static class LookupElement extends InjectionMetadata.InjectedElement {
-
-		protected String name = "";
-
-		protected boolean isDefaultName = false;
-
-		protected Class<?> lookupType = Object.class;
-
-		@Nullable
-		protected String mappedName;
-
-		public LookupElement(Member member, @Nullable PropertyDescriptor pd) {
-			super(member, pd);
-		}
-
-		/**
-		 * Return the resource name for the lookup.
-		 */
-		public final String getName() {
-			return this.name;
-		}
-
-		/**
-		 * Return the desired type for the lookup.
-		 */
-		public final Class<?> getLookupType() {
-			return this.lookupType;
-		}
-
-		/**
-		 * Build a DependencyDescriptor for the underlying field/method.
-		 */
-		public final DependencyDescriptor getDependencyDescriptor() {
-			if (this.isField) {
-				return new LookupDependencyDescriptor((Field) this.member, this.lookupType);
-			}
-			else {
-				return new LookupDependencyDescriptor((Method) this.member, this.lookupType);
-			}
-		}
-	}
-
-
-	/**
 	 * Class representing injection information about an annotated field
 	 * or setter method, supporting the @Resource annotation.
 	 */
@@ -584,6 +515,51 @@ public class CommonAnnotationBeanPostProcessor
 		}
 	}
 
+	/**
+	 * Class representing generic injection information about an annotated field
+	 * or setter method, supporting @Resource and related annotations.
+	 */
+	protected abstract static class LookupElement extends InjectionMetadata.InjectedElement {
+
+		protected String name = "";
+
+		protected boolean isDefaultName = false;
+
+		protected Class<?> lookupType = Object.class;
+
+		@Nullable
+		protected String mappedName;
+
+		public LookupElement(Member member, @Nullable PropertyDescriptor pd) {
+			super(member, pd);
+		}
+
+		/**
+		 * Return the resource name for the lookup.
+		 */
+		public final String getName() {
+			return this.name;
+		}
+
+		/**
+		 * Return the desired type for the lookup.
+		 */
+		public final Class<?> getLookupType() {
+			return this.lookupType;
+		}
+
+		/**
+		 * Build a DependencyDescriptor for the underlying field/method.
+		 */
+		public final DependencyDescriptor getDependencyDescriptor() {
+			if (this.isField) {
+				return new LookupDependencyDescriptor((Field) this.member, this.lookupType);
+			}
+			else {
+				return new LookupDependencyDescriptor((Method) this.member, this.lookupType);
+			}
+		}
+	}
 
 	/**
 	 * Class representing injection information about an annotated field

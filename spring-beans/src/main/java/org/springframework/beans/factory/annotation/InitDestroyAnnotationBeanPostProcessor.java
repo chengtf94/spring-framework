@@ -82,6 +82,7 @@ public class InitDestroyAnnotationBeanPostProcessor implements
 		MergedBeanDefinitionPostProcessor,
 		PriorityOrdered,
 		Serializable {
+	protected transient Log logger = LogFactory.getLog(getClass());
 
 	private final transient LifecycleMetadata emptyLifecycleMetadata =
 			new LifecycleMetadata(Object.class, Collections.emptyList(), Collections.emptyList()) {
@@ -100,12 +101,15 @@ public class InitDestroyAnnotationBeanPostProcessor implements
 				}
 			};
 
-
-	protected transient Log logger = LogFactory.getLog(getClass());
-
+	/**
+	 * 初始化注解类型
+	 */
 	@Nullable
 	private Class<? extends Annotation> initAnnotationType;
 
+	/**
+	 * 销毁注解类型
+	 */
 	@Nullable
 	private Class<? extends Annotation> destroyAnnotationType;
 
@@ -113,45 +117,6 @@ public class InitDestroyAnnotationBeanPostProcessor implements
 
 	@Nullable
 	private final transient Map<Class<?>, LifecycleMetadata> lifecycleMetadataCache = new ConcurrentHashMap<>(256);
-
-
-	/**
-	 * Specify the init annotation to check for, indicating initialization
-	 * methods to call after configuration of a bean.
-	 * <p>Any custom annotation can be used, since there are no required
-	 * annotation attributes. There is no default, although a typical choice
-	 * is the JSR-250 {@link javax.annotation.PostConstruct} annotation.
-	 */
-	public void setInitAnnotationType(Class<? extends Annotation> initAnnotationType) {
-		this.initAnnotationType = initAnnotationType;
-	}
-
-	/**
-	 * Specify the destroy annotation to check for, indicating destruction
-	 * methods to call when the context is shutting down.
-	 * <p>Any custom annotation can be used, since there are no required
-	 * annotation attributes. There is no default, although a typical choice
-	 * is the JSR-250 {@link javax.annotation.PreDestroy} annotation.
-	 */
-	public void setDestroyAnnotationType(Class<? extends Annotation> destroyAnnotationType) {
-		this.destroyAnnotationType = destroyAnnotationType;
-	}
-
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
-	@Override
-	public int getOrder() {
-		return this.order;
-	}
-
-
-	@Override
-	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
-		LifecycleMetadata metadata = findLifecycleMetadata(beanType);
-		metadata.checkConfigMembers(beanDefinition);
-	}
 
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
@@ -198,6 +163,16 @@ public class InitDestroyAnnotationBeanPostProcessor implements
 		return findLifecycleMetadata(bean.getClass()).hasDestroyMethods();
 	}
 
+	@Override
+	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+		LifecycleMetadata metadata = findLifecycleMetadata(beanType);
+		metadata.checkConfigMembers(beanDefinition);
+	}
+
+	@Override
+	public int getOrder() {
+		return this.order;
+	}
 
 	private LifecycleMetadata findLifecycleMetadata(Class<?> clazz) {
 		if (this.lifecycleMetadataCache == null) {
@@ -217,6 +192,33 @@ public class InitDestroyAnnotationBeanPostProcessor implements
 			}
 		}
 		return metadata;
+	}
+
+
+
+
+
+	/**
+	 * Specify the init annotation to check for, indicating initialization
+	 * methods to call after configuration of a bean.
+	 */
+	public void setInitAnnotationType(Class<? extends Annotation> initAnnotationType) {
+		this.initAnnotationType = initAnnotationType;
+	}
+
+	/**
+	 * Specify the destroy annotation to check for, indicating destruction
+	 * methods to call when the context is shutting down.
+	 * <p>Any custom annotation can be used, since there are no required
+	 * annotation attributes. There is no default, although a typical choice
+	 * is the JSR-250 {@link javax.annotation.PreDestroy} annotation.
+	 */
+	public void setDestroyAnnotationType(Class<? extends Annotation> destroyAnnotationType) {
+		this.destroyAnnotationType = destroyAnnotationType;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
 	}
 
 	private LifecycleMetadata buildLifecycleMetadata(final Class<?> clazz) {
