@@ -22,9 +22,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
- * 子Bean定义：主要用于继承场景，当前Bean定义会默认继承了parentName对应Bean'定义
- * Bean definition for beans which inherit settings from their parent.
- * Child bean definitions have a fixed dependency on a parent bean definition.
+ * ChildBeanDefinition：子Bean定义，主要用于继承场景，当前Bean定义会默认继承了parentName对应Bean'定义
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

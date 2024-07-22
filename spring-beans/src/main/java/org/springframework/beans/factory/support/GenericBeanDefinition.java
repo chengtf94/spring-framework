@@ -21,7 +21,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
- * GenericBeanDefinition：通用Bean定义
+ * GenericBeanDefinition：普通通用的Bean定义
  *
  * @author Juergen Hoeller
  * @since 2.5
