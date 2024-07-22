@@ -160,12 +160,12 @@ public class DefaultListableBeanFactory
 	/** List of names of manually registered singletons, in registration order. */
 	private volatile Set<String> manualSingletonNames = new LinkedHashSet<>(16);
 
-	/** Cached array of bean definition names in case of frozen configuration. */
-	@Nullable
-	private volatile String[] frozenBeanDefinitionNames;
-
 	/** 是否已经冻结Ben定义元数据：Whether bean definition metadata may be cached for all beans. */
 	private volatile boolean configurationFrozen;
+
+	/** 已经冻结Ben定义元数据数组：Cached array of bean definition names in case of frozen configuration. */
+	@Nullable
+	private volatile String[] frozenBeanDefinitionNames;
 
 	/**
 	 * 构造方法
@@ -318,11 +318,11 @@ public class DefaultListableBeanFactory
 
 	@Override
 	public String[] getBeanDefinitionNames() {
+		// 若已经冻结，则返回已经冻结的Bean定义数组，否则实时返回
 		String[] frozenNames = this.frozenBeanDefinitionNames;
 		if (frozenNames != null) {
 			return frozenNames.clone();
-		}
-		else {
+		} else {
 			return StringUtils.toStringArray(this.beanDefinitionNames);
 		}
 	}
