@@ -295,116 +295,6 @@ public class AutowiredAnnotationBeanPostProcessor implements
 		return pvs;
 	}
 
-	@Deprecated
-	@Override
-	public PropertyValues postProcessPropertyValues(
-			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
-
-		return postProcessProperties(pvs, bean, beanName);
-	}
-
-
-	@Override
-	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
-		// 查找自动注入元数据
-		InjectionMetadata metadata = findAutowiringMetadata(beanName, beanType, null);
-		metadata.checkConfigMembers(beanDefinition);
-	}
-
-	@Override
-	public void resetBeanDefinition(String beanName) {
-		this.lookupMethodsChecked.remove(beanName);
-		this.injectionMetadataCache.remove(beanName);
-	}
-
-	@Override
-	public int getOrder() {
-		return this.order;
-	}
-
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) {
-		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
-			throw new IllegalArgumentException(
-					"AutowiredAnnotationBeanPostProcessor requires a ConfigurableListableBeanFactory: " + beanFactory);
-		}
-		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
-		this.metadataReaderFactory = new SimpleMetadataReaderFactory(this.beanFactory.getBeanClassLoader());
-	}
-
-
-
-
-
-
-
-
-
-
-
-	/**
-	 * Set the 'autowired' annotation type, to be used on constructors, fields, setter methods, and arbitrary config methods.
-	 */
-	public void setAutowiredAnnotationType(Class<? extends Annotation> autowiredAnnotationType) {
-		Assert.notNull(autowiredAnnotationType, "'autowiredAnnotationType' must not be null");
-		this.autowiredAnnotationTypes.clear();
-		this.autowiredAnnotationTypes.add(autowiredAnnotationType);
-	}
-
-	/**
-	 * Set the 'autowired' annotation types, to be used on constructors, fields, setter methods, and arbitrary config methods.
-	 */
-	public void setAutowiredAnnotationTypes(Set<Class<? extends Annotation>> autowiredAnnotationTypes) {
-		Assert.notEmpty(autowiredAnnotationTypes, "'autowiredAnnotationTypes' must not be empty");
-		this.autowiredAnnotationTypes.clear();
-		this.autowiredAnnotationTypes.addAll(autowiredAnnotationTypes);
-	}
-
-	public void setRequiredParameterName(String requiredParameterName) {
-		this.requiredParameterName = requiredParameterName;
-	}
-
-	public void setRequiredParameterValue(boolean requiredParameterValue) {
-		this.requiredParameterValue = requiredParameterValue;
-	}
-
-	public void setOrder(int order) {
-		this.order = order;
-	}
-
-
-
-
-
-
-
-
-
-
-
-	/**
-	 * 'Native' processing method for direct calls with an arbitrary target instance,
-	 * resolving all of its fields and methods which are annotated with one of the
-	 * configured 'autowired' annotation types.
-	 * @param bean the target instance to process
-	 * @throws BeanCreationException if autowiring failed
-	 * @see #setAutowiredAnnotationTypes(Set)
-	 */
-	public void processInjection(Object bean) throws BeanCreationException {
-		Class<?> clazz = bean.getClass();
-		InjectionMetadata metadata = findAutowiringMetadata(clazz.getName(), clazz, null);
-		try {
-			metadata.inject(bean, null, null);
-		}
-		catch (BeanCreationException ex) {
-			throw ex;
-		}
-		catch (Throwable ex) {
-			throw new BeanCreationException(
-					"Injection of autowired dependencies failed for class [" + clazz + "]", ex);
-		}
-	}
-
 	private InjectionMetadata findAutowiringMetadata(String beanName, Class<?> clazz, @Nullable PropertyValues pvs) {
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.
 		String cacheKey = (StringUtils.hasLength(beanName) ? beanName : clazz.getName());
@@ -482,6 +372,99 @@ public class AutowiredAnnotationBeanPostProcessor implements
 		while (targetClass != null && targetClass != Object.class);
 
 		return InjectionMetadata.forElements(elements, clazz);
+	}
+
+	@Deprecated
+	@Override
+	public PropertyValues postProcessPropertyValues(
+			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
+
+		return postProcessProperties(pvs, bean, beanName);
+	}
+
+
+	@Override
+	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
+		// 查找自动注入元数据
+		InjectionMetadata metadata = findAutowiringMetadata(beanName, beanType, null);
+		metadata.checkConfigMembers(beanDefinition);
+	}
+
+	@Override
+	public void resetBeanDefinition(String beanName) {
+		this.lookupMethodsChecked.remove(beanName);
+		this.injectionMetadataCache.remove(beanName);
+	}
+
+	@Override
+	public int getOrder() {
+		return this.order;
+	}
+
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) {
+		if (!(beanFactory instanceof ConfigurableListableBeanFactory)) {
+			throw new IllegalArgumentException(
+					"AutowiredAnnotationBeanPostProcessor requires a ConfigurableListableBeanFactory: " + beanFactory);
+		}
+		this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
+		this.metadataReaderFactory = new SimpleMetadataReaderFactory(this.beanFactory.getBeanClassLoader());
+	}
+
+
+
+
+	/**
+	 * Set the 'autowired' annotation type, to be used on constructors, fields, setter methods, and arbitrary config methods.
+	 */
+	public void setAutowiredAnnotationType(Class<? extends Annotation> autowiredAnnotationType) {
+		Assert.notNull(autowiredAnnotationType, "'autowiredAnnotationType' must not be null");
+		this.autowiredAnnotationTypes.clear();
+		this.autowiredAnnotationTypes.add(autowiredAnnotationType);
+	}
+
+	/**
+	 * Set the 'autowired' annotation types, to be used on constructors, fields, setter methods, and arbitrary config methods.
+	 */
+	public void setAutowiredAnnotationTypes(Set<Class<? extends Annotation>> autowiredAnnotationTypes) {
+		Assert.notEmpty(autowiredAnnotationTypes, "'autowiredAnnotationTypes' must not be empty");
+		this.autowiredAnnotationTypes.clear();
+		this.autowiredAnnotationTypes.addAll(autowiredAnnotationTypes);
+	}
+
+	public void setRequiredParameterName(String requiredParameterName) {
+		this.requiredParameterName = requiredParameterName;
+	}
+
+	public void setRequiredParameterValue(boolean requiredParameterValue) {
+		this.requiredParameterValue = requiredParameterValue;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	/**
+	 * 'Native' processing method for direct calls with an arbitrary target instance,
+	 * resolving all of its fields and methods which are annotated with one of the
+	 * configured 'autowired' annotation types.
+	 * @param bean the target instance to process
+	 * @throws BeanCreationException if autowiring failed
+	 * @see #setAutowiredAnnotationTypes(Set)
+	 */
+	public void processInjection(Object bean) throws BeanCreationException {
+		Class<?> clazz = bean.getClass();
+		InjectionMetadata metadata = findAutowiringMetadata(clazz.getName(), clazz, null);
+		try {
+			metadata.inject(bean, null, null);
+		}
+		catch (BeanCreationException ex) {
+			throw ex;
+		}
+		catch (Throwable ex) {
+			throw new BeanCreationException(
+					"Injection of autowired dependencies failed for class [" + clazz + "]", ex);
+		}
 	}
 
 	@Nullable

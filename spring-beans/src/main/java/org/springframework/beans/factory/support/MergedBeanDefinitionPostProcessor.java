@@ -19,7 +19,7 @@ package org.springframework.beans.factory.support;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
 /**
- * MergedBeanDefinitionPostProcessor：合并Bean定义 Bean后置处理器
+ * MergedBeanDefinitionPostProcessor：合并Bean定义 Bean后置处理器，用于处理Bean之间的继承关系处理，例如子类继承父类的字段
  *
  * @author Juergen Hoeller
  * @since 2.5
