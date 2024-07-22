@@ -1204,6 +1204,7 @@ public abstract class AbstractAutowireCapableBeanFactory
 	 */
 	protected BeanWrapper instantiateBean(String beanName, RootBeanDefinition mbd) {
 		try {
+			// #1 实例化Bean
 			Object beanInstance;
 			if (System.getSecurityManager() != null) {
 				beanInstance = AccessController.doPrivileged(
@@ -1213,6 +1214,7 @@ public abstract class AbstractAutowireCapableBeanFactory
 				// 传统实例化方式：基于CglibSubclassingInstantiationStrategy执行实例化
 				beanInstance = getInstantiationStrategy().instantiate(mbd, beanName, this);
 			}
+			// #2 包装
 			BeanWrapper bw = new BeanWrapperImpl(beanInstance);
 			initBeanWrapper(bw);
 			return bw;
