@@ -58,7 +58,7 @@ public interface ConfigurableListableBeanFactory extends
 	void ignoreDependencyInterface(Class<?> ifc);
 
 	/**
-	 * 注册非Spring管理的特殊对象作为依赖来源：Register a special dependency type with corresponding autowired value.
+	 * 注册非Spring管理的特殊对象（也称为游离对象）作为依赖来源：Register a special dependency type with corresponding autowired value.
 	 */
 	void registerResolvableDependency(Class<?> dependencyType, @Nullable Object autowiredValue);
 
