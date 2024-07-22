@@ -85,7 +85,8 @@ import org.springframework.util.StringValueResolver;
  * @see PreDestroy
  */
 @SuppressWarnings("serial")
-public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBeanPostProcessor
+public class CommonAnnotationBeanPostProcessor
+		extends InitDestroyAnnotationBeanPostProcessor
 		implements InstantiationAwareBeanPostProcessor, BeanFactoryAware, Serializable {
 
 	// Defensive reference to JNDI API for JDK 9+ (optional java.naming module)
@@ -102,12 +103,10 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 	static {
 		resourceAnnotationTypes.add(Resource.class);
-
 		webServiceRefClass = loadAnnotationType("javax.xml.ws.WebServiceRef");
 		if (webServiceRefClass != null) {
 			resourceAnnotationTypes.add(webServiceRefClass);
 		}
-
 		ejbClass = loadAnnotationType("javax.ejb.EJB");
 		if (ejbClass != null) {
 			resourceAnnotationTypes.add(ejbClass);
@@ -148,6 +147,28 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		}
 	}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	/**
 	 * Ignore the given resource type when resolving {@code @Resource} annotations.
 	 */
@@ -172,15 +193,6 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	/**
 	 * Specify the factory for objects to be injected into {@code @Resource} /
 	 * {@code @WebServiceRef} / {@code @EJB} annotated fields and setter methods,
-	 * <b>for {@code name} attributes and default names</b>.
-	 * <p>The default is the BeanFactory that this post-processor is defined in,
-	 * if any, looking up resource names as Spring bean names. Specify the resource
-	 * factory explicitly for programmatic usage of this post-processor.
-	 * <p>Specifying Spring's {@link org.springframework.jndi.support.SimpleJndiBeanFactory}
-	 * leads to JNDI lookup behavior equivalent to standard Java EE 5 resource injection,
-	 * even for {@code name} attributes and default names. This is the same behavior
-	 * that the "alwaysUseJndiLookup" flag enables.
-	 * @see #setAlwaysUseJndiLookup
 	 */
 	public void setResourceFactory(BeanFactory resourceFactory) {
 		Assert.notNull(resourceFactory, "BeanFactory must not be null");
@@ -238,7 +250,6 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	@Override
 	public PropertyValues postProcessPropertyValues(
 			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) {
-
 		return postProcessProperties(pvs, bean, beanName);
 	}
 
@@ -480,7 +491,6 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			return null;
 		}
 	}
-
 
 	/**
 	 * Class representing generic injection information about an annotated field
