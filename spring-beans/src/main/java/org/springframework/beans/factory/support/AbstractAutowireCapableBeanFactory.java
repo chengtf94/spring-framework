@@ -1270,7 +1270,7 @@ public abstract class AbstractAutowireCapableBeanFactory
 			}
 		}
 
-		// 实例化之后处理：若为false，则直接返回不再执行属性赋值
+		// #1 实例化之后处理：若为false，则直接返回不再执行属性赋值
 		if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 			for (InstantiationAwareBeanPostProcessor bp : getBeanPostProcessorCache().instantiationAware) {
 				if (!bp.postProcessAfterInstantiation(bw.getWrappedInstance(), beanName)) {
@@ -1279,7 +1279,7 @@ public abstract class AbstractAutowireCapableBeanFactory
 			}
 		}
 
-		// 属性赋值
+		// #2 获取Bean属性元数据
 		PropertyValues pvs = (mbd.hasPropertyValues() ? mbd.getPropertyValues() : null);
 		int resolvedAutowireMode = mbd.getResolvedAutowireMode();
 		if (resolvedAutowireMode == AUTOWIRE_BY_NAME || resolvedAutowireMode == AUTOWIRE_BY_TYPE) {
@@ -1295,9 +1295,9 @@ public abstract class AbstractAutowireCapableBeanFactory
 			pvs = newPvs;
 		}
 
+		// #3 执行Bean属性赋值前回调
 		boolean hasInstAwareBpps = hasInstantiationAwareBeanPostProcessors();
 		boolean needsDepCheck = (mbd.getDependencyCheck() != AbstractBeanDefinition.DEPENDENCY_CHECK_NONE);
-
 		PropertyDescriptor[] filteredPds = null;
 		if (hasInstAwareBpps) {
 			if (pvs == null) {
@@ -1324,6 +1324,7 @@ public abstract class AbstractAutowireCapableBeanFactory
 			checkDependencies(beanName, mbd, filteredPds, pvs);
 		}
 
+		// #4 执行Bean属性赋值
 		if (pvs != null) {
 			applyPropertyValues(beanName, mbd, bw, pvs);
 		}
