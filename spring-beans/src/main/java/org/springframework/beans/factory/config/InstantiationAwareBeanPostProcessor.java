@@ -32,7 +32,7 @@ import org.springframework.lang.Nullable;
 public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 
 	/**
-	 * 实例化之前处理
+	 * 实例化之前处理：目前用于自定义实例化Bean
 	 * The returned bean object may be a proxy to use instead of the target bean,
 	 * effectively suppressing default instantiation of the target bean.
 	 */
@@ -43,7 +43,9 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 
 	/**
 	 /**
-	 * 实例化之后处理
+	 * 实例化之后处理：目前用于判断是否允许Bean实例属性赋值
+	 * Perform operations after the bean has been instantiated, via a constructor or factory method,
+	 * but before Spring property population (from explicit properties or autowiring) occurs.
 	 */
 	default boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
 		return true;

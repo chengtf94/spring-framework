@@ -131,8 +131,7 @@ class ConstructorResolver {
 
 		if (explicitArgs != null) {
 			argsToUse = explicitArgs;
-		}
-		else {
+		} else {
 			Object[] argsToResolve = null;
 			synchronized (mbd.constructorArgumentLock) {
 				constructorToUse = (Constructor<?>) mbd.resolvedConstructorOrFactoryMethod;
@@ -157,8 +156,7 @@ class ConstructorResolver {
 				try {
 					candidates = (mbd.isNonPublicAccessAllowed() ?
 							beanClass.getDeclaredConstructors() : beanClass.getConstructors());
-				}
-				catch (Throwable ex) {
+				} catch (Throwable ex) {
 					throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 							"Resolution of declared constructors on bean Class [" + beanClass.getName() +
 							"] from ClassLoader [" + beanClass.getClassLoader() + "] failed", ex);
