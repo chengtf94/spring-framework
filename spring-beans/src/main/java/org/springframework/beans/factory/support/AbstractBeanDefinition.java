@@ -39,9 +39,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Base class for concrete, full-fledged {@link BeanDefinition} classes,
- * factoring out common properties of {@link GenericBeanDefinition},
- * {@link RootBeanDefinition}, and {@link ChildBeanDefinition}.
+ * AbstractBeanDefinition：Bean定义抽象基类
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
