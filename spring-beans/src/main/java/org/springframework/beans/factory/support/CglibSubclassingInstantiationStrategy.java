@@ -41,6 +41,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
+ * CglibSubclassingInstantiationStrategy：基于Cglib的方式产生动态子类，进行Bean实例化
  * Default object instantiation strategy for use in BeanFactories.
  *
  * <p>Uses CGLIB to generate subclasses dynamically if methods need to be

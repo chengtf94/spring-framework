@@ -30,8 +30,7 @@ import org.springframework.lang.Nullable;
 public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationAwareBeanPostProcessor {
 
 	/**
-	 * Predict the type of the bean to be eventually returned from this
-	 * processor's {@link #postProcessBeforeInstantiation} callback.
+	 * Predict the type of the bean to be eventually returned from this processor's {@link #postProcessBeforeInstantiation} callback.
 	 */
 	@Nullable
 	default Class<?> predictBeanType(Class<?> beanClass, String beanName) throws BeansException {
@@ -39,11 +38,10 @@ public interface SmartInstantiationAwareBeanPostProcessor extends InstantiationA
 	}
 
 	/**
-	 * Determine the candidate constructors to use for the given bean.
+	 * 确定候选的构造器：一种拦截机制，Determine the candidate constructors to use for the given bean.
 	 */
 	@Nullable
-	default Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName)
-			throws BeansException {
+	default Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName) throws BeansException {
 		return null;
 	}
 
