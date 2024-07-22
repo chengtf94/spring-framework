@@ -890,7 +890,7 @@ public abstract class AbstractApplicationContext
 		// Stop using the temporary ClassLoader for type matching.
 		beanFactory.setTempClassLoader(null);
 
-		// Allow for caching all bean definition metadata, not expecting further changes.
+		// 冻结所有的Bean定义：Allow for caching all bean definition metadata, not expecting further changes.
 		beanFactory.freezeConfiguration();
 
 		// Instantiate all remaining (non-lazy-init) singletons.
