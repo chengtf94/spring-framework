@@ -57,7 +57,6 @@ public class GenericBeanDefinition extends AbstractBeanDefinition {
 		return this.parentName;
 	}
 
-
 	@Override
 	public AbstractBeanDefinition cloneBeanDefinition() {
 		return new GenericBeanDefinition(this);

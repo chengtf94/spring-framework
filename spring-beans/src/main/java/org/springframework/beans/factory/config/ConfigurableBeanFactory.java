@@ -33,9 +33,6 @@ import org.springframework.util.StringValueResolver;
 
 /**
  * ConfigurableBeanFactory：可配置的BeanFactory
- * Configuration interface to be implemented by most bean factories. Provides
- * facilities to configure a bean factory, in addition to the bean factory
- * client methods in the {@link org.springframework.beans.factory.BeanFactory} interface.
  *
  * @author Juergen Hoeller
  * @since 03.11.2003
@@ -54,8 +51,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	void setParentBeanFactory(BeanFactory parentBeanFactory) throws IllegalStateException;
 
 	/**
-	 * Set the class loader to use for loading bean classes.
-	 * Default is the thread context class loader.
+	 * Set the class loader to use for loading bean classes. Default is the thread context class loader.
 	 */
 	void setBeanClassLoader(@Nullable ClassLoader beanClassLoader);
 
@@ -66,8 +62,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	ClassLoader getBeanClassLoader();
 
 	/**
-	 * Specify a temporary ClassLoader to use for type matching purposes.
-	 * Default is none, simply using the standard bean ClassLoader.
+	 * Specify a temporary ClassLoader to use for type matching purposes. Default is none, simply using the standard bean ClassLoader.
 	 * @since 2.5
 	 */
 	void setTempClassLoader(@Nullable ClassLoader tempClassLoader);
@@ -283,8 +278,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	void resolveAliases(StringValueResolver valueResolver);
 
 	/**
-	 * Return a merged BeanDefinition for the given bean name,
-	 * merging a child bean definition with its parent if necessary.
+	 * 获取合并的Bean定义：主要是继承场景使用
+	 * Return a merged BeanDefinition for the given bean name, merging a child bean definition with its parent if necessary.
 	 * Considers bean definitions in ancestor factories as well.
 	 * @param beanName the name of the bean to retrieve the merged definition for
 	 * @return a (potentially merged) BeanDefinition for the given bean
