@@ -30,8 +30,7 @@ import org.springframework.core.AliasRegistry;
 public interface BeanDefinitionRegistry extends AliasRegistry {
 
 	/**
-	 * 注册新的Bean定义
-	 * Must support RootBeanDefinition and ChildBeanDefinition.
+	 * 注册新的Bean定义：Must support RootBeanDefinition and ChildBeanDefinition.
 	 */
 	void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
 			throws BeanDefinitionStoreException;

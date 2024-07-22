@@ -937,6 +937,7 @@ public class DefaultListableBeanFactory
 			}
 		}
 
+		// #2 从Bean定义Map获取Bean定义
 		BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
 		if (existingDefinition != null) {
 			// #2.1 Bean定义已注册
@@ -970,7 +971,7 @@ public class DefaultListableBeanFactory
 		else {
 			// #2.2 Bean定义未注册
 			if (hasBeanCreationStarted()) {
-				// Cannot modify startup-time collection elements anymore (for stable iteration)
+				// #2.2.1 Bean已经在创建中：Cannot modify startup-time collection elements anymore (for stable iteration)
 				synchronized (this.beanDefinitionMap) {
 					this.beanDefinitionMap.put(beanName, beanDefinition);
 					List<String> updatedDefinitions = new ArrayList<>(this.beanDefinitionNames.size() + 1);
@@ -981,7 +982,7 @@ public class DefaultListableBeanFactory
 				}
 			}
 			else {
-				// #2.2.2 Still in startup registration phase
+				// #2.2.2 仍然处理启动注册阶段：Still in startup registration phase
 				this.beanDefinitionMap.put(beanName, beanDefinition);
 				this.beanDefinitionNames.add(beanName);
 				removeManualSingletonName(beanName);
