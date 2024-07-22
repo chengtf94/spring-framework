@@ -142,7 +142,10 @@ public class DefaultListableBeanFactory
 	/** Map from dependency type to corresponding autowired value. */
 	private final Map<Class<?>, Object> resolvableDependencies = new ConcurrentHashMap<>(16);
 
-	/** Map of bean definition objects, keyed by bean name. */
+	/** Bean定义列表：可确保有序性，List of bean definition names, in registration order. */
+	private volatile List<String> beanDefinitionNames = new ArrayList<>(256);
+
+	/** Bean定义Map：Map of bean definition objects, keyed by bean name. */
 	private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(256);
 
 	/** Map from bean name to merged BeanDefinitionHolder. */
@@ -153,9 +156,6 @@ public class DefaultListableBeanFactory
 
 	/** Map of singleton-only bean names, keyed by dependency type. */
 	private final Map<Class<?>, String[]> singletonBeanNamesByType = new ConcurrentHashMap<>(64);
-
-	/** List of bean definition names, in registration order. */
-	private volatile List<String> beanDefinitionNames = new ArrayList<>(256);
 
 	/** List of names of manually registered singletons, in registration order. */
 	private volatile Set<String> manualSingletonNames = new LinkedHashSet<>(16);
@@ -972,6 +972,7 @@ public class DefaultListableBeanFactory
 		Assert.hasText(beanName, "Bean name must not be empty");
 		Assert.notNull(beanDefinition, "BeanDefinition must not be null");
 
+		// #1 校验
 		if (beanDefinition instanceof AbstractBeanDefinition) {
 			try {
 				((AbstractBeanDefinition) beanDefinition).validate();
@@ -984,6 +985,7 @@ public class DefaultListableBeanFactory
 
 		BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
 		if (existingDefinition != null) {
+			// #2.1 Bean定义已注册
 			if (!isAllowBeanDefinitionOverriding()) {
 				throw new BeanDefinitionOverrideException(beanName, beanDefinition, existingDefinition);
 			}
@@ -1012,6 +1014,7 @@ public class DefaultListableBeanFactory
 			this.beanDefinitionMap.put(beanName, beanDefinition);
 		}
 		else {
+			// #2.2 Bean定义未注册
 			if (hasBeanCreationStarted()) {
 				// Cannot modify startup-time collection elements anymore (for stable iteration)
 				synchronized (this.beanDefinitionMap) {
@@ -1024,7 +1027,7 @@ public class DefaultListableBeanFactory
 				}
 			}
 			else {
-				// Still in startup registration phase
+				// #2.2.2 Still in startup registration phase
 				this.beanDefinitionMap.put(beanName, beanDefinition);
 				this.beanDefinitionNames.add(beanName);
 				removeManualSingletonName(beanName);
