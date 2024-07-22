@@ -164,7 +164,7 @@ public class DefaultListableBeanFactory
 	@Nullable
 	private volatile String[] frozenBeanDefinitionNames;
 
-	/** Whether bean definition metadata may be cached for all beans. */
+	/** 是否已经冻结Ben定义元数据：Whether bean definition metadata may be cached for all beans. */
 	private volatile boolean configurationFrozen;
 
 	/**
