@@ -23,7 +23,7 @@ import org.springframework.beans.PropertyValues;
 import org.springframework.lang.Nullable;
 
 /**
- * InstantiationAwareBeanPostProcessor：实例化Bean后置处理器
+ * InstantiationAwareBeanPostProcessor：实例化Bean后置处理器，属于非主流的生命周期（Bean实例化前阶段）
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -33,6 +33,8 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 
 	/**
 	 * 实例化之前处理
+	 * The returned bean object may be a proxy to use instead of the target bean,
+	 * effectively suppressing default instantiation of the target bean.
 	 */
 	@Nullable
 	default Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
@@ -48,21 +50,19 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	}
 
 	/**
-	 * Post-process the given property values before the factory applies them
-	 * to the given bean, without any need for property descriptors.
+	 * Post-process the given property values before the factory applies them to the given bean,
+	 * without any need for property descriptors.
 	 * @since 5.1
 	 * @see #postProcessPropertyValues
 	 */
 	@Nullable
-	default PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName)
-			throws BeansException {
+	default PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) throws BeansException {
 		return null;
 	}
 
 	@Deprecated
 	@Nullable
-	default PropertyValues postProcessPropertyValues(
-			PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
+	default PropertyValues postProcessPropertyValues(PropertyValues pvs, PropertyDescriptor[] pds, Object bean, String beanName) throws BeansException {
 		return pvs;
 	}
 
