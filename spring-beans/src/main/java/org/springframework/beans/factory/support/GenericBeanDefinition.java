@@ -21,13 +21,14 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
- * GenericBeanDefinition：普通通用的Bean定义
+ * GenericBeanDefinition：普通通用的Bean定义，默认解析的都是GenericBeanDefinition，在Bean定义合并阶段会根据继承关系处理成RootBeanDefinition
  *
  * @author Juergen Hoeller
  * @since 2.5
  * @see #setParentName
  * @see RootBeanDefinition
  * @see ChildBeanDefinition
+ * @see AbstractBeanFactory#getMergedBeanDefinition(String)
  */
 @SuppressWarnings("serial")
 public class GenericBeanDefinition extends AbstractBeanDefinition {

@@ -246,22 +246,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		}
 	}
 
-
 	/**
-	 * Override settings in this bean definition (presumably a copied parent
-	 * from a parent-child inheritance relationship) from the given bean
-	 * definition (presumably the child).
-	 * <ul>
-	 * <li>Will override beanClass if specified in the given bean definition.
-	 * <li>Will always take {@code abstract}, {@code scope},
-	 * {@code lazyInit}, {@code autowireMode}, {@code dependencyCheck},
-	 * and {@code dependsOn} from the given bean definition.
-	 * <li>Will add {@code constructorArgumentValues}, {@code propertyValues},
-	 * {@code methodOverrides} from the given bean definition to existing ones.
-	 * <li>Will override {@code factoryBeanName}, {@code factoryMethodName},
-	 * {@code initMethodName}, and {@code destroyMethodName} if specified
-	 * in the given bean definition.
-	 * </ul>
+	 * Bean定义覆盖：一般是Bean定义的继承覆盖使用
+	 * @see AbstractBeanFactory#getMergedBeanDefinition(String)
 	 */
 	public void overrideFrom(BeanDefinition other) {
 		if (StringUtils.hasLength(other.getBeanClassName())) {

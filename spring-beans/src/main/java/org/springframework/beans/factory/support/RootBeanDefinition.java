@@ -122,7 +122,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	@Nullable
 	private Set<String> externallyManagedDestroyMethods;
 
-
 	/**
 	 * 构造方法
 	 */
@@ -148,14 +147,6 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		setInstanceSupplier(instanceSupplier);
 	}
 
-	/**
-	 * Create a new RootBeanDefinition for a singleton,
-	 * using the given autowire mode.
-	 * @param beanClass the class of the bean to instantiate
-	 * @param autowireMode by name or type, using the constants in this interface
-	 * @param dependencyCheck whether to perform a dependency check for objects
-	 * (not applicable to autowiring a constructor, thus ignored there)
-	 */
 	public RootBeanDefinition(@Nullable Class<?> beanClass, int autowireMode, boolean dependencyCheck) {
 		super();
 		setBeanClass(beanClass);
@@ -165,46 +156,23 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 		}
 	}
 
-	/**
-	 * Create a new RootBeanDefinition for a singleton,
-	 * providing constructor arguments and property values.
-	 * @param beanClass the class of the bean to instantiate
-	 * @param cargs the constructor argument values to apply
-	 * @param pvs the property values to apply
-	 */
 	public RootBeanDefinition(@Nullable Class<?> beanClass, @Nullable ConstructorArgumentValues cargs,
 			@Nullable MutablePropertyValues pvs) {
-
 		super(cargs, pvs);
 		setBeanClass(beanClass);
 	}
 
-	/**
-	 * Create a new RootBeanDefinition for a singleton,
-	 * providing constructor arguments and property values.
-	 * <p>Takes a bean class name to avoid eager loading of the bean class.
-	 * @param beanClassName the name of the class to instantiate
-	 */
 	public RootBeanDefinition(String beanClassName) {
 		setBeanClassName(beanClassName);
 	}
 
-	/**
-	 * Create a new RootBeanDefinition for a singleton,
-	 * providing constructor arguments and property values.
-	 * <p>Takes a bean class name to avoid eager loading of the bean class.
-	 * @param beanClassName the name of the class to instantiate
-	 * @param cargs the constructor argument values to apply
-	 * @param pvs the property values to apply
-	 */
 	public RootBeanDefinition(String beanClassName, ConstructorArgumentValues cargs, MutablePropertyValues pvs) {
 		super(cargs, pvs);
 		setBeanClassName(beanClassName);
 	}
 
 	/**
-	 * Create a new RootBeanDefinition as deep copy of the given
-	 * bean definition.
+	 * Create a new RootBeanDefinition as deep copy of the given bean definition.
 	 * @param original the original bean definition to copy from
 	 */
 	public RootBeanDefinition(RootBeanDefinition original) {
@@ -218,14 +186,12 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	}
 
 	/**
-	 * Create a new RootBeanDefinition as deep copy of the given
-	 * bean definition.
+	 * Create a new RootBeanDefinition as deep copy of the given bean definition.
 	 * @param original the original bean definition to copy from
 	 */
 	RootBeanDefinition(BeanDefinition original) {
 		super(original);
 	}
-
 
 	@Override
 	public String getParentName() {
