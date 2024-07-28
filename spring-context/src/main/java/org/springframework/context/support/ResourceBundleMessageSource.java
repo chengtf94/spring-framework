@@ -40,34 +40,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * {@link org.springframework.context.MessageSource} implementation that
- * accesses resource bundles using specified basenames. This class relies
- * on the underlying JDK's {@link java.util.ResourceBundle} implementation,
- * in combination with the JDK's standard message parsing provided by
- * {@link java.text.MessageFormat}.
- *
- * <p>This MessageSource caches both the accessed ResourceBundle instances and
- * the generated MessageFormats for each message. It also implements rendering of
- * no-arg messages without MessageFormat, as supported by the AbstractMessageSource
- * base class. The caching provided by this MessageSource is significantly faster
- * than the built-in caching of the {@code java.util.ResourceBundle} class.
- *
- * <p>The basenames follow {@link java.util.ResourceBundle} conventions: essentially,
- * a fully-qualified classpath location. If it doesn't contain a package qualifier
- * (such as {@code org.mypackage}), it will be resolved from the classpath root.
- * Note that the JDK's standard ResourceBundle treats dots as package separators:
- * This means that "test.theme" is effectively equivalent to "test/theme".
- *
- * <p>On the classpath, bundle resources will be read with the locally configured
- * {@link #setDefaultEncoding encoding}: by default, ISO-8859-1; consider switching
- * this to UTF-8, or to {@code null} for the platform default encoding. On the JDK 9+
- * module path where locally provided {@code ResourceBundle.Control} handles are not
- * supported, this MessageSource always falls back to {@link ResourceBundle#getBundle}
- * retrieval with the platform default encoding: UTF-8 with a ISO-8859-1 fallback on
- * JDK 9+ (configurable through the "java.util.PropertyResourceBundle.encoding" system
- * property). Note that {@link #loadBundle(Reader)}/{@link #loadBundle(InputStream)}
- * won't be called in this case either, effectively ignoring overrides in subclasses.
- * Consider implementing a JDK 9 {@code java.util.spi.ResourceBundleProvider} instead.
+ * ResourceBundleMessageSource：基于ResourceBundle + MessageFormat 组合 的MessageSource实现
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -77,7 +50,9 @@ import org.springframework.util.ClassUtils;
  * @see java.util.ResourceBundle
  * @see java.text.MessageFormat
  */
-public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSource implements BeanClassLoaderAware {
+public class ResourceBundleMessageSource
+		extends AbstractResourceBasedMessageSource
+		implements BeanClassLoaderAware {
 
 	@Nullable
 	private ClassLoader bundleClassLoader;
@@ -92,8 +67,7 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * This allows for very efficient hash lookups, significantly faster
 	 * than the ResourceBundle class's own cache.
 	 */
-	private final Map<String, Map<Locale, ResourceBundle>> cachedResourceBundles =
-			new ConcurrentHashMap<>();
+	private final Map<String, Map<Locale, ResourceBundle>> cachedResourceBundles = new ConcurrentHashMap<>();
 
 	/**
 	 * Cache to hold already generated MessageFormats.
@@ -103,25 +77,20 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	 * very efficient hash lookups without concatenated keys.
 	 * @see #getMessageFormat
 	 */
-	private final Map<ResourceBundle, Map<String, Map<Locale, MessageFormat>>> cachedBundleMessageFormats =
-			new ConcurrentHashMap<>();
+	private final Map<ResourceBundle, Map<String, Map<Locale, MessageFormat>>> cachedBundleMessageFormats = new ConcurrentHashMap<>();
 
 	@Nullable
 	private volatile MessageSourceControl control = new MessageSourceControl();
 
-
+	/**
+	 * 构造方法
+	 */
 	public ResourceBundleMessageSource() {
 		setDefaultEncoding("ISO-8859-1");
 	}
 
-
 	/**
 	 * Set the ClassLoader to load resource bundles with.
-	 * <p>Default is the containing BeanFactory's
-	 * {@link org.springframework.beans.factory.BeanClassLoaderAware bean ClassLoader},
-	 * or the default ClassLoader determined by
-	 * {@link org.springframework.util.ClassUtils#getDefaultClassLoader()}
-	 * if not running within a BeanFactory.
 	 */
 	public void setBundleClassLoader(ClassLoader classLoader) {
 		this.bundleClassLoader = classLoader;
@@ -129,8 +98,6 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 
 	/**
 	 * Return the ClassLoader to load resource bundles with.
-	 * <p>Default is the containing BeanFactory's bean ClassLoader.
-	 * @see #setBundleClassLoader
 	 */
 	@Nullable
 	protected ClassLoader getBundleClassLoader() {
@@ -142,11 +109,6 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 		this.beanClassLoader = classLoader;
 	}
 
-
-	/**
-	 * Resolves the given message code as key in the registered resource bundles,
-	 * returning the value found in the bundle as-is (without MessageFormat parsing).
-	 */
 	@Override
 	protected String resolveCodeWithoutArguments(String code, Locale locale) {
 		Set<String> basenames = getBasenameSet();
@@ -162,10 +124,6 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 		return null;
 	}
 
-	/**
-	 * Resolves the given message code as key in the registered resource bundles,
-	 * using a cached MessageFormat instance per message code.
-	 */
 	@Override
 	@Nullable
 	protected MessageFormat resolveCode(String code, Locale locale) {
@@ -184,12 +142,10 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 
 
 	/**
-	 * Return a ResourceBundle for the given basename and Locale,
-	 * fetching already generated ResourceBundle from the cache.
+	 * Return a ResourceBundle for the given basename and Locale, fetching already generated ResourceBundle from the cache.
 	 * @param basename the basename of the ResourceBundle
 	 * @param locale the Locale to find the ResourceBundle for
-	 * @return the resulting ResourceBundle, or {@code null} if none
-	 * found for the given basename and Locale
+	 * @return the resulting ResourceBundle, or {@code null} if none found for the given basename and Locale
 	 */
 	@Nullable
 	protected ResourceBundle getResourceBundle(String basename, Locale locale) {
@@ -346,26 +302,14 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 	}
 
 	/**
-	 * Efficiently retrieve the String value for the specified key,
-	 * or return {@code null} if not found.
-	 * <p>As of 4.2, the default implementation checks {@code containsKey}
-	 * before it attempts to call {@code getString} (which would require
-	 * catching {@code MissingResourceException} for key not found).
-	 * <p>Can be overridden in subclasses.
-	 * @param bundle the ResourceBundle to perform the lookup in
-	 * @param key the key to look up
-	 * @return the associated value, or {@code null} if none
-	 * @since 4.2
-	 * @see ResourceBundle#getString(String)
-	 * @see ResourceBundle#containsKey(String)
+	 * Efficiently retrieve the String value for the specified key, or return {@code null} if not found.
 	 */
 	@Nullable
 	protected String getStringOrNull(ResourceBundle bundle, String key) {
 		if (bundle.containsKey(key)) {
 			try {
 				return bundle.getString(key);
-			}
-			catch (MissingResourceException ex) {
+			} catch (MissingResourceException ex) {
 				// Assume key not found for some other reason
 				// -> do NOT throw the exception to allow for checking parent message source.
 			}
@@ -373,14 +317,10 @@ public class ResourceBundleMessageSource extends AbstractResourceBasedMessageSou
 		return null;
 	}
 
-	/**
-	 * Show the configuration of this MessageSource.
-	 */
 	@Override
 	public String toString() {
 		return getClass().getName() + ": basenames=" + getBasenameSet();
 	}
-
 
 	/**
 	 * Custom implementation of {@code ResourceBundle.Control}, adding support

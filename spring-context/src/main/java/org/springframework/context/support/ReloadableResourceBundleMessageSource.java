@@ -39,39 +39,7 @@ import org.springframework.util.PropertiesPersister;
 import org.springframework.util.StringUtils;
 
 /**
- * Spring-specific {@link org.springframework.context.MessageSource} implementation
- * that accesses resource bundles using specified basenames, participating in the
- * Spring {@link org.springframework.context.ApplicationContext}'s resource loading.
- *
- * <p>In contrast to the JDK-based {@link ResourceBundleMessageSource}, this class uses
- * {@link java.util.Properties} instances as its custom data structure for messages,
- * loading them via a {@link org.springframework.util.PropertiesPersister} strategy
- * from Spring {@link Resource} handles. This strategy is not only capable of
- * reloading files based on timestamp changes, but also of loading properties files
- * with a specific character encoding. It will detect XML property files as well.
- *
- * <p>Note that the basenames set as {@link #setBasenames "basenames"} property
- * are treated in a slightly different fashion than the "basenames" property of
- * {@link ResourceBundleMessageSource}. It follows the basic ResourceBundle rule of not
- * specifying file extension or language codes, but can refer to any Spring resource
- * location (instead of being restricted to classpath resources). With a "classpath:"
- * prefix, resources can still be loaded from the classpath, but "cacheSeconds" values
- * other than "-1" (caching forever) might not work reliably in this case.
- *
- * <p>For a typical web application, message files could be placed in {@code WEB-INF}:
- * e.g. a "WEB-INF/messages" basename would find a "WEB-INF/messages.properties",
- * "WEB-INF/messages_en.properties" etc arrangement as well as "WEB-INF/messages.xml",
- * "WEB-INF/messages_en.xml" etc. Note that message definitions in a <i>previous</i>
- * resource bundle will override ones in a later bundle, due to sequential lookup.
-
- * <p>This MessageSource can easily be used outside an
- * {@link org.springframework.context.ApplicationContext}: it will use a
- * {@link org.springframework.core.io.DefaultResourceLoader} as default,
- * simply getting overridden with the ApplicationContext's resource loader
- * if running in a context. It does not have any other specific dependencies.
- *
- * <p>Thanks to Thomas Achleitner for providing the initial implementation of
- * this message source!
+ * ReloadableResourceBundleMessageSource：可重载Properties + MessageFormat 组合 MessageSource的实现
  *
  * @author Juergen Hoeller
  * @see #setCacheSeconds
@@ -85,7 +53,8 @@ import org.springframework.util.StringUtils;
  * @see ResourceBundleMessageSource
  * @see java.util.ResourceBundle
  */
-public class ReloadableResourceBundleMessageSource extends AbstractResourceBasedMessageSource
+public class ReloadableResourceBundleMessageSource
+		extends AbstractResourceBasedMessageSource
 		implements ResourceLoaderAware {
 
 	private static final String PROPERTIES_SUFFIX = ".properties";

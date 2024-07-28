@@ -35,7 +35,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.StringValueResolver;
 
 /**
- * ApplicationContextAwareProcessor：负责处理EnvironmentAware、ResourceLoaderAware、ApplicationEcentPublisherAware、ApplicationContextAware等Aware接口的回调
+ * ApplicationContextAwareProcessor：负责处理EnvironmentAware、ResourceLoaderAware、ApplicationEventPublisherAware、ApplicationContextAware等Aware接口的回调
  *
  * @author Juergen Hoeller
  * @author Costin Leau
