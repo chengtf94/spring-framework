@@ -22,17 +22,7 @@ import org.springframework.beans.PropertyAccessor;
 import org.springframework.lang.Nullable;
 
 /**
- * Stores and exposes information about data-binding and validation errors
- * for a specific object.
- *
- * <p>Field names are typically properties of the target object (e.g. "name"
- * when binding to a customer object). Implementations may also support nested
- * fields in case of nested objects (e.g. "address.street"), in conjunction
- * with subtree navigation via {@link #setNestedPath}: for example, an
- * {@code AddressValidator} may validate "address", not being aware that this
- * is a nested object of a top-level customer object.
- *
- * <p>Note: {@code Errors} objects are single-threaded.
+ * Errors：数据绑定和校验错误收集接口，与Java Bean 和其属性有强相关性
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -51,7 +41,6 @@ public interface Errors {
 	 * in the beans package.
 	 */
 	String NESTED_PATH_SEPARATOR = PropertyAccessor.NESTED_PROPERTY_SEPARATOR;
-
 
 	/**
 	 * Return the name of the bound root object.
@@ -100,6 +89,7 @@ public interface Errors {
 	void popNestedPath() throws IllegalStateException;
 
 	/**
+	 * 收集错误文案
 	 * Register a global error for the entire target object,
 	 * using the given error description.
 	 * @param errorCode error code, interpretable as a message key
@@ -128,6 +118,7 @@ public interface Errors {
 	void reject(String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage);
 
 	/**
+	 * 收集对象字段中的错误文案
 	 * Register a field error for the specified field of the current object
 	 * (respecting the current nested path, if any), using the given error
 	 * description.

@@ -17,7 +17,7 @@
 package org.springframework.validation;
 
 /**
- * Validator：校验接口
+ * Validator：校验器接口，通过编程的方式校验目标对象
  *
  * @author Rod Johnson
  * @see SmartValidator
@@ -28,13 +28,12 @@ package org.springframework.validation;
 public interface Validator {
 
 	/**
-	 * Can this {@link Validator} {@link #validate(Object, Errors) validate} instances of the supplied {@code clazz}?
+	 * 目标类能否校验
 	 */
 	boolean supports(Class<?> clazz);
 
 	/**
-	 * Validate the given {@code target} object which must be of a {@link Class} for which the {@link #supports(Class)} method
-	 * typically has returned (or would return) {@code true}.
+	 * 校验目标对象，并将校验失败的信息输出到Errors对象
 	 */
 	void validate(Object target, Errors errors);
 
