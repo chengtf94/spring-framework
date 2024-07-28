@@ -30,30 +30,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Abstract implementation of the {@link HierarchicalMessageSource} interface,
- * implementing common handling of message variants, making it easy
- * to implement a specific strategy for a concrete MessageSource.
- *
- * <p>Subclasses must implement the abstract {@link #resolveCode}
- * method. For efficient resolution of messages without arguments, the
- * {@link #resolveCodeWithoutArguments} method should be overridden
- * as well, resolving messages without a MessageFormat being involved.
- *
- * <p><b>Note:</b> By default, message texts are only parsed through
- * MessageFormat if arguments have been passed in for the message. In case
- * of no arguments, message texts will be returned as-is. As a consequence,
- * you should only use MessageFormat escaping for messages with actual
- * arguments, and keep all other messages unescaped. If you prefer to
- * escape all messages, set the "alwaysUseMessageFormat" flag to "true".
- *
- * <p>Supports not only MessageSourceResolvables as primary messages
- * but also resolution of message arguments that are in turn
- * MessageSourceResolvables themselves.
- *
- * <p>This class does not implement caching of messages per code, thus
- * subclasses can dynamically change messages over time. Subclasses are
- * encouraged to cache their messages in a modification-aware fashion,
- * allowing for hot deployment of updated messages.
+ * AbstractMessageSource
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -62,7 +39,9 @@ import org.springframework.util.ObjectUtils;
  * @see #setAlwaysUseMessageFormat
  * @see java.text.MessageFormat
  */
-public abstract class AbstractMessageSource extends MessageSourceSupport implements HierarchicalMessageSource {
+public abstract class AbstractMessageSource
+		extends MessageSourceSupport
+		implements HierarchicalMessageSource {
 
 	@Nullable
 	private MessageSource parentMessageSource;
@@ -71,7 +50,6 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	private Properties commonMessages;
 
 	private boolean useCodeAsDefaultMessage = false;
-
 
 	@Override
 	public void setParentMessageSource(@Nullable MessageSource parent) {
@@ -106,18 +84,6 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 	 * Set whether to use the message code as default message instead of
 	 * throwing a NoSuchMessageException. Useful for development and debugging.
 	 * Default is "false".
-	 * <p>Note: In case of a MessageSourceResolvable with multiple codes
-	 * (like a FieldError) and a MessageSource that has a parent MessageSource,
-	 * do <i>not</i> activate "useCodeAsDefaultMessage" in the <i>parent</i>:
-	 * Else, you'll get the first code returned as message by the parent,
-	 * without attempts to check further codes.
-	 * <p>To be able to work with "useCodeAsDefaultMessage" turned on in the parent,
-	 * AbstractMessageSource and AbstractApplicationContext contain special checks
-	 * to delegate to the internal {@link #getMessageInternal} method if available.
-	 * In general, it is recommended to just use "useCodeAsDefaultMessage" during
-	 * development and not rely on it in production in the first place, though.
-	 * @see #getMessage(String, Object[], Locale)
-	 * @see org.springframework.validation.FieldError
 	 */
 	public void setUseCodeAsDefaultMessage(boolean useCodeAsDefaultMessage) {
 		this.useCodeAsDefaultMessage = useCodeAsDefaultMessage;
@@ -213,9 +179,7 @@ public abstract class AbstractMessageSource extends MessageSourceSupport impleme
 			if (message != null) {
 				return message;
 			}
-		}
-
-		else {
+		} else {
 			// Resolve arguments eagerly, for the case where the message
 			// is defined in a parent MessageSource but resolvable arguments
 			// are defined in the child MessageSource.
