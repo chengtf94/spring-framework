@@ -761,9 +761,8 @@ public abstract class AbstractApplicationContext
 			if (logger.isTraceEnabled()) {
 				logger.trace("Using MessageSource [" + this.messageSource + "]");
 			}
-		}
-		else {
-			// Use empty MessageSource to be able to accept getMessage calls.
+		} else {
+			// 使用空MessageSource兜底：Use empty MessageSource to be able to accept getMessage calls.
 			DelegatingMessageSource dms = new DelegatingMessageSource();
 			dms.setParentMessageSource(getInternalParentMessageSource());
 			this.messageSource = dms;
