@@ -29,11 +29,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Holder that combines a {@link Resource} descriptor with a specific encoding
- * or {@code Charset} to be used for reading from the resource.
- *
- * <p>Used as an argument for operations that support reading content with
- * a specific encoding, typically via a {@code java.io.Reader}.
+ * EncodedResource：编码资源
  *
  * @author Juergen Hoeller
  * @author Sam Brannen

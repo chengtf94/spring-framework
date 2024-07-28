@@ -27,7 +27,7 @@ import java.nio.channels.ReadableByteChannel;
 import org.springframework.lang.Nullable;
 
 /**
- * Resource：资源接口
+ * Resource：只读资源接口
  *
  * @author Juergen Hoeller
  * @since 28.12.2003
