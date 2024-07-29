@@ -980,8 +980,7 @@ public class DefaultListableBeanFactory
 					this.beanDefinitionNames = updatedDefinitions;
 					removeManualSingletonName(beanName);
 				}
-			}
-			else {
+			} else {
 				// #2.2.2 仍然处理启动注册阶段：Still in startup registration phase
 				this.beanDefinitionMap.put(beanName, beanDefinition);
 				this.beanDefinitionNames.add(beanName);
@@ -992,8 +991,7 @@ public class DefaultListableBeanFactory
 
 		if (existingDefinition != null || containsSingleton(beanName)) {
 			resetBeanDefinition(beanName);
-		}
-		else if (isConfigurationFrozen()) {
+		} else if (isConfigurationFrozen()) {
 			clearByTypeCache();
 		}
 	}
