@@ -23,6 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * EnableAspectJAutoProxy：基于AspectJ的自动代理模块驱动注解
  * Enables support for handling components marked with AspectJ's {@code @Aspect} annotation,
  * similar to functionality found in Spring's {@code <aop:aspectj-autoproxy>} XML element.
  * To be used on @{@link Configuration} classes as follows:
@@ -123,12 +124,14 @@ import java.lang.annotation.Target;
 public @interface EnableAspectJAutoProxy {
 
 	/**
+	 * 是否使用CGLib动态代理，默认为JDK动态代理
 	 * Indicate whether subclass-based (CGLIB) proxies are to be created as opposed
 	 * to standard Java interface-based proxies. The default is {@code false}.
 	 */
 	boolean proxyTargetClass() default false;
 
 	/**
+	 * 是否将代理对象暴露在AopContext中
 	 * Indicate that the proxy should be exposed by the AOP framework as a {@code ThreadLocal}
 	 * for retrieval via the {@link org.springframework.aop.framework.AopContext} class.
 	 * Off by default, i.e. no guarantees that {@code AopContext} access will work.
