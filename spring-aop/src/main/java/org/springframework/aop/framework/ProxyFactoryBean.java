@@ -64,24 +64,31 @@ import org.springframework.util.ObjectUtils;
 public class ProxyFactoryBean
 		extends ProxyCreatorSupport
 		implements FactoryBean<Object>, BeanClassLoaderAware, BeanFactoryAware {
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
 	 * This suffix in a value in an interceptor list indicates to expand globals.
 	 */
 	public static final String GLOBAL_SUFFIX = "*";
 
-
-	protected final Log logger = LogFactory.getLog(getClass());
-
+	/**
+	 * 拦截器Bean名称
+	 */
 	@Nullable
 	private String[] interceptorNames;
 
+	/**
+	 * 目标Bean名称
+	 */
 	@Nullable
 	private String targetName;
 
-	private boolean autodetectInterfaces = true;
-
+	/**
+	 * 是否单例
+	 */
 	private boolean singleton = true;
+
+	private boolean autodetectInterfaces = true;
 
 	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
 

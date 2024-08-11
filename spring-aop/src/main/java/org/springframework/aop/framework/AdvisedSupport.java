@@ -71,7 +71,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	public static final TargetSource EMPTY_TARGET_SOURCE = EmptyTargetSource.INSTANCE;
 
 
-	/** Package-protected to allow direct access for efficiency. */
+	/** 目标对象：Package-protected to allow direct access for efficiency. */
 	TargetSource targetSource = EMPTY_TARGET_SOURCE;
 
 	/** Whether the Advisors are already filtered for the specific target class. */
