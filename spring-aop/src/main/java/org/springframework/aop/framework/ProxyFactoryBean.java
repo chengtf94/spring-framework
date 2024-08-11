@@ -52,35 +52,6 @@ import org.springframework.util.ObjectUtils;
  * {@link org.springframework.beans.factory.FactoryBean} implementation that builds an
  * AOP proxy based on beans in a Spring {@link org.springframework.beans.factory.BeanFactory}.
  *
- * <p>{@link org.aopalliance.intercept.MethodInterceptor MethodInterceptors} and
- * {@link org.springframework.aop.Advisor Advisors} are identified by a list of bean
- * names in the current bean factory, specified through the "interceptorNames" property.
- * The last entry in the list can be the name of a target bean or a
- * {@link org.springframework.aop.TargetSource}; however, it is normally preferable
- * to use the "targetName"/"target"/"targetSource" properties instead.
- *
- * <p>Global interceptors and advisors can be added at the factory level. The specified
- * ones are expanded in an interceptor list where an "xxx*" entry is included in the
- * list, matching the given prefix with the bean names &mdash; for example, "global*"
- * would match both "globalBean1" and "globalBean2"; whereas, "*" would match all
- * defined interceptors. The matching interceptors get applied according to their
- * returned order value, if they implement the {@link org.springframework.core.Ordered}
- * interface.
- *
- * <p>Creates a JDK proxy when proxy interfaces are given, and a CGLIB proxy for the
- * actual target class if not. Note that the latter will only work if the target class
- * does not have final methods, as a dynamic subclass will be created at runtime.
- *
- * <p>It's possible to cast a proxy obtained from this factory to {@link Advised},
- * or to obtain the ProxyFactoryBean reference and programmatically manipulate it.
- * This won't work for existing prototype references, which are independent. However,
- * it will work for prototypes subsequently obtained from the factory. Changes to
- * interception will work immediately on singletons (including existing references).
- * However, to change interfaces or a target it's necessary to obtain a new instance
- * from the factory. This means that singleton instances obtained from the factory
- * do not have the same object identity. However, they do have the same interceptors
- * and target, and changing any reference will change all objects.
- *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see #setInterceptorNames
@@ -90,7 +61,8 @@ import org.springframework.util.ObjectUtils;
  * @see Advised
  */
 @SuppressWarnings("serial")
-public class ProxyFactoryBean extends ProxyCreatorSupport
+public class ProxyFactoryBean
+		extends ProxyCreatorSupport
 		implements FactoryBean<Object>, BeanClassLoaderAware, BeanFactoryAware {
 
 	/**
@@ -126,52 +98,84 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	/** Whether the advisor chain has already been initialized. */
 	private boolean advisorChainInitialized = false;
 
-	/** If this is a singleton, the cached singleton proxy instance. */
+	/** 单例代理对象：If this is a singleton, the cached singleton proxy instance. */
 	@Nullable
 	private Object singletonInstance;
 
+	/**
+	 * Return a proxy
+	 * Create an instance of the AOP proxy to be returned by this factory.
+	 * The instance will be cached for a singleton, and create on each call to {@code getObject()} for a proxy.
+	 * @return a fresh AOP proxy reflecting the current state of this factory
+	 */
+	@Override
+	@Nullable
+	public Object getObject() throws BeansException {
+		initializeAdvisorChain();
+		if (isSingleton()) {
+			return getSingletonInstance();
+		} else {
+			if (this.targetName == null) {
+				logger.info("Using non-singleton proxies with singleton targets is often undesirable. " +
+						"Enable prototype proxies by setting the 'targetName' property.");
+			}
+			return newPrototypeInstance();
+		}
+	}
+
+	@Override
+	public boolean isSingleton() {
+		return this.singleton;
+	}
 
 	/**
-	 * Set the names of the interfaces we're proxying. If no interface
-	 * is given, a CGLIB for the actual class will be created.
-	 * <p>This is essentially equivalent to the "setInterfaces" method,
-	 * but mirrors TransactionProxyFactoryBean's "setProxyInterfaces".
-	 * @see #setInterfaces
-	 * @see AbstractSingletonProxyFactoryBean#setProxyInterfaces
+	 * Return the singleton instance of this class's proxy object, lazily creating it if it hasn't been created already.
+	 * @return the shared singleton proxy
+	 */
+	private synchronized Object getSingletonInstance() {
+		if (this.singletonInstance == null) {
+			this.targetSource = freshTargetSource();
+			if (this.autodetectInterfaces && getProxiedInterfaces().length == 0 && !isProxyTargetClass()) {
+				// Rely on AOP infrastructure to tell us what interfaces to proxy.
+				Class<?> targetClass = getTargetClass();
+				if (targetClass == null) {
+					throw new FactoryBeanNotInitializedException("Cannot determine target class for proxy");
+				}
+				setInterfaces(ClassUtils.getAllInterfacesForClass(targetClass, this.proxyClassLoader));
+			}
+			// Initialize the shared singleton instance.
+			super.setFrozen(this.freezeProxy);
+			this.singletonInstance = getProxy(createAopProxy());
+		}
+		return this.singletonInstance;
+	}
+
+	/**
+	 * Return the proxy object to expose.
+	 * @param aopProxy the prepared AopProxy instance to get the proxy from
+	 * @return the proxy object to expose
+	 * @see AopProxy#getProxy(ClassLoader)
+	 */
+	protected Object getProxy(AopProxy aopProxy) {
+		return aopProxy.getProxy(this.proxyClassLoader);
+	}
+
+	/**
+	 * Set the names of the interfaces we're proxying.
 	 */
 	public void setProxyInterfaces(Class<?>[] proxyInterfaces) throws ClassNotFoundException {
 		setInterfaces(proxyInterfaces);
 	}
 
 	/**
-	 * Set the list of Advice/Advisor bean names. This must always be set
-	 * to use this factory bean in a bean factory.
-	 * <p>The referenced beans should be of type Interceptor, Advisor or Advice
-	 * The last entry in the list can be the name of any bean in the factory.
-	 * If it's neither an Advice nor an Advisor, a new SingletonTargetSource
-	 * is added to wrap it. Such a target bean cannot be used if the "target"
-	 * or "targetSource" or "targetName" property is set, in which case the
-	 * "interceptorNames" array must contain only Advice/Advisor bean names.
-	 * <p><b>NOTE: Specifying a target bean as final name in the "interceptorNames"
-	 * list is deprecated and will be removed in a future Spring version.</b>
-	 * Use the {@link #setTargetName "targetName"} property instead.
-	 * @see org.aopalliance.intercept.MethodInterceptor
-	 * @see org.springframework.aop.Advisor
-	 * @see org.aopalliance.aop.Advice
-	 * @see org.springframework.aop.target.SingletonTargetSource
+	 * Set the list of Advice/Advisor bean names.
 	 */
 	public void setInterceptorNames(String... interceptorNames) {
 		this.interceptorNames = interceptorNames;
 	}
 
 	/**
-	 * Set the name of the target bean. This is an alternative to specifying
-	 * the target name at the end of the "interceptorNames" array.
-	 * <p>You can also specify a target object or a TargetSource object
-	 * directly, via the "target"/"targetSource" property, respectively.
-	 * @see #setInterceptorNames(String[])
-	 * @see #setTarget(Object)
-	 * @see #setTargetSource(org.springframework.aop.TargetSource)
+	 * Set the name of the target bean.
 	 */
 	public void setTargetName(String targetName) {
 		this.targetName = targetName;
@@ -188,12 +192,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	}
 
 	/**
-	 * Set the value of the singleton property. Governs whether this factory
-	 * should always return the same proxy instance (which implies the same target)
-	 * or whether it should return a new prototype instance, which implies that
-	 * the target and interceptors may be new instances also, if they are obtained
-	 * from prototype bean definitions. This allows for fine control of
-	 * independence/uniqueness in the object graph.
+	 * Set the value of the singleton property.
 	 */
 	public void setSingleton(boolean singleton) {
 		this.singleton = singleton;
@@ -237,30 +236,6 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		checkInterceptorNames();
 	}
 
-
-	/**
-	 * Return a proxy. Invoked when clients obtain beans from this factory bean.
-	 * Create an instance of the AOP proxy to be returned by this factory.
-	 * The instance will be cached for a singleton, and create on each call to
-	 * {@code getObject()} for a proxy.
-	 * @return a fresh AOP proxy reflecting the current state of this factory
-	 */
-	@Override
-	@Nullable
-	public Object getObject() throws BeansException {
-		initializeAdvisorChain();
-		if (isSingleton()) {
-			return getSingletonInstance();
-		}
-		else {
-			if (this.targetName == null) {
-				logger.info("Using non-singleton proxies with singleton targets is often undesirable. " +
-						"Enable prototype proxies by setting the 'targetName' property.");
-			}
-			return newPrototypeInstance();
-		}
-	}
-
 	/**
 	 * Return the type of the proxy. Will check the singleton instance if
 	 * already created, else fall back to the proxy interface (in case of just
@@ -289,12 +264,6 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		}
 	}
 
-	@Override
-	public boolean isSingleton() {
-		return this.singleton;
-	}
-
-
 	/**
 	 * Create a composite interface Class for the given interfaces,
 	 * implementing the given interfaces in one single Class.
@@ -306,29 +275,6 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 */
 	protected Class<?> createCompositeInterface(Class<?>[] interfaces) {
 		return ClassUtils.createCompositeInterface(interfaces, this.proxyClassLoader);
-	}
-
-	/**
-	 * Return the singleton instance of this class's proxy object,
-	 * lazily creating it if it hasn't been created already.
-	 * @return the shared singleton proxy
-	 */
-	private synchronized Object getSingletonInstance() {
-		if (this.singletonInstance == null) {
-			this.targetSource = freshTargetSource();
-			if (this.autodetectInterfaces && getProxiedInterfaces().length == 0 && !isProxyTargetClass()) {
-				// Rely on AOP infrastructure to tell us what interfaces to proxy.
-				Class<?> targetClass = getTargetClass();
-				if (targetClass == null) {
-					throw new FactoryBeanNotInitializedException("Cannot determine target class for proxy");
-				}
-				setInterfaces(ClassUtils.getAllInterfacesForClass(targetClass, this.proxyClassLoader));
-			}
-			// Initialize the shared singleton instance.
-			super.setFrozen(this.freezeProxy);
-			this.singletonInstance = getProxy(createAopProxy());
-		}
-		return this.singletonInstance;
 	}
 
 	/**
@@ -358,18 +304,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 		return getProxy(copy.createAopProxy());
 	}
 
-	/**
-	 * Return the proxy object to expose.
-	 * <p>The default implementation uses a {@code getProxy} call with
-	 * the factory's bean class loader. Can be overridden to specify a
-	 * custom class loader.
-	 * @param aopProxy the prepared AopProxy instance to get the proxy from
-	 * @return the proxy object to expose
-	 * @see AopProxy#getProxy(ClassLoader)
-	 */
-	protected Object getProxy(AopProxy aopProxy) {
-		return aopProxy.getProxy(this.proxyClassLoader);
-	}
+
 
 	/**
 	 * Check the interceptorNames list whether it contains a target name as final element.
