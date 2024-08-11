@@ -49,7 +49,8 @@ import org.springframework.core.NamedThreadLocal;
  * @see org.springframework.beans.factory.DisposableBean#destroy()
  */
 @SuppressWarnings("serial")
-public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
+public class ThreadLocalTargetSource
+		extends AbstractPrototypeBasedTargetSource
 		implements ThreadLocalTargetSourceStats, DisposableBean {
 
 	/**
@@ -73,7 +74,6 @@ public class ThreadLocalTargetSource extends AbstractPrototypeBasedTargetSource
 	private int invocationCount;
 
 	private int hitCount;
-
 
 	/**
 	 * Implementation of abstract getTarget() method.

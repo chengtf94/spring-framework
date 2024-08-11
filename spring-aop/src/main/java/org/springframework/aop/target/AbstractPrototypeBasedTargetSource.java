@@ -44,7 +44,8 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
  * @see CommonsPool2TargetSource
  */
 @SuppressWarnings("serial")
-public abstract class AbstractPrototypeBasedTargetSource extends AbstractBeanFactoryBasedTargetSource {
+public abstract class AbstractPrototypeBasedTargetSource
+		extends AbstractBeanFactoryBasedTargetSource {
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {

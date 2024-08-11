@@ -36,14 +36,11 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  */
 public class HotSwappableTargetSource implements TargetSource, Serializable {
-
-	/** use serialVersionUID from Spring 1.2 for interoperability. */
 	private static final long serialVersionUID = 7497929212653839187L;
 
 
 	/** The current target object. */
 	private Object target;
-
 
 	/**
 	 * Create a new HotSwappableTargetSource with the given initial target object.
@@ -54,11 +51,6 @@ public class HotSwappableTargetSource implements TargetSource, Serializable {
 		this.target = initialTarget;
 	}
 
-
-	/**
-	 * Return the type of the current target object.
-	 * <p>The returned type should usually be constant across all target objects.
-	 */
 	@Override
 	public synchronized Class<?> getTargetClass() {
 		return this.target.getClass();
@@ -79,7 +71,6 @@ public class HotSwappableTargetSource implements TargetSource, Serializable {
 		// nothing to do
 	}
 
-
 	/**
 	 * Swap the target, returning the old target object.
 	 * @param newTarget the new target object
@@ -92,7 +83,6 @@ public class HotSwappableTargetSource implements TargetSource, Serializable {
 		this.target = newTarget;
 		return old;
 	}
-
 
 	/**
 	 * Two HotSwappableTargetSources are equal if the current target objects are equal.
