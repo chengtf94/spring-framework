@@ -17,8 +17,7 @@
 package org.aopalliance.aop;
 
 /**
- * Tag interface for Advice. Implementations can be any type
- * of advice, such as Interceptors.
+ * Advice：通知标记接口，Tag interface for Advice. Implementations can be any type of advice, such as Interceptors.
  *
  * @author Rod Johnson
  * @version $Id: Advice.java,v 1.1 2004/03/19 17:02:16 johnsonr Exp $

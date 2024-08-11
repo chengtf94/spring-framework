@@ -49,6 +49,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * ProxyFactoryBean：代理工厂Bean，属于3种创建AOP代理的方式之一（与IoC打通）
  * {@link org.springframework.beans.factory.FactoryBean} implementation that builds an
  * AOP proxy based on beans in a Spring {@link org.springframework.beans.factory.BeanFactory}.
  *

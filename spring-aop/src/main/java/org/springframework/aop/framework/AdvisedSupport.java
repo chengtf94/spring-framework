@@ -43,26 +43,16 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Base class for AOP proxy configuration managers.
+ * AOP代理配置管理基础类：Base class for AOP proxy configuration managers.
  * These are not themselves AOP proxies, but subclasses of this class are
  * normally factories from which AOP proxy instances are obtained directly.
- *
- * <p>This class frees subclasses of the housekeeping of Advices
- * and Advisors, but doesn't actually implement proxy creation
- * methods, which are provided by subclasses.
- *
- * <p>This class is serializable; subclasses need not be.
- * This class is used to hold snapshots of proxies.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @see org.springframework.aop.framework.AopProxy
  */
 public class AdvisedSupport extends ProxyConfig implements Advised {
-
-	/** use serialVersionUID from Spring 2.0 for interoperability. */
 	private static final long serialVersionUID = 2651364800145442165L;
-
 
 	/**
 	 * Canonical TargetSource when there's no target, and behavior is
@@ -84,34 +74,26 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	private transient Map<MethodCacheKey, List<Object>> methodCache;
 
 	/**
-	 * Interfaces to be implemented by the proxy. Held in List to keep the order
-	 * of registration, to create JDK proxy with specified order of interfaces.
+	 * 代理实现的接口列表：Interfaces to be implemented by the proxy. Held in List to keep the order of registration, to create JDK proxy with specified order of interfaces.
 	 */
 	private List<Class<?>> interfaces = new ArrayList<>();
 
 	/**
-	 * List of Advisors. If an Advice is added, it will be wrapped
-	 * in an Advisor before being added to this List.
+	 * 通知列表：List of Advisors. If an Advice is added, it will be wrapped in an Advisor before being added to this List.
 	 */
 	private List<Advisor> advisors = new ArrayList<>();
 
-
 	/**
-	 * No-arg constructor for use as a JavaBean.
+	 * 构造方法
 	 */
 	public AdvisedSupport() {
 		this.methodCache = new ConcurrentHashMap<>(32);
 	}
 
-	/**
-	 * Create a AdvisedSupport instance with the given parameters.
-	 * @param interfaces the proxied interfaces
-	 */
 	public AdvisedSupport(Class<?>... interfaces) {
 		this();
 		setInterfaces(interfaces);
 	}
-
 
 	/**
 	 * Set the given object as target.

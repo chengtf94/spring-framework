@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
+ * ProxyFactoryBean：AspectJ代理工厂，属于3种创建AOP代理的方式之一（与AspectJ打通）
  * AspectJ-based proxy factory, allowing for programmatic building of proxies which include AspectJ aspects
  * (code style as well annotation style).
  *
