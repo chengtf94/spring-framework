@@ -20,11 +20,10 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.lang.Nullable;
 
 /**
- * DefaultAdvisorAutoProxyCreator：
- * {@code BeanPostProcessor} implementation that creates AOP proxies based on all
- * candidate {@code Advisor}s in the current {@code BeanFactory}. This class is
- * completely generic; it contains no special code to handle any particular aspects,
- * such as pooling aspects.
+ * DefaultAdvisorAutoProxyCreator：基于应用上下文BeanFactory的自动动态代理，会读取所有Advisor的实现自动创建dialing
+ * {@code BeanPostProcessor} implementation that creates AOP proxies based on all candidate {@code Advisor}s
+ * in the current {@code BeanFactory}.
+ * This class is completely generic; it contains no special code to handle any particular aspects, such as pooling aspects.
  *
  * <p>It's possible to filter out advisors - for example, to use multiple post processors
  * of this type in the same factory - by setting the {@code usePrefix} property to true,

@@ -23,6 +23,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
+ * EmptyTargetSource：空目标源
  * Canonical {@code TargetSource} when there is no target
  * (or just the target class known), and behavior is supplied
  * by interfaces and advisors only.
@@ -31,8 +32,6 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  */
 public final class EmptyTargetSource implements TargetSource, Serializable {
-
-	/** use serialVersionUID from Spring 1.2 for interoperability. */
 	private static final long serialVersionUID = 3680494563553489691L;
 
 
@@ -40,27 +39,12 @@ public final class EmptyTargetSource implements TargetSource, Serializable {
 	// Static factory methods
 	//---------------------------------------------------------------------
 
-	/**
-	 * The canonical (Singleton) instance of this {@link EmptyTargetSource}.
-	 */
 	public static final EmptyTargetSource INSTANCE = new EmptyTargetSource(null, true);
 
-
-	/**
-	 * Return an EmptyTargetSource for the given target Class.
-	 * @param targetClass the target Class (may be {@code null})
-	 * @see #getTargetClass()
-	 */
 	public static EmptyTargetSource forClass(@Nullable Class<?> targetClass) {
 		return forClass(targetClass, true);
 	}
 
-	/**
-	 * Return an EmptyTargetSource for the given target Class.
-	 * @param targetClass the target Class (may be {@code null})
-	 * @param isStatic whether the TargetSource should be marked as static
-	 * @see #getTargetClass()
-	 */
 	public static EmptyTargetSource forClass(@Nullable Class<?> targetClass, boolean isStatic) {
 		return (targetClass == null && isStatic ? INSTANCE : new EmptyTargetSource(targetClass, isStatic));
 	}
@@ -75,7 +59,6 @@ public final class EmptyTargetSource implements TargetSource, Serializable {
 
 	private final boolean isStatic;
 
-
 	/**
 	 * Create a new instance of the {@link EmptyTargetSource} class.
 	 * <p>This constructor is {@code private} to enforce the
@@ -88,19 +71,12 @@ public final class EmptyTargetSource implements TargetSource, Serializable {
 		this.isStatic = isStatic;
 	}
 
-
-	/**
-	 * Always returns the specified target Class, or {@code null} if none.
-	 */
 	@Override
 	@Nullable
 	public Class<?> getTargetClass() {
 		return this.targetClass;
 	}
 
-	/**
-	 * Always returns {@code true}.
-	 */
 	@Override
 	public boolean isStatic() {
 		return this.isStatic;
