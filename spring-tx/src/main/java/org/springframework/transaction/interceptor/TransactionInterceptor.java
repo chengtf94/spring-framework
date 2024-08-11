@@ -61,42 +61,17 @@ public class TransactionInterceptor extends TransactionAspectSupport implements 
 	public TransactionInterceptor() {
 	}
 
-	/**
-	 * Create a new TransactionInterceptor.
-	 * @param ptm the default transaction manager to perform the actual transaction management
-	 * @param tas the attribute source to be used to find transaction attributes
-	 * @since 5.2.5
-	 * @see #setTransactionManager
-	 * @see #setTransactionAttributeSource
-	 */
 	public TransactionInterceptor(TransactionManager ptm, TransactionAttributeSource tas) {
 		setTransactionManager(ptm);
 		setTransactionAttributeSource(tas);
 	}
 
-	/**
-	 * Create a new TransactionInterceptor.
-	 * @param ptm the default transaction manager to perform the actual transaction management
-	 * @param tas the attribute source to be used to find transaction attributes
-	 * @see #setTransactionManager
-	 * @see #setTransactionAttributeSource
-	 * @deprecated as of 5.2.5, in favor of
-	 * {@link #TransactionInterceptor(TransactionManager, TransactionAttributeSource)}
-	 */
 	@Deprecated
 	public TransactionInterceptor(PlatformTransactionManager ptm, TransactionAttributeSource tas) {
 		setTransactionManager(ptm);
 		setTransactionAttributeSource(tas);
 	}
 
-	/**
-	 * Create a new TransactionInterceptor.
-	 * @param ptm the default transaction manager to perform the actual transaction management
-	 * @param attributes the transaction attributes in properties format
-	 * @see #setTransactionManager
-	 * @see #setTransactionAttributes(java.util.Properties)
-	 * @deprecated as of 5.2.5, in favor of {@link #setTransactionAttributes(Properties)}
-	 */
 	@Deprecated
 	public TransactionInterceptor(PlatformTransactionManager ptm, Properties attributes) {
 		setTransactionManager(ptm);

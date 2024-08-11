@@ -53,7 +53,6 @@ public abstract class AbstractTransactionManagementConfiguration implements Impo
 	@Nullable
 	protected TransactionManager txManager;
 
-
 	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		this.enableTx = AnnotationAttributes.fromMap(

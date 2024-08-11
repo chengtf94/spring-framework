@@ -386,13 +386,11 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				// This is an around advice: Invoke the next interceptor in the chain.
 				// This will normally result in a target object being invoked.
 				retVal = invocation.proceedWithInvocation();
-			}
-			catch (Throwable ex) {
+			} catch (Throwable ex) {
 				// target invocation exception
 				completeTransactionAfterThrowing(txInfo, ex);
 				throw ex;
-			}
-			finally {
+			} finally {
 				cleanupTransactionInfo(txInfo);
 			}
 
@@ -670,13 +668,11 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			if (txInfo.transactionAttribute != null && txInfo.transactionAttribute.rollbackOn(ex)) {
 				try {
 					txInfo.getTransactionManager().rollback(txInfo.getTransactionStatus());
-				}
-				catch (TransactionSystemException ex2) {
+				} catch (TransactionSystemException ex2) {
 					logger.error("Application exception overridden by rollback exception", ex);
 					ex2.initApplicationException(ex);
 					throw ex2;
-				}
-				catch (RuntimeException | Error ex2) {
+				} catch (RuntimeException | Error ex2) {
 					logger.error("Application exception overridden by rollback exception", ex);
 					throw ex2;
 				}
@@ -686,13 +682,11 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				// Will still roll back if TransactionStatus.isRollbackOnly() is true.
 				try {
 					txInfo.getTransactionManager().commit(txInfo.getTransactionStatus());
-				}
-				catch (TransactionSystemException ex2) {
+				} catch (TransactionSystemException ex2) {
 					logger.error("Application exception overridden by commit exception", ex);
 					ex2.initApplicationException(ex);
 					throw ex2;
-				}
-				catch (RuntimeException | Error ex2) {
+				} catch (RuntimeException | Error ex2) {
 					logger.error("Application exception overridden by commit exception", ex);
 					throw ex2;
 				}
