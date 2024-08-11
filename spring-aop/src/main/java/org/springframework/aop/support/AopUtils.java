@@ -42,9 +42,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Utility methods for AOP support code.
- *
- * <p>Mainly for internal use within Spring's AOP support.
+ * AopUtils：AOP工具类
+ * Utility methods for AOP support code, Mainly for internal use within Spring's AOP support.
  *
  * <p>See {@link org.springframework.aop.framework.AopProxyUtils} for a
  * collection of framework-specific AOP utility methods which depend
@@ -58,6 +57,7 @@ import org.springframework.util.ReflectionUtils;
 public abstract class AopUtils {
 
 	/**
+	 * 判断对象是否为代理对象
 	 * Check whether the given object is a JDK dynamic proxy or a CGLIB proxy.
 	 * <p>This method additionally checks if the given object is an instance
 	 * of {@link SpringProxy}.
@@ -66,11 +66,12 @@ public abstract class AopUtils {
 	 * @see #isCglibProxy
 	 */
 	public static boolean isAopProxy(@Nullable Object object) {
-		return (object instanceof SpringProxy && (Proxy.isProxyClass(object.getClass()) ||
-				object.getClass().getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR)));
+		return (object instanceof SpringProxy
+				&& (Proxy.isProxyClass(object.getClass()) || object.getClass().getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR)));
 	}
 
 	/**
+	 * 判断对象是否为JDK动态代理对象
 	 * Check whether the given object is a JDK dynamic proxy.
 	 * <p>This method goes beyond the implementation of
 	 * {@link Proxy#isProxyClass(Class)} by additionally checking if the
@@ -83,6 +84,7 @@ public abstract class AopUtils {
 	}
 
 	/**
+	 * 判断对象是否为CGLib动态代理对象
 	 * Check whether the given object is a CGLIB proxy.
 	 * <p>This method goes beyond the implementation of
 	 * {@link ClassUtils#isCglibProxy(Object)} by additionally checking if
@@ -96,6 +98,7 @@ public abstract class AopUtils {
 	}
 
 	/**
+	 * 从对象中回去目标类型
 	 * Determine the target class of the given bean instance which might be an AOP proxy.
 	 * <p>Returns the target class for an AOP proxy or the plain class otherwise.
 	 * @param candidate the instance to check (might be an AOP proxy)
@@ -326,6 +329,7 @@ public abstract class AopUtils {
 	}
 
 	/**
+	 * 使用Java反射调用Joinpoint（目标方法）
 	 * Invoke the given target via reflection, as part of an AOP method invocation.
 	 * @param target the target object
 	 * @param method the method to invoke

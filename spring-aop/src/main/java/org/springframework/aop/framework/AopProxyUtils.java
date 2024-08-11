@@ -36,8 +36,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Utility methods for AOP proxy factories.
- * Mainly for internal use within the AOP framework.
+ * AopProxyUtils：AOP代理工具类
+ * Utility methods for AOP proxy factories, Mainly for internal use within the AOP framework.
  *
  * <p>See {@link org.springframework.aop.support.AopUtils} for a collection of
  * generic AOP utility methods which do not depend on AOP framework internals.
@@ -53,8 +53,8 @@ public abstract class AopProxyUtils {
 	@Nullable
 	private static final Method isSealedMethod = ClassUtils.getMethodIfAvailable(Class.class, "isSealed");
 
-
 	/**
+	 * 从实例中获取单例对象
 	 * Obtain the singleton target object behind the given proxy, if any.
 	 * @param candidate the (potential) proxy to check
 	 * @return the singleton target object managed in a {@link SingletonTargetSource},
@@ -75,6 +75,7 @@ public abstract class AopProxyUtils {
 	}
 
 	/**
+	 * 从实例中获取获取最终目标类
 	 * Determine the ultimate target class of the given bean instance, traversing
 	 * not only a top-level proxy but any number of nested proxies as well &mdash;
 	 * as long as possible without side effects, that is, just for singleton targets.
@@ -99,6 +100,7 @@ public abstract class AopProxyUtils {
 	}
 
 	/**
+	 * 计算AdvisedSupport配置中的所有被代理的接口
 	 * Determine the complete set of interfaces to proxy for the given AOP configuration.
 	 * <p>This will always add the {@link Advised} interface unless the AdvisedSupport's
 	 * {@link AdvisedSupport#setOpaque "opaque"} flag is on. Always adds the
@@ -160,6 +162,7 @@ public abstract class AopProxyUtils {
 	}
 
 	/**
+	 * 从代理对象中获取代理接口
 	 * Extract the user-specified interfaces that the given proxy implements,
 	 * i.e. all non-Advised interfaces that the proxy implements.
 	 * @param proxy the proxy to analyze (usually a JDK dynamic proxy)

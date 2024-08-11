@@ -20,21 +20,12 @@ import org.springframework.core.NamedThreadLocal;
 import org.springframework.lang.Nullable;
 
 /**
- * AopContext：AOP上下文
+ * AopContext：AOP上下文辅助类，基于ThreadLocal扩展，用于临时存储AOP代理对象
  * Class containing static methods used to obtain information about the current AOP invocation.
  *
- * <p>The {@code currentProxy()} method is usable if the AOP framework is configured to
- * expose the current proxy (not the default). It returns the AOP proxy in use. Target objects
- * or advice can use this to make advised calls, in the same way as {@code getEJBObject()}
+ * <p>The {@code currentProxy()} method is usable if the AOP framework is configured to expose the current proxy (not the default).
+ * It returns the AOP proxy in use. Target objects or advice can use this to make advised calls, in the same way as {@code getEJBObject()}
  * can be used in EJBs. They can also use it to find advice configuration.
- *
- * <p>Spring's AOP framework does not expose proxies by default, as there is a performance cost
- * in doing so.
- *
- * <p>The functionality in this class might be used by a target object that needed access
- * to resources on the invocation. However, this approach should not be used when there is
- * a reasonable alternative, as it makes application code dependent on usage under AOP and
- * the Spring AOP framework in particular.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
