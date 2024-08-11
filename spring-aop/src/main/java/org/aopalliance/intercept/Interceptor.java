@@ -19,7 +19,7 @@ package org.aopalliance.intercept;
 import org.aopalliance.aop.Advice;
 
 /**
- * Interceptor：拦截器
+ * Interceptor：拦截器，也就是Around Advice（环绕通知）
  *
  * @author Rod Johnson
  * @see Joinpoint

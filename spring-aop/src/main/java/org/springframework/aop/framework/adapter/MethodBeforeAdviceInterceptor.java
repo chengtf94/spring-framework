@@ -27,9 +27,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * MethodBeforeAdviceInterceptor：前置通知拦截器的标准实现（适配器模式）
  * Interceptor to wrap a {@link MethodBeforeAdvice}.
- * <p>Used internally by the AOP framework; application developers should not
- * need to use this class directly.
+ * <p>Used internally by the AOP framework; application developers should not need to use this class directly.
  *
  * @author Rod Johnson
  * @see AfterReturningAdviceInterceptor
@@ -38,18 +38,18 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class MethodBeforeAdviceInterceptor implements MethodInterceptor, BeforeAdvice, Serializable {
 
+	/**
+	 * 基于方法的前置通知
+	 */
 	private final MethodBeforeAdvice advice;
 
-
 	/**
-	 * Create a new MethodBeforeAdviceInterceptor for the given advice.
-	 * @param advice the MethodBeforeAdvice to wrap
+	 * 构造方法
 	 */
 	public MethodBeforeAdviceInterceptor(MethodBeforeAdvice advice) {
 		Assert.notNull(advice, "Advice must not be null");
 		this.advice = advice;
 	}
-
 
 	@Override
 	@Nullable

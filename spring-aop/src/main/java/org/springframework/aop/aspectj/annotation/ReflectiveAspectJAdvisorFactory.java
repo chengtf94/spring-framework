@@ -56,9 +56,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.comparator.InstanceComparator;
 
 /**
- * Factory that can create Spring AOP Advisors given AspectJ classes from
- * classes honoring AspectJ's annotation syntax, using reflection to invoke the
- * corresponding advice methods.
+ * ReflectiveAspectJAdvisorFactory：基于反射的AspectJ切面工厂
+ * Factory that can create Spring AOP Advisors given AspectJ classes from classes honoring AspectJ's annotation syntax,
+ * using reflection to invoke the corresponding advice methods.
  *
  * @author Rod Johnson
  * @author Adrian Colyer
@@ -259,7 +259,6 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 		}
 
 		AbstractAspectJAdvice springAdvice;
-
 		switch (aspectJAnnotation.getAnnotationType()) {
 			case AtPointcut:
 				if (logger.isDebugEnabled()) {
@@ -267,28 +266,23 @@ public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFacto
 				}
 				return null;
 			case AtAround:
-				springAdvice = new AspectJAroundAdvice(
-						candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
+				springAdvice = new AspectJAroundAdvice(candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
 				break;
 			case AtBefore:
-				springAdvice = new AspectJMethodBeforeAdvice(
-						candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
+				springAdvice = new AspectJMethodBeforeAdvice(candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
 				break;
 			case AtAfter:
-				springAdvice = new AspectJAfterAdvice(
-						candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
+				springAdvice = new AspectJAfterAdvice(candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
 				break;
 			case AtAfterReturning:
-				springAdvice = new AspectJAfterReturningAdvice(
-						candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
+				springAdvice = new AspectJAfterReturningAdvice(candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
 				AfterReturning afterReturningAnnotation = (AfterReturning) aspectJAnnotation.getAnnotation();
 				if (StringUtils.hasText(afterReturningAnnotation.returning())) {
 					springAdvice.setReturningName(afterReturningAnnotation.returning());
 				}
 				break;
 			case AtAfterThrowing:
-				springAdvice = new AspectJAfterThrowingAdvice(
-						candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
+				springAdvice = new AspectJAfterThrowingAdvice(candidateAdviceMethod, expressionPointcut, aspectInstanceFactory);
 				AfterThrowing afterThrowingAnnotation = (AfterThrowing) aspectJAnnotation.getAnnotation();
 				if (StringUtils.hasText(afterThrowingAnnotation.throwing())) {
 					springAdvice.setThrowingName(afterThrowingAnnotation.throwing());

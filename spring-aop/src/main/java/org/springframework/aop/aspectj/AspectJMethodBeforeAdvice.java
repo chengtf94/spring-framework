@@ -23,6 +23,7 @@ import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.lang.Nullable;
 
 /**
+ * AspectJMethodBeforeAdvice：前置通知的AspectJ实现
  * Spring AOP advice that wraps an AspectJ before method.
  *
  * @author Rod Johnson
@@ -32,9 +33,12 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class AspectJMethodBeforeAdvice extends AbstractAspectJAdvice implements MethodBeforeAdvice, Serializable {
 
-	public AspectJMethodBeforeAdvice(
-			Method aspectJBeforeAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aif) {
-
+	/**
+	 * 构造方法
+	 */
+	public AspectJMethodBeforeAdvice(Method aspectJBeforeAdviceMethod,
+									 AspectJExpressionPointcut pointcut,
+									 AspectInstanceFactory aif) {
 		super(aspectJBeforeAdviceMethod, pointcut, aif);
 	}
 
