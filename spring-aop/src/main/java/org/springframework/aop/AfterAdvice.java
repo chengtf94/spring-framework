@@ -19,7 +19,7 @@ package org.springframework.aop;
 import org.aopalliance.aop.Advice;
 
 /**
- * 后置通知：Common marker interface for after advice,
+ * 后置通知（finally执行）：Common marker interface for after advice,
  * such as {@link AfterReturningAdvice} and {@link ThrowsAdvice}.
  *
  * @author Juergen Hoeller
