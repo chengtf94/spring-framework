@@ -23,7 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * EnableAspectJAutoProxy：基于AspectJ的自动代理模块驱动注解
+ * EnableAspectJAutoProxy：基于AspectJ的自动代理 模块驱动注解
  * Enables support for handling components marked with AspectJ's {@code @Aspect} annotation,
  * similar to functionality found in Spring's {@code <aop:aspectj-autoproxy>} XML element.
  * To be used on @{@link Configuration} classes as follows:

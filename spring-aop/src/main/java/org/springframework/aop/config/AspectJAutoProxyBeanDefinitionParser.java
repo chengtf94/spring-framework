@@ -28,6 +28,7 @@ import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.lang.Nullable;
 
 /**
+ * AspectJAutoProxyBeanDefinitionParser：基于AspectJ的自动代理 XML配置驱动
  * {@link BeanDefinitionParser} for the {@code aspectj-autoproxy} tag,
  * enabling the automatic application of @AspectJ-style aspects found in
  * the {@link org.springframework.beans.factory.BeanFactory}.
@@ -47,8 +48,7 @@ class AspectJAutoProxyBeanDefinitionParser implements BeanDefinitionParser {
 	}
 
 	private void extendBeanDefinition(Element element, ParserContext parserContext) {
-		BeanDefinition beanDef =
-				parserContext.getRegistry().getBeanDefinition(AopConfigUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
+		BeanDefinition beanDef = parserContext.getRegistry().getBeanDefinition(AopConfigUtils.AUTO_PROXY_CREATOR_BEAN_NAME);
 		if (element.hasChildNodes()) {
 			addIncludePatterns(element, parserContext, beanDef);
 		}
