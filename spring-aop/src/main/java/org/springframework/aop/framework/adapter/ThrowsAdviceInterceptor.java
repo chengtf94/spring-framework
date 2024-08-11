@@ -31,23 +31,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * ThrowsAdviceInterceptor：后置通知（异常发生后）拦截器的标准实现（适配器模式）
  * Interceptor to wrap an after-throwing advice.
- *
- * <p>The signatures on handler methods on the {@code ThrowsAdvice}
- * implementation method argument must be of the form:<br>
- *
- * {@code void afterThrowing([Method, args, target], ThrowableSubclass);}
- *
- * <p>Only the last argument is required.
- *
- * <p>Some examples of valid methods would be:
- *
- * <pre class="code">public void afterThrowing(Exception ex)</pre>
- * <pre class="code">public void afterThrowing(RemoteException)</pre>
- * <pre class="code">public void afterThrowing(Method method, Object[] args, Object target, Exception ex)</pre>
- * <pre class="code">public void afterThrowing(Method method, Object[] args, Object target, ServletException ex)</pre>
- *
- * <p>This is a framework class that need not be used directly by Spring users.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -55,17 +40,17 @@ import org.springframework.util.Assert;
  * @see AfterReturningAdviceInterceptor
  */
 public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
+	private static final Log logger = LogFactory.getLog(ThrowsAdviceInterceptor.class);
 
 	private static final String AFTER_THROWING = "afterThrowing";
 
-	private static final Log logger = LogFactory.getLog(ThrowsAdviceInterceptor.class);
-
-
+	/**
+	 * 异常通知
+	 */
 	private final Object throwsAdvice;
 
-	/** Methods on throws advice, keyed by exception class. */
+	/** 异常处理器Map：Methods on throws advice, keyed by exception class. */
 	private final Map<Class<?>, Method> exceptionHandlerMap = new HashMap<>();
-
 
 	/**
 	 * Create a new ThrowsAdviceInterceptor for the given ThrowsAdvice.
@@ -78,8 +63,7 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 
 		Method[] methods = throwsAdvice.getClass().getMethods();
 		for (Method method : methods) {
-			if (method.getName().equals(AFTER_THROWING) &&
-					(method.getParameterCount() == 1 || method.getParameterCount() == 4)) {
+			if (method.getName().equals(AFTER_THROWING) && (method.getParameterCount() == 1 || method.getParameterCount() == 4)) {
 				Class<?> throwableParam = method.getParameterTypes()[method.getParameterCount() - 1];
 				if (Throwable.class.isAssignableFrom(throwableParam)) {
 					// An exception handler to register...
@@ -105,14 +89,12 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 		return this.exceptionHandlerMap.size();
 	}
 
-
 	@Override
 	@Nullable
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		try {
 			return mi.proceed();
-		}
-		catch (Throwable ex) {
+		} catch (Throwable ex) {
 			Method handlerMethod = getExceptionHandler(ex);
 			if (handlerMethod != null) {
 				invokeHandlerMethod(mi, ex, handlerMethod);
@@ -147,14 +129,12 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 		Object[] handlerArgs;
 		if (method.getParameterCount() == 1) {
 			handlerArgs = new Object[] {ex};
-		}
-		else {
+		} else {
 			handlerArgs = new Object[] {mi.getMethod(), mi.getArguments(), mi.getThis(), ex};
 		}
 		try {
 			method.invoke(this.throwsAdvice, handlerArgs);
-		}
-		catch (InvocationTargetException targetEx) {
+		} catch (InvocationTargetException targetEx) {
 			throw targetEx.getTargetException();
 		}
 	}

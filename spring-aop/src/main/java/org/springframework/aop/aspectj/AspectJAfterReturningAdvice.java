@@ -35,12 +35,13 @@ import org.springframework.util.TypeUtils;
  * @since 2.0
  */
 @SuppressWarnings("serial")
-public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice
+public class AspectJAfterReturningAdvice
+		extends AbstractAspectJAdvice
 		implements AfterReturningAdvice, AfterAdvice, Serializable {
 
-	public AspectJAfterReturningAdvice(
-			Method aspectJBeforeAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aif) {
-
+	public AspectJAfterReturningAdvice(Method aspectJBeforeAdviceMethod,
+									   AspectJExpressionPointcut pointcut,
+									   AspectInstanceFactory aif) {
 		super(aspectJBeforeAdviceMethod, pointcut, aif);
 	}
 
@@ -66,7 +67,6 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice
 			invokeAdviceMethod(getJoinPointMatch(), returnValue, null);
 		}
 	}
-
 
 	/**
 	 * Following AspectJ semantics, if a returning clause was specified, then the
@@ -98,11 +98,9 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice
 	private boolean matchesReturnValue(Class<?> type, Method method, @Nullable Object returnValue) {
 		if (returnValue != null) {
 			return ClassUtils.isAssignableValue(type, returnValue);
-		}
-		else if (Object.class == type && void.class == method.getReturnType()) {
+		} else if (Object.class == type && void.class == method.getReturnType()) {
 			return true;
-		}
-		else {
+		} else {
 			return ClassUtils.isAssignable(type, method.getReturnType());
 		}
 	}

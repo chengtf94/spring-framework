@@ -27,6 +27,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * AfterReturningAdviceInterceptor：后置通知（finally执行）拦截器的标准实现（适配器模式）
  * Interceptor to wrap an {@link org.springframework.aop.AfterReturningAdvice}.
  * Used internally by the AOP framework; application developers should not need
  * to use this class directly.
@@ -40,7 +41,6 @@ public class AfterReturningAdviceInterceptor implements MethodInterceptor, After
 
 	private final AfterReturningAdvice advice;
 
-
 	/**
 	 * Create a new AfterReturningAdviceInterceptor for the given advice.
 	 * @param advice the AfterReturningAdvice to wrap
@@ -49,7 +49,6 @@ public class AfterReturningAdviceInterceptor implements MethodInterceptor, After
 		Assert.notNull(advice, "Advice must not be null");
 		this.advice = advice;
 	}
-
 
 	@Override
 	@Nullable
