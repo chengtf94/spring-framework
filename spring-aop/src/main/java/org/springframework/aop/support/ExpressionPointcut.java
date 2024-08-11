@@ -20,7 +20,7 @@ import org.springframework.aop.Pointcut;
 import org.springframework.lang.Nullable;
 
 /**
- * ExpressionPointcut：表达式切点
+ * ExpressionPointcut：基于表达式的切点
  *
  * @author Rob Harrop
  * @since 2.0

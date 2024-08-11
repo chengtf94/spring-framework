@@ -21,7 +21,7 @@ import java.io.Serializable;
 import org.springframework.lang.Nullable;
 
 /**
- * AbstractExpressionPointcut：表达式切点基类
+ * AbstractExpressionPointcut：基于表达式的切点抽象基类
  *
  * @author Rod Johnson
  * @author Rob Harrop

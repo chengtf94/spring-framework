@@ -78,9 +78,11 @@ import org.springframework.util.StringUtils;
 public class AspectJExpressionPointcut
 		extends AbstractExpressionPointcut
 		implements ClassFilter, IntroductionAwareMethodMatcher, BeanFactoryAware {
-
 	private static final Log logger = LogFactory.getLog(AspectJExpressionPointcut.class);
 
+	/**
+	 * 支持的切点源语
+	 */
 	private static final Set<PointcutPrimitive> SUPPORTED_PRIMITIVES = new HashSet<>();
 
 	static {
@@ -103,17 +105,22 @@ public class AspectJExpressionPointcut
 
 	private Class<?>[] pointcutParameterTypes = new Class<?>[0];
 
+	/**
+	 * IoC容器
+	 */
 	@Nullable
 	private BeanFactory beanFactory;
 
 	@Nullable
 	private transient ClassLoader pointcutClassLoader;
 
+	/**
+	 * 切点表达式
+	 */
 	@Nullable
 	private transient PointcutExpression pointcutExpression;
 
 	private transient Map<Method, ShadowMatch> shadowMatchCache = new ConcurrentHashMap<>(32);
-
 
 	/**
 	 * 构造方法
@@ -137,33 +144,10 @@ public class AspectJExpressionPointcut
 		this.pointcutParameterTypes = paramTypes;
 	}
 
-
-	/**
-	 * Set the declaration scope for the pointcut.
-	 */
-	public void setPointcutDeclarationScope(Class<?> pointcutDeclarationScope) {
-		this.pointcutDeclarationScope = pointcutDeclarationScope;
-	}
-
-	/**
-	 * Set the parameter names for the pointcut.
-	 */
-	public void setParameterNames(String... names) {
-		this.pointcutParameterNames = names;
-	}
-
-	/**
-	 * Set the parameter types for the pointcut.
-	 */
-	public void setParameterTypes(Class<?>... types) {
-		this.pointcutParameterTypes = types;
-	}
-
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
-
 
 	@Override
 	public ClassFilter getClassFilter() {
@@ -176,7 +160,6 @@ public class AspectJExpressionPointcut
 		obtainPointcutExpression();
 		return this;
 	}
-
 
 	/**
 	 * Check whether this pointcut is ready to match,
@@ -214,10 +197,10 @@ public class AspectJExpressionPointcut
 		PointcutParser parser = initializePointcutParser(classLoader);
 		PointcutParameter[] pointcutParameters = new PointcutParameter[this.pointcutParameterNames.length];
 		for (int i = 0; i < pointcutParameters.length; i++) {
-			pointcutParameters[i] = parser.createPointcutParameter(
-					this.pointcutParameterNames[i], this.pointcutParameterTypes[i]);
+			pointcutParameters[i] = parser.createPointcutParameter(this.pointcutParameterNames[i], this.pointcutParameterTypes[i]);
 		}
-		return parser.parsePointcutExpression(replaceBooleanOperators(resolveExpression()),
+		return parser.parsePointcutExpression(
+				replaceBooleanOperators(resolveExpression()),
 				this.pointcutDeclarationScope, pointcutParameters);
 	}
 
@@ -226,18 +209,6 @@ public class AspectJExpressionPointcut
 		Assert.state(expression != null, "No expression set");
 		return expression;
 	}
-
-	/**
-	 * Initialize the underlying AspectJ pointcut parser.
-	 */
-	private PointcutParser initializePointcutParser(@Nullable ClassLoader classLoader) {
-		PointcutParser parser = PointcutParser
-				.getPointcutParserSupportingSpecifiedPrimitivesAndUsingSpecifiedClassLoaderForResolution(
-						SUPPORTED_PRIMITIVES, classLoader);
-		parser.registerPointcutDesignatorHandler(new BeanPointcutDesignatorHandler());
-		return parser;
-	}
-
 
 	/**
 	 * If a pointcut expression has been specified in XML, the user cannot
@@ -252,22 +223,13 @@ public class AspectJExpressionPointcut
 		return result;
 	}
 
-
-	/**
-	 * Return the underlying AspectJ pointcut expression.
-	 */
-	public PointcutExpression getPointcutExpression() {
-		return obtainPointcutExpression();
-	}
-
 	@Override
 	public boolean matches(Class<?> targetClass) {
 		PointcutExpression pointcutExpression = obtainPointcutExpression();
 		try {
 			try {
 				return pointcutExpression.couldMatchJoinPointsInType(targetClass);
-			}
-			catch (ReflectionWorldException ex) {
+			} catch (ReflectionWorldException ex) {
 				logger.debug("PointcutExpression matching rejected target class - trying fallback expression", ex);
 				// Actually this is still a "maybe" - treat the pointcut as dynamic if we don't know enough yet
 				PointcutExpression fallbackExpression = getFallbackPointcutExpression(targetClass);
@@ -275,8 +237,7 @@ public class AspectJExpressionPointcut
 					return fallbackExpression.couldMatchJoinPointsInType(targetClass);
 				}
 			}
-		}
-		catch (Throwable ex) {
+		} catch (Throwable ex) {
 			logger.debug("PointcutExpression matching rejected target class", ex);
 		}
 		return false;
@@ -292,11 +253,9 @@ public class AspectJExpressionPointcut
 		// and there will never be matching subclass at runtime.
 		if (shadowMatch.alwaysMatches()) {
 			return true;
-		}
-		else if (shadowMatch.neverMatches()) {
+		} else if (shadowMatch.neverMatches()) {
 			return false;
-		}
-		else {
+		} else {
 			// the maybe case
 			if (hasIntroductions) {
 				return true;
@@ -338,8 +297,7 @@ public class AspectJExpressionPointcut
 			}
 			pmi = (ProxyMethodInvocation) mi;
 			thisObject = pmi.getProxy();
-		}
-		catch (IllegalStateException ex) {
+		} catch (IllegalStateException ex) {
 			// No current invocation...
 			if (logger.isDebugEnabled()) {
 				logger.debug("Could not access current invocation - matching with limited context: " + ex);
@@ -368,8 +326,7 @@ public class AspectJExpressionPointcut
 			}
 
 			return joinPointMatch.matches();
-		}
-		catch (Throwable ex) {
+		} catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Failed to evaluate join point for arguments " + Arrays.toString(args) +
 						" - falling back to non-match", ex);
@@ -378,11 +335,50 @@ public class AspectJExpressionPointcut
 		}
 	}
 
+
+	/**
+	 * Set the declaration scope for the pointcut.
+	 */
+	public void setPointcutDeclarationScope(Class<?> pointcutDeclarationScope) {
+		this.pointcutDeclarationScope = pointcutDeclarationScope;
+	}
+
+	/**
+	 * Set the parameter names for the pointcut.
+	 */
+	public void setParameterNames(String... names) {
+		this.pointcutParameterNames = names;
+	}
+
+	/**
+	 * Set the parameter types for the pointcut.
+	 */
+	public void setParameterTypes(Class<?>... types) {
+		this.pointcutParameterTypes = types;
+	}
+
+	/**
+	 * Initialize the underlying AspectJ pointcut parser.
+	 */
+	private PointcutParser initializePointcutParser(@Nullable ClassLoader classLoader) {
+		PointcutParser parser = PointcutParser
+				.getPointcutParserSupportingSpecifiedPrimitivesAndUsingSpecifiedClassLoaderForResolution(
+						SUPPORTED_PRIMITIVES, classLoader);
+		parser.registerPointcutDesignatorHandler(new BeanPointcutDesignatorHandler());
+		return parser;
+	}
+
+	/**
+	 * Return the underlying AspectJ pointcut expression.
+	 */
+	public PointcutExpression getPointcutExpression() {
+		return obtainPointcutExpression();
+	}
+
 	@Nullable
 	protected String getCurrentProxiedBeanName() {
 		return ProxyCreationContext.getCurrentProxiedBeanName();
 	}
-
 
 	/**
 	 * Get a new pointcut expression based on a target class's loader rather than the default.
