@@ -17,7 +17,7 @@
 package org.springframework.aop;
 
 /**
- * Pointcut：IQEIDIAN
+ * Pointcut：切点
  *
  * @author Rod Johnson
  * @see ClassFilter
@@ -29,14 +29,12 @@ package org.springframework.aop;
 public interface Pointcut {
 
 	/**
-	 * Return the ClassFilter for this pointcut.
-	 * @return the ClassFilter (never {@code null})
+	 * 获取类过滤器：Return the ClassFilter for this pointcut.
 	 */
 	ClassFilter getClassFilter();
 
 	/**
-	 * Return the MethodMatcher for this pointcut.
-	 * @return the MethodMatcher (never {@code null})
+	 * 获取方法匹配器：Return the MethodMatcher for this pointcut.
 	 */
 	MethodMatcher getMethodMatcher();
 

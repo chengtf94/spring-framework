@@ -33,13 +33,13 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  */
 @SuppressWarnings("serial")
-public abstract class StaticMethodMatcherPointcutAdvisor extends StaticMethodMatcherPointcut
+public abstract class StaticMethodMatcherPointcutAdvisor
+		extends StaticMethodMatcherPointcut
 		implements PointcutAdvisor, Ordered, Serializable {
 
 	private Advice advice = EMPTY_ADVICE;
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
-
 
 	/**
 	 * Create a new StaticMethodMatcherPointcutAdvisor,
