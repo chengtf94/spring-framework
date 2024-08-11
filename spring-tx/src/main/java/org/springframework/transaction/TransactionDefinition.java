@@ -17,8 +17,11 @@
 package org.springframework.transaction;
 
 import org.springframework.lang.Nullable;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 
 /**
+ * TransactionDefinition：事务定义接口
  * Interface that defines Spring-compliant transaction properties.
  * Based on the propagation behavior definitions analogous to EJB CMT attributes.
  *
@@ -48,6 +51,7 @@ public interface TransactionDefinition {
 	 * Analogous to the EJB transaction attribute of the same name.
 	 * <p>This is typically the default setting of a transaction definition,
 	 * and typically defines a transaction synchronization scope.
+	 * @see Propagation
 	 */
 	int PROPAGATION_REQUIRED = 0;
 
@@ -136,6 +140,7 @@ public interface TransactionDefinition {
 	 * Use the default isolation level of the underlying datastore.
 	 * All other levels correspond to the JDBC isolation levels.
 	 * @see java.sql.Connection
+	 * @see Isolation
 	 */
 	int ISOLATION_DEFAULT = -1;
 
@@ -192,7 +197,7 @@ public interface TransactionDefinition {
 
 
 	/**
-	 * Return the propagation behavior.
+	 * 获取事务的传播行为：Return the propagation behavior.
 	 * <p>Must return one of the {@code PROPAGATION_XXX} constants
 	 * defined on {@link TransactionDefinition this interface}.
 	 * <p>The default is {@link #PROPAGATION_REQUIRED}.
@@ -205,7 +210,7 @@ public interface TransactionDefinition {
 	}
 
 	/**
-	 * Return the isolation level.
+	 * 获取事务的隔离级别：Return the isolation level.
 	 * <p>Must return one of the {@code ISOLATION_XXX} constants defined on
 	 * {@link TransactionDefinition this interface}. Those constants are designed
 	 * to match the values of the same constants on {@link java.sql.Connection}.
@@ -227,7 +232,7 @@ public interface TransactionDefinition {
 	}
 
 	/**
-	 * Return the transaction timeout.
+	 * 获取事务的执行超时时间：Return the transaction timeout.
 	 * <p>Must return a number of seconds, or {@link #TIMEOUT_DEFAULT}.
 	 * <p>Exclusively designed for use with {@link #PROPAGATION_REQUIRED} or
 	 * {@link #PROPAGATION_REQUIRES_NEW} since it only applies to newly started
@@ -242,7 +247,7 @@ public interface TransactionDefinition {
 	}
 
 	/**
-	 * Return whether to optimize as a read-only transaction.
+	 * 是否为只读事务：Return whether to optimize as a read-only transaction.
 	 * <p>The read-only flag applies to any transaction context, whether backed
 	 * by an actual resource transaction ({@link #PROPAGATION_REQUIRED}/
 	 * {@link #PROPAGATION_REQUIRES_NEW}) or operating non-transactionally at

@@ -32,6 +32,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionManager;
 
 /**
+ * TransactionInterceptor：事务拦截器
  * AOP Alliance MethodInterceptor for declarative transaction
  * management using the common Spring transaction infrastructure
  * ({@link org.springframework.transaction.PlatformTransactionManager}/
@@ -55,11 +56,7 @@ import org.springframework.transaction.TransactionManager;
 public class TransactionInterceptor extends TransactionAspectSupport implements MethodInterceptor, Serializable {
 
 	/**
-	 * Create a new TransactionInterceptor.
-	 * <p>Transaction manager and transaction attributes still need to be set.
-	 * @see #setTransactionManager
-	 * @see #setTransactionAttributes(java.util.Properties)
-	 * @see #setTransactionAttributeSource(TransactionAttributeSource)
+	 *构造方法
 	 */
 	public TransactionInterceptor() {
 	}

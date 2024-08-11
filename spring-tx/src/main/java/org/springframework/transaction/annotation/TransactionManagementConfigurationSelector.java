@@ -23,6 +23,7 @@ import org.springframework.transaction.config.TransactionManagementConfigUtils;
 import org.springframework.util.ClassUtils;
 
 /**
+ * TransactionManagementConfigurationSelector：
  * Selects which implementation of {@link AbstractTransactionManagementConfiguration}
  * should be used based on the value of {@link EnableTransactionManagement#mode} on the
  * importing {@code @Configuration} class.
@@ -47,8 +48,7 @@ public class TransactionManagementConfigurationSelector extends AdviceModeImport
 	protected String[] selectImports(AdviceMode adviceMode) {
 		switch (adviceMode) {
 			case PROXY:
-				return new String[] {AutoProxyRegistrar.class.getName(),
-						ProxyTransactionManagementConfiguration.class.getName()};
+				return new String[] {AutoProxyRegistrar.class.getName(), ProxyTransactionManagementConfiguration.class.getName()};
 			case ASPECTJ:
 				return new String[] {determineTransactionAspectClass()};
 			default:

@@ -27,6 +27,7 @@ import org.springframework.core.annotation.AliasFor;
 import org.springframework.transaction.TransactionDefinition;
 
 /**
+ * Transactional：事务注解
  * Describes a transaction attribute on an individual method or on a class.
  *
  * <p>When this annotation is declared at the class level, it applies as a default

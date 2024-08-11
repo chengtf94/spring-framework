@@ -19,6 +19,7 @@ package org.springframework.transaction.annotation;
 import org.springframework.transaction.TransactionDefinition;
 
 /**
+ * 事务传播行为美剧
  * Enumeration that represents transaction propagation behaviors for use
  * with the {@link Transactional} annotation, corresponding to the
  * {@link TransactionDefinition} interface.

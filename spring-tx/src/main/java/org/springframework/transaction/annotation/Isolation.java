@@ -19,6 +19,7 @@ package org.springframework.transaction.annotation;
 import org.springframework.transaction.TransactionDefinition;
 
 /**
+ * 事务隔离级别枚举
  * Enumeration that represents transaction isolation levels for use
  * with the {@link Transactional} annotation, corresponding to the
  * {@link TransactionDefinition} interface.
