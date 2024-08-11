@@ -22,7 +22,7 @@ import java.util.List;
 import org.springframework.util.Assert;
 
 /**
- * ProxyCreatorSupport：AOP代理创建辅助基类
+ * ProxyCreatorSupport：AOP代理对象 创建辅助基类
  * Base class for proxy factories. Provides convenient access to a configurable AopProxyFactory.
  *
  * @author Juergen Hoeller
@@ -37,6 +37,9 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 	 */
 	private AopProxyFactory aopProxyFactory;
 
+	/**
+	 * 监听器列表
+	 */
 	private final List<AdvisedSupportListener> listeners = new ArrayList<>();
 
 	/** Set to true when the first AOP proxy has been created. */
@@ -52,25 +55,6 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 	public ProxyCreatorSupport(AopProxyFactory aopProxyFactory) {
 		Assert.notNull(aopProxyFactory, "AopProxyFactory must not be null");
 		this.aopProxyFactory = aopProxyFactory;
-	}
-
-	public void setAopProxyFactory(AopProxyFactory aopProxyFactory) {
-		Assert.notNull(aopProxyFactory, "AopProxyFactory must not be null");
-		this.aopProxyFactory = aopProxyFactory;
-	}
-
-	public AopProxyFactory getAopProxyFactory() {
-		return this.aopProxyFactory;
-	}
-
-	public void addListener(AdvisedSupportListener listener) {
-		Assert.notNull(listener, "AdvisedSupportListener must not be null");
-		this.listeners.add(listener);
-	}
-
-	public void removeListener(AdvisedSupportListener listener) {
-		Assert.notNull(listener, "AdvisedSupportListener must not be null");
-		this.listeners.remove(listener);
 	}
 
 	/**
@@ -93,6 +77,25 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 		for (AdvisedSupportListener listener : this.listeners) {
 			listener.activated(this);
 		}
+	}
+
+	public void setAopProxyFactory(AopProxyFactory aopProxyFactory) {
+		Assert.notNull(aopProxyFactory, "AopProxyFactory must not be null");
+		this.aopProxyFactory = aopProxyFactory;
+	}
+
+	public AopProxyFactory getAopProxyFactory() {
+		return this.aopProxyFactory;
+	}
+
+	public void addListener(AdvisedSupportListener listener) {
+		Assert.notNull(listener, "AdvisedSupportListener must not be null");
+		this.listeners.add(listener);
+	}
+
+	public void removeListener(AdvisedSupportListener listener) {
+		Assert.notNull(listener, "AdvisedSupportListener must not be null");
+		this.listeners.remove(listener);
 	}
 
 	/**

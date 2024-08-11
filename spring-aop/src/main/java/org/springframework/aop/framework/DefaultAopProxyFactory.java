@@ -38,7 +38,6 @@ import org.springframework.util.ClassUtils;
 public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
 	private static final long serialVersionUID = 7930414337282325166L;
 
-
 	@Override
 	public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException {
 		if (!NativeDetector.inNativeImage() && (config.isOptimize() || config.isProxyTargetClass() || hasNoUserSuppliedProxyInterfaces(config))) {

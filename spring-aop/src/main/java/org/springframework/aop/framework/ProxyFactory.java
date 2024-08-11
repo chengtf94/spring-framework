@@ -23,7 +23,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
- * ProxyFactory：代理工厂，属于3种创建AOP代理的方式之一（普通的API实现）
+ * ProxyFactory：AOP代理对象工厂，属于3种创建AOP代理的方式之一（标准的API实现）
  * Factory for AOP proxies for programmatic use, rather than via declarative
  * setup in a bean factory. This class provides a simple way of obtaining
  * and configuring AOP proxy instances in custom user code.

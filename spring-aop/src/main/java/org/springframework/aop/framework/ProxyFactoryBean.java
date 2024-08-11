@@ -49,7 +49,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
- * ProxyFactoryBean：代理工厂Bean，属于3种创建AOP代理的方式之一（与IoC打通）
+ * ProxyFactoryBean：AOP代理对象工厂Bean，属于3种创建AOP代理的方式之一（与IoC打通的IoC容器实现）
  * {@link org.springframework.beans.factory.FactoryBean} implementation that builds an
  * AOP proxy based on beans in a Spring {@link org.springframework.beans.factory.BeanFactory}.
  *
@@ -110,12 +110,43 @@ public class ProxyFactoryBean
 	@Nullable
 	private Object singletonInstance;
 
+	@Override
+	public Class<?> getObjectType() {
+		synchronized (this) {
+			if (this.singletonInstance != null) {
+				return this.singletonInstance.getClass();
+			}
+		}
+		Class<?>[] ifcs = getProxiedInterfaces();
+		if (ifcs.length == 1) {
+			return ifcs[0];
+		} else if (ifcs.length > 1) {
+			return createCompositeInterface(ifcs);
+		} else if (this.targetName != null && this.beanFactory != null) {
+			return this.beanFactory.getType(this.targetName);
+		} else {
+			return getTargetClass();
+		}
+	}
+
 	/**
-	 * Return a proxy
-	 * Create an instance of the AOP proxy to be returned by this factory.
-	 * The instance will be cached for a singleton, and create on each call to {@code getObject()} for a proxy.
-	 * @return a fresh AOP proxy reflecting the current state of this factory
+	 * Create a composite interface Class for the given interfaces,
+	 * implementing the given interfaces in one single Class.
+	 * <p>The default implementation builds a JDK proxy class for the
+	 * given interfaces.
+	 * @param interfaces the interfaces to merge
+	 * @return the merged interface as Class
+	 * @see java.lang.reflect.Proxy#getProxyClass
 	 */
+	protected Class<?> createCompositeInterface(Class<?>[] interfaces) {
+		return ClassUtils.createCompositeInterface(interfaces, this.proxyClassLoader);
+	}
+
+	@Override
+	public boolean isSingleton() {
+		return this.singleton;
+	}
+
 	@Override
 	@Nullable
 	public Object getObject() throws BeansException {
@@ -131,9 +162,108 @@ public class ProxyFactoryBean
 		}
 	}
 
-	@Override
-	public boolean isSingleton() {
-		return this.singleton;
+	/**
+	 * Create the advisor (interceptor) chain. Advisors that are sourced
+	 * from a BeanFactory will be refreshed each time a new prototype instance
+	 * is added. Interceptors added programmatically through the factory API
+	 * are unaffected by such changes.
+	 */
+	private synchronized void initializeAdvisorChain() throws AopConfigException, BeansException {
+		if (!this.advisorChainInitialized && !ObjectUtils.isEmpty(this.interceptorNames)) {
+			if (this.beanFactory == null) {
+				throw new IllegalStateException("No BeanFactory available anymore (probably due to serialization) " +
+						"- cannot resolve interceptor names " + Arrays.toString(this.interceptorNames));
+			}
+
+			// Globals can't be last unless we specified a targetSource using the property...
+			if (this.interceptorNames[this.interceptorNames.length - 1].endsWith(GLOBAL_SUFFIX)
+					&& this.targetName == null
+					&& this.targetSource == EMPTY_TARGET_SOURCE) {
+				throw new AopConfigException("Target required after globals");
+			}
+
+			// Materialize interceptor chain from bean names.
+			for (String name : this.interceptorNames) {
+				if (name.endsWith(GLOBAL_SUFFIX)) {
+					if (!(this.beanFactory instanceof ListableBeanFactory)) {
+						throw new AopConfigException(
+								"Can only use global advisors or interceptors with a ListableBeanFactory");
+					}
+					addGlobalAdvisors((ListableBeanFactory) this.beanFactory, name.substring(0, name.length() - GLOBAL_SUFFIX.length()));
+				} else {
+					// If we get here, we need to add a named interceptor.
+					// We must check if it's a singleton or prototype.
+					Object advice;
+					if (this.singleton || this.beanFactory.isSingleton(name)) {
+						// Add the real Advisor/Advice to the chain.
+						advice = this.beanFactory.getBean(name);
+					} else {
+						// It's a prototype Advice or Advisor: replace with a prototype.
+						// Avoid unnecessary creation of prototype bean just for advisor chain initialization.
+						advice = new PrototypePlaceholderAdvisor(name);
+					}
+					addAdvisorOnChainCreation(advice);
+				}
+			}
+
+			this.advisorChainInitialized = true;
+		}
+	}
+
+	/**
+	 * Add all global interceptors and pointcuts.
+	 */
+	private void addGlobalAdvisors(ListableBeanFactory beanFactory, String prefix) {
+		String[] globalAdvisorNames =
+				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, Advisor.class);
+		String[] globalInterceptorNames =
+				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, Interceptor.class);
+		if (globalAdvisorNames.length > 0 || globalInterceptorNames.length > 0) {
+			List<Object> beans = new ArrayList<>(globalAdvisorNames.length + globalInterceptorNames.length);
+			for (String name : globalAdvisorNames) {
+				if (name.startsWith(prefix)) {
+					beans.add(beanFactory.getBean(name));
+				}
+			}
+			for (String name : globalInterceptorNames) {
+				if (name.startsWith(prefix)) {
+					beans.add(beanFactory.getBean(name));
+				}
+			}
+			AnnotationAwareOrderComparator.sort(beans);
+			for (Object bean : beans) {
+				addAdvisorOnChainCreation(bean);
+			}
+		}
+	}
+
+	/**
+	 * Invoked when advice chain is created.
+	 * <p>Add the given advice, advisor or object to the interceptor list.
+	 * Because of these three possibilities, we can't type the signature
+	 * more strongly.
+	 * @param next advice, advisor or target object
+	 */
+	private void addAdvisorOnChainCreation(Object next) {
+		// We need to convert to an Advisor if necessary so that our source reference
+		// matches what we find from superclass interceptors.
+		addAdvisor(namedBeanToAdvisor(next));
+	}
+
+	/**
+	 * Convert the following object sourced from calling getBean() on a name in the
+	 * interceptorNames array to an Advisor or TargetSource.
+	 */
+	private Advisor namedBeanToAdvisor(Object next) {
+		try {
+			return this.advisorAdapterRegistry.wrap(next);
+		} catch (UnknownAdviceTypeException ex) {
+			// We expected this to be an Advisor or Advice,
+			// but it wasn't. This is a configuration error.
+			throw new AopConfigException("Unknown advisor type " + next.getClass() +
+					"; can only include Advisor or Advice type beans in interceptorNames chain " +
+					"except for last entry which may also be target instance or TargetSource", ex);
+		}
 	}
 
 	/**
@@ -160,9 +290,6 @@ public class ProxyFactoryBean
 
 	/**
 	 * Return the proxy object to expose.
-	 * @param aopProxy the prepared AopProxy instance to get the proxy from
-	 * @return the proxy object to expose
-	 * @see AopProxy#getProxy(ClassLoader)
 	 */
 	protected Object getProxy(AopProxy aopProxy) {
 		return aopProxy.getProxy(this.proxyClassLoader);
@@ -245,47 +372,6 @@ public class ProxyFactoryBean
 	}
 
 	/**
-	 * Return the type of the proxy. Will check the singleton instance if
-	 * already created, else fall back to the proxy interface (in case of just
-	 * a single one), the target bean type, or the TargetSource's target class.
-	 * @see org.springframework.aop.TargetSource#getTargetClass
-	 */
-	@Override
-	public Class<?> getObjectType() {
-		synchronized (this) {
-			if (this.singletonInstance != null) {
-				return this.singletonInstance.getClass();
-			}
-		}
-		Class<?>[] ifcs = getProxiedInterfaces();
-		if (ifcs.length == 1) {
-			return ifcs[0];
-		}
-		else if (ifcs.length > 1) {
-			return createCompositeInterface(ifcs);
-		}
-		else if (this.targetName != null && this.beanFactory != null) {
-			return this.beanFactory.getType(this.targetName);
-		}
-		else {
-			return getTargetClass();
-		}
-	}
-
-	/**
-	 * Create a composite interface Class for the given interfaces,
-	 * implementing the given interfaces in one single Class.
-	 * <p>The default implementation builds a JDK proxy class for the
-	 * given interfaces.
-	 * @param interfaces the interfaces to merge
-	 * @return the merged interface as Class
-	 * @see java.lang.reflect.Proxy#getProxyClass
-	 */
-	protected Class<?> createCompositeInterface(Class<?>[] interfaces) {
-		return ClassUtils.createCompositeInterface(interfaces, this.proxyClassLoader);
-	}
-
-	/**
 	 * Create a new prototype instance of this class's created proxy object,
 	 * backed by an independent AdvisedSupport configuration.
 	 * @return a totally independent proxy, whose advice we may manipulate in isolation
@@ -359,58 +445,6 @@ public class ProxyFactoryBean
 	}
 
 	/**
-	 * Create the advisor (interceptor) chain. Advisors that are sourced
-	 * from a BeanFactory will be refreshed each time a new prototype instance
-	 * is added. Interceptors added programmatically through the factory API
-	 * are unaffected by such changes.
-	 */
-	private synchronized void initializeAdvisorChain() throws AopConfigException, BeansException {
-		if (!this.advisorChainInitialized && !ObjectUtils.isEmpty(this.interceptorNames)) {
-			if (this.beanFactory == null) {
-				throw new IllegalStateException("No BeanFactory available anymore (probably due to serialization) " +
-						"- cannot resolve interceptor names " + Arrays.toString(this.interceptorNames));
-			}
-
-			// Globals can't be last unless we specified a targetSource using the property...
-			if (this.interceptorNames[this.interceptorNames.length - 1].endsWith(GLOBAL_SUFFIX) &&
-					this.targetName == null && this.targetSource == EMPTY_TARGET_SOURCE) {
-				throw new AopConfigException("Target required after globals");
-			}
-
-			// Materialize interceptor chain from bean names.
-			for (String name : this.interceptorNames) {
-				if (name.endsWith(GLOBAL_SUFFIX)) {
-					if (!(this.beanFactory instanceof ListableBeanFactory)) {
-						throw new AopConfigException(
-								"Can only use global advisors or interceptors with a ListableBeanFactory");
-					}
-					addGlobalAdvisors((ListableBeanFactory) this.beanFactory,
-							name.substring(0, name.length() - GLOBAL_SUFFIX.length()));
-				}
-
-				else {
-					// If we get here, we need to add a named interceptor.
-					// We must check if it's a singleton or prototype.
-					Object advice;
-					if (this.singleton || this.beanFactory.isSingleton(name)) {
-						// Add the real Advisor/Advice to the chain.
-						advice = this.beanFactory.getBean(name);
-					}
-					else {
-						// It's a prototype Advice or Advisor: replace with a prototype.
-						// Avoid unnecessary creation of prototype bean just for advisor chain initialization.
-						advice = new PrototypePlaceholderAdvisor(name);
-					}
-					addAdvisorOnChainCreation(advice);
-				}
-			}
-
-			this.advisorChainInitialized = true;
-		}
-	}
-
-
-	/**
 	 * Return an independent advisor chain.
 	 * We need to do this every time a new prototype instance is returned,
 	 * to return distinct instances of prototype Advisors and Advices.
@@ -442,46 +476,6 @@ public class ProxyFactoryBean
 	}
 
 	/**
-	 * Add all global interceptors and pointcuts.
-	 */
-	private void addGlobalAdvisors(ListableBeanFactory beanFactory, String prefix) {
-		String[] globalAdvisorNames =
-				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, Advisor.class);
-		String[] globalInterceptorNames =
-				BeanFactoryUtils.beanNamesForTypeIncludingAncestors(beanFactory, Interceptor.class);
-		if (globalAdvisorNames.length > 0 || globalInterceptorNames.length > 0) {
-			List<Object> beans = new ArrayList<>(globalAdvisorNames.length + globalInterceptorNames.length);
-			for (String name : globalAdvisorNames) {
-				if (name.startsWith(prefix)) {
-					beans.add(beanFactory.getBean(name));
-				}
-			}
-			for (String name : globalInterceptorNames) {
-				if (name.startsWith(prefix)) {
-					beans.add(beanFactory.getBean(name));
-				}
-			}
-			AnnotationAwareOrderComparator.sort(beans);
-			for (Object bean : beans) {
-				addAdvisorOnChainCreation(bean);
-			}
-		}
-	}
-
-	/**
-	 * Invoked when advice chain is created.
-	 * <p>Add the given advice, advisor or object to the interceptor list.
-	 * Because of these three possibilities, we can't type the signature
-	 * more strongly.
-	 * @param next advice, advisor or target object
-	 */
-	private void addAdvisorOnChainCreation(Object next) {
-		// We need to convert to an Advisor if necessary so that our source reference
-		// matches what we find from superclass interceptors.
-		addAdvisor(namedBeanToAdvisor(next));
-	}
-
-	/**
 	 * Return a TargetSource to use when creating a proxy. If the target was not
 	 * specified at the end of the interceptorNames list, the TargetSource will be
 	 * this class's TargetSource member. Otherwise, we get the target bean and wrap
@@ -502,23 +496,6 @@ public class ProxyFactoryBean
 			}
 			Object target = this.beanFactory.getBean(this.targetName);
 			return (target instanceof TargetSource ? (TargetSource) target : new SingletonTargetSource(target));
-		}
-	}
-
-	/**
-	 * Convert the following object sourced from calling getBean() on a name in the
-	 * interceptorNames array to an Advisor or TargetSource.
-	 */
-	private Advisor namedBeanToAdvisor(Object next) {
-		try {
-			return this.advisorAdapterRegistry.wrap(next);
-		}
-		catch (UnknownAdviceTypeException ex) {
-			// We expected this to be an Advisor or Advice,
-			// but it wasn't. This is a configuration error.
-			throw new AopConfigException("Unknown advisor type " + next.getClass() +
-					"; can only include Advisor or Advice type beans in interceptorNames chain " +
-					"except for last entry which may also be target instance or TargetSource", ex);
 		}
 	}
 

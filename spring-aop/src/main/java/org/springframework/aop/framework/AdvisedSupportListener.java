@@ -17,6 +17,7 @@
 package org.springframework.aop.framework;
 
 /**
+ * AdvisedSupportListener：AdvisedSupport事件监听器接口
  * Listener to be registered on {@link ProxyCreatorSupport} objects
  * Allows for receiving callbacks on activation and change of advice.
  *
