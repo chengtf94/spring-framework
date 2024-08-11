@@ -43,7 +43,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
 /**
- * AOP代理配置管理基础类：Base class for AOP proxy configuration managers.
+ * AdvisedSupport：AOP代理配置管理基础类
+ * Base class for AOP proxy configuration managers.
  * These are not themselves AOP proxies, but subclasses of this class are
  * normally factories from which AOP proxy instances are obtained directly.
  *

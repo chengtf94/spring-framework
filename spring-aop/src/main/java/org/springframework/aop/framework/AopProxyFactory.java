@@ -17,7 +17,7 @@
 package org.springframework.aop.framework;
 
 /**
- * AopProxyFactory：AOP代理工厂
+ * AopProxyFactory：AOP代理工厂接口
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -25,9 +25,8 @@ package org.springframework.aop.framework;
 public interface AopProxyFactory {
 
 	/**
-	 * Create an {@link AopProxy} for the given AOP configuration.
-	 * @param config the AOP configuration in the form of an
-	 * AdvisedSupport object
+	 * 创建AOP代理：Create an {@link AopProxy} for the given AOP configuration.
+	 * @param config the AOP configuration in the form of an AdvisedSupport object
 	 * @return the corresponding AOP proxy
 	 * @throws AopConfigException if the configuration is invalid
 	 */

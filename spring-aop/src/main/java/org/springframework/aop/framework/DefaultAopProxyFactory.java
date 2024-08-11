@@ -24,7 +24,7 @@ import org.springframework.core.NativeDetector;
 import org.springframework.util.ClassUtils;
 
 /**
- * DefaultAopProxyFactory：默认AOP代理工厂
+ * DefaultAopProxyFactory：AOP代理工厂的默认实现
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -36,14 +36,12 @@ import org.springframework.util.ClassUtils;
  * @see AdvisedSupport#setInterfaces
  */
 public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
-
 	private static final long serialVersionUID = 7930414337282325166L;
 
 
 	@Override
 	public AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException {
-		if (!NativeDetector.inNativeImage() &&
-				(config.isOptimize() || config.isProxyTargetClass() || hasNoUserSuppliedProxyInterfaces(config))) {
+		if (!NativeDetector.inNativeImage() && (config.isOptimize() || config.isProxyTargetClass() || hasNoUserSuppliedProxyInterfaces(config))) {
 			Class<?> targetClass = config.getTargetClass();
 			if (targetClass == null) {
 				throw new AopConfigException("TargetSource cannot determine target class: " +

@@ -22,7 +22,8 @@ import java.util.List;
 import org.springframework.util.Assert;
 
 /**
- * ProxyCreatorSupport：AOP代理创建辅助基类，Base class for proxy factories. Provides convenient access to a configurable AopProxyFactory.
+ * ProxyCreatorSupport：AOP代理创建辅助基类
+ * Base class for proxy factories. Provides convenient access to a configurable AopProxyFactory.
  *
  * @author Juergen Hoeller
  * @since 2.0.3

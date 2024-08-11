@@ -20,6 +20,7 @@ import org.springframework.core.NamedThreadLocal;
 import org.springframework.lang.Nullable;
 
 /**
+ * AopContext：AOP上下文
  * Class containing static methods used to obtain information about the current AOP invocation.
  *
  * <p>The {@code currentProxy()} method is usable if the AOP framework is configured to
@@ -43,16 +44,13 @@ public final class AopContext {
 
 	/**
 	 * ThreadLocal holder for AOP proxy associated with this thread.
-	 * Will contain {@code null} unless the "exposeProxy" property on
-	 * the controlling proxy configuration has been set to "true".
+	 * Will contain {@code null} unless the "exposeProxy" property on the controlling proxy configuration has been set to "true".
 	 * @see ProxyConfig#setExposeProxy
 	 */
 	private static final ThreadLocal<Object> currentProxy = new NamedThreadLocal<>("Current AOP proxy");
 
-
 	private AopContext() {
 	}
-
 
 	/**
 	 * Try to return the current AOP proxy. This method is usable only if the
@@ -85,8 +83,7 @@ public final class AopContext {
 		Object old = currentProxy.get();
 		if (proxy != null) {
 			currentProxy.set(proxy);
-		}
-		else {
+		} else {
 			currentProxy.remove();
 		}
 		return old;
