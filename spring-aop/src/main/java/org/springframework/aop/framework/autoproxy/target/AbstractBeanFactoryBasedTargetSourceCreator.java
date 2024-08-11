@@ -95,8 +95,7 @@ public abstract class AbstractBeanFactoryBasedTargetSourceCreator
 	@Override
 	@Nullable
 	public final TargetSource getTargetSource(Class<?> beanClass, String beanName) {
-		AbstractBeanFactoryBasedTargetSource targetSource =
-				createBeanFactoryBasedTargetSource(beanClass, beanName);
+		AbstractBeanFactoryBasedTargetSource targetSource = createBeanFactoryBasedTargetSource(beanClass, beanName);
 		if (targetSource == null) {
 			return null;
 		}

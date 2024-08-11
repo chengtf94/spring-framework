@@ -28,7 +28,7 @@ import org.springframework.util.PatternMatchUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * BeanNameAutoProxyCreator：基于Bean名称的自动动态代理
+ * BeanNameAutoProxyCreator：基于Bean名称匹配的自动代理
  * Auto proxy creator that identifies beans to proxy via a list of names. Checks for direct, "xxx*", and "*xxx" matches.
  *
  * <p>For configuration details, see the javadoc of the parent class AbstractAutoProxyCreator.

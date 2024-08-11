@@ -54,10 +54,9 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * AbstractAutoProxyCreator：自动动态代理抽象基类
+ * AbstractAutoProxyCreator：自动代理 抽象基类
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
- * that wraps each eligible bean with an AOP proxy, delegating to specified interceptors
- * before invoking the bean itself.
+ * that wraps each eligible bean with an AOP proxy, delegating to specified interceptors before invoking the bean itself.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -92,12 +91,12 @@ public abstract class AbstractAutoProxyCreator
 	/** Logger available to subclasses. */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	/** Default is global AdvisorAdapterRegistry. */
+	/** 切面适配器注册中心：Default is global AdvisorAdapterRegistry. */
 	private AdvisorAdapterRegistry advisorAdapterRegistry = GlobalAdvisorAdapterRegistry.getInstance();
 
 	/**
-	 * Indicates whether the proxy should be frozen. Overridden from super
-	 * to prevent the configuration from becoming frozen too early.
+	 * Indicates whether the proxy should be frozen.
+	 * Overridden from super to prevent the configuration from becoming frozen too early.
 	 */
 	private boolean freezeProxy = false;
 
@@ -106,9 +105,15 @@ public abstract class AbstractAutoProxyCreator
 
 	private boolean applyCommonInterceptorsFirst = true;
 
+	/**
+	 * 目标对象来源创建器数组
+	 */
 	@Nullable
 	private TargetSourceCreator[] customTargetSourceCreators;
 
+	/**
+	 * IoC容器
+	 */
 	@Nullable
 	private BeanFactory beanFactory;
 
@@ -175,8 +180,9 @@ public abstract class AbstractAutoProxyCreator
 	@Nullable
 	protected TargetSource getCustomTargetSource(Class<?> beanClass, String beanName) {
 		// We can't create fancy target sources for directly registered singletons.
-		if (this.customTargetSourceCreators != null &&
-				this.beanFactory != null && this.beanFactory.containsBean(beanName)) {
+		if (this.customTargetSourceCreators != null
+				&& this.beanFactory != null
+				&& this.beanFactory.containsBean(beanName)) {
 			for (TargetSourceCreator tsc : this.customTargetSourceCreators) {
 				TargetSource ts = tsc.getTargetSource(beanClass, beanName);
 				if (ts != null) {
@@ -246,8 +252,7 @@ public abstract class AbstractAutoProxyCreator
 					proxyFactory.addInterface(ifc);
 				}
 			}
-		}
-		else {
+		} else {
 			// No proxyTargetClass flag enforced, let's apply our default checks...
 			if (shouldProxyTargetClass(beanClass, beanName)) {
 				proxyFactory.setProxyTargetClass(true);
@@ -275,6 +280,76 @@ public abstract class AbstractAutoProxyCreator
 		return proxyFactory.getProxy(classLoader);
 	}
 
+	/**
+	 * Determine the advisors for the given bean, including the specific interceptors
+	 * as well as the common interceptor, all adapted to the Advisor interface.
+	 * @param beanName the name of the bean
+	 * @param specificInterceptors the set of interceptors that is
+	 * specific to this bean (may be empty, but not null)
+	 * @return the list of Advisors for the given bean
+	 */
+	protected Advisor[] buildAdvisors(@Nullable String beanName, @Nullable Object[] specificInterceptors) {
+		// Handle prototypes correctly...
+		Advisor[] commonInterceptors = resolveInterceptorNames();
+
+		List<Object> allInterceptors = new ArrayList<>();
+		if (specificInterceptors != null) {
+			if (specificInterceptors.length > 0) {
+				// specificInterceptors may equal PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS
+				allInterceptors.addAll(Arrays.asList(specificInterceptors));
+			}
+			if (commonInterceptors.length > 0) {
+				if (this.applyCommonInterceptorsFirst) {
+					allInterceptors.addAll(0, Arrays.asList(commonInterceptors));
+				}
+				else {
+					allInterceptors.addAll(Arrays.asList(commonInterceptors));
+				}
+			}
+		}
+		if (logger.isTraceEnabled()) {
+			int nrOfCommonInterceptors = commonInterceptors.length;
+			int nrOfSpecificInterceptors = (specificInterceptors != null ? specificInterceptors.length : 0);
+			logger.trace("Creating implicit proxy for bean '" + beanName + "' with " + nrOfCommonInterceptors +
+					" common interceptors and " + nrOfSpecificInterceptors + " specific interceptors");
+		}
+
+		Advisor[] advisors = new Advisor[allInterceptors.size()];
+		for (int i = 0; i < allInterceptors.size(); i++) {
+			advisors[i] = this.advisorAdapterRegistry.wrap(allInterceptors.get(i));
+		}
+		return advisors;
+	}
+
+	/**
+	 * Resolves the specified interceptor names to Advisor objects.
+	 * @see #setInterceptorNames
+	 */
+	private Advisor[] resolveInterceptorNames() {
+		BeanFactory bf = this.beanFactory;
+		ConfigurableBeanFactory cbf = (bf instanceof ConfigurableBeanFactory ? (ConfigurableBeanFactory) bf : null);
+		List<Advisor> advisors = new ArrayList<>();
+		for (String beanName : this.interceptorNames) {
+			if (cbf == null || !cbf.isCurrentlyInCreation(beanName)) {
+				Assert.state(bf != null, "BeanFactory required for resolving interceptor names");
+				Object next = bf.getBean(beanName);
+				advisors.add(this.advisorAdapterRegistry.wrap(next));
+			}
+		}
+		return advisors.toArray(new Advisor[0]);
+	}
+
+	/**
+	 * Subclasses may choose to implement this: for example,
+	 * to change the interfaces exposed.
+	 * <p>The default implementation is empty.
+	 * @param proxyFactory a ProxyFactory that is already configured with
+	 * TargetSource and interfaces and will be used to create the proxy
+	 * immediately after this method returns
+	 */
+	protected void customizeProxyFactory(ProxyFactory proxyFactory) {
+	}
+
 	@Override
 	public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) {
 		if (bean != null) {
@@ -286,7 +361,66 @@ public abstract class AbstractAutoProxyCreator
 		return bean;
 	}
 
+	/**
+	 * Wrap the given bean if necessary, i.e. if it is eligible for being proxied.
+	 * @param bean the raw bean instance
+	 * @param beanName the name of the bean
+	 * @param cacheKey the cache key for metadata access
+	 * @return a proxy wrapping the bean, or the raw bean instance as-is
+	 */
+	protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
+		if (StringUtils.hasLength(beanName) && this.targetSourcedBeans.contains(beanName)) {
+			return bean;
+		}
+		if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
+			return bean;
+		}
+		if (isInfrastructureClass(bean.getClass()) || shouldSkip(bean.getClass(), beanName)) {
+			this.advisedBeans.put(cacheKey, Boolean.FALSE);
+			return bean;
+		}
 
+		// Create proxy if we have advice.
+		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
+		if (specificInterceptors != DO_NOT_PROXY) {
+			this.advisedBeans.put(cacheKey, Boolean.TRUE);
+			Object proxy = createProxy(
+					bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
+			this.proxyTypes.put(cacheKey, proxy.getClass());
+			return proxy;
+		}
+
+		this.advisedBeans.put(cacheKey, Boolean.FALSE);
+		return bean;
+	}
+
+	@Override
+	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
+		return pvs;  // skip postProcessPropertyValues
+	}
+
+	@Override
+	@Nullable
+	public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
+		if (this.proxyTypes.isEmpty()) {
+			return null;
+		}
+		Object cacheKey = getCacheKey(beanClass, beanName);
+		return this.proxyTypes.get(cacheKey);
+	}
+
+	@Override
+	@Nullable
+	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName) {
+		return null;
+	}
+
+	@Override
+	public Object getEarlyBeanReference(Object bean, String beanName) {
+		Object cacheKey = getCacheKey(bean.getClass(), beanName);
+		this.earlyProxyReferences.put(cacheKey, bean);
+		return wrapIfNecessary(bean, beanName, cacheKey);
+	}
 
 	/**
 	 * Set whether the proxy should be frozen, preventing advice
@@ -364,70 +498,6 @@ public abstract class AbstractAutoProxyCreator
 		return this.beanFactory;
 	}
 
-
-	@Override
-	@Nullable
-	public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
-		if (this.proxyTypes.isEmpty()) {
-			return null;
-		}
-		Object cacheKey = getCacheKey(beanClass, beanName);
-		return this.proxyTypes.get(cacheKey);
-	}
-
-	@Override
-	@Nullable
-	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName) {
-		return null;
-	}
-
-	@Override
-	public Object getEarlyBeanReference(Object bean, String beanName) {
-		Object cacheKey = getCacheKey(bean.getClass(), beanName);
-		this.earlyProxyReferences.put(cacheKey, bean);
-		return wrapIfNecessary(bean, beanName, cacheKey);
-	}
-
-
-
-	@Override
-	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
-		return pvs;  // skip postProcessPropertyValues
-	}
-
-	/**
-	 * Wrap the given bean if necessary, i.e. if it is eligible for being proxied.
-	 * @param bean the raw bean instance
-	 * @param beanName the name of the bean
-	 * @param cacheKey the cache key for metadata access
-	 * @return a proxy wrapping the bean, or the raw bean instance as-is
-	 */
-	protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
-		if (StringUtils.hasLength(beanName) && this.targetSourcedBeans.contains(beanName)) {
-			return bean;
-		}
-		if (Boolean.FALSE.equals(this.advisedBeans.get(cacheKey))) {
-			return bean;
-		}
-		if (isInfrastructureClass(bean.getClass()) || shouldSkip(bean.getClass(), beanName)) {
-			this.advisedBeans.put(cacheKey, Boolean.FALSE);
-			return bean;
-		}
-
-		// Create proxy if we have advice.
-		Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(bean.getClass(), beanName, null);
-		if (specificInterceptors != DO_NOT_PROXY) {
-			this.advisedBeans.put(cacheKey, Boolean.TRUE);
-			Object proxy = createProxy(
-					bean.getClass(), beanName, specificInterceptors, new SingletonTargetSource(bean));
-			this.proxyTypes.put(cacheKey, proxy.getClass());
-			return proxy;
-		}
-
-		this.advisedBeans.put(cacheKey, Boolean.FALSE);
-		return bean;
-	}
-
 	/**
 	 * Return whether the given bean class represents an infrastructure class
 	 * that should never be proxied.
@@ -493,76 +563,6 @@ public abstract class AbstractAutoProxyCreator
 	 */
 	protected boolean advisorsPreFiltered() {
 		return false;
-	}
-
-	/**
-	 * Determine the advisors for the given bean, including the specific interceptors
-	 * as well as the common interceptor, all adapted to the Advisor interface.
-	 * @param beanName the name of the bean
-	 * @param specificInterceptors the set of interceptors that is
-	 * specific to this bean (may be empty, but not null)
-	 * @return the list of Advisors for the given bean
-	 */
-	protected Advisor[] buildAdvisors(@Nullable String beanName, @Nullable Object[] specificInterceptors) {
-		// Handle prototypes correctly...
-		Advisor[] commonInterceptors = resolveInterceptorNames();
-
-		List<Object> allInterceptors = new ArrayList<>();
-		if (specificInterceptors != null) {
-			if (specificInterceptors.length > 0) {
-				// specificInterceptors may equal PROXY_WITHOUT_ADDITIONAL_INTERCEPTORS
-				allInterceptors.addAll(Arrays.asList(specificInterceptors));
-			}
-			if (commonInterceptors.length > 0) {
-				if (this.applyCommonInterceptorsFirst) {
-					allInterceptors.addAll(0, Arrays.asList(commonInterceptors));
-				}
-				else {
-					allInterceptors.addAll(Arrays.asList(commonInterceptors));
-				}
-			}
-		}
-		if (logger.isTraceEnabled()) {
-			int nrOfCommonInterceptors = commonInterceptors.length;
-			int nrOfSpecificInterceptors = (specificInterceptors != null ? specificInterceptors.length : 0);
-			logger.trace("Creating implicit proxy for bean '" + beanName + "' with " + nrOfCommonInterceptors +
-					" common interceptors and " + nrOfSpecificInterceptors + " specific interceptors");
-		}
-
-		Advisor[] advisors = new Advisor[allInterceptors.size()];
-		for (int i = 0; i < allInterceptors.size(); i++) {
-			advisors[i] = this.advisorAdapterRegistry.wrap(allInterceptors.get(i));
-		}
-		return advisors;
-	}
-
-	/**
-	 * Resolves the specified interceptor names to Advisor objects.
-	 * @see #setInterceptorNames
-	 */
-	private Advisor[] resolveInterceptorNames() {
-		BeanFactory bf = this.beanFactory;
-		ConfigurableBeanFactory cbf = (bf instanceof ConfigurableBeanFactory ? (ConfigurableBeanFactory) bf : null);
-		List<Advisor> advisors = new ArrayList<>();
-		for (String beanName : this.interceptorNames) {
-			if (cbf == null || !cbf.isCurrentlyInCreation(beanName)) {
-				Assert.state(bf != null, "BeanFactory required for resolving interceptor names");
-				Object next = bf.getBean(beanName);
-				advisors.add(this.advisorAdapterRegistry.wrap(next));
-			}
-		}
-		return advisors.toArray(new Advisor[0]);
-	}
-
-	/**
-	 * Subclasses may choose to implement this: for example,
-	 * to change the interfaces exposed.
-	 * <p>The default implementation is empty.
-	 * @param proxyFactory a ProxyFactory that is already configured with
-	 * TargetSource and interfaces and will be used to create the proxy
-	 * immediately after this method returns
-	 */
-	protected void customizeProxyFactory(ProxyFactory proxyFactory) {
 	}
 
 }

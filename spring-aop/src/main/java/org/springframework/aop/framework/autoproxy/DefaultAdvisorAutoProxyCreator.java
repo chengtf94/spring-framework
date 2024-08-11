@@ -20,23 +20,17 @@ import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.lang.Nullable;
 
 /**
- * DefaultAdvisorAutoProxyCreator：基于应用上下文BeanFactory的自动动态代理，会读取所有Advisor的实现自动创建dialing
- * {@code BeanPostProcessor} implementation that creates AOP proxies based on all candidate {@code Advisor}s
- * in the current {@code BeanFactory}.
+ * DefaultAdvisorAutoProxyCreator：基于应用上下文BeanFactory的自动代理，会读取所有Advisor的实现自动创建代理
+ * {@code BeanPostProcessor} implementation that creates AOP proxies based on all candidate {@code Advisor}s in the current {@code BeanFactory}.
  * This class is completely generic; it contains no special code to handle any particular aspects, such as pooling aspects.
- *
- * <p>It's possible to filter out advisors - for example, to use multiple post processors
- * of this type in the same factory - by setting the {@code usePrefix} property to true,
- * in which case only advisors beginning with the DefaultAdvisorAutoProxyCreator's bean
- * name followed by a dot (like "aapc.") will be used. This default prefix can be changed
- * from the bean name by setting the {@code advisorBeanNamePrefix} property.
- * The separator (.) will also be used in this case.
  *
  * @author Rod Johnson
  * @author Rob Harrop
  */
 @SuppressWarnings("serial")
-public class DefaultAdvisorAutoProxyCreator extends AbstractAdvisorAutoProxyCreator implements BeanNameAware {
+public class DefaultAdvisorAutoProxyCreator
+		extends AbstractAdvisorAutoProxyCreator
+		implements BeanNameAware {
 
 	/** Separator between prefix and remainder of bean name. */
 	public static final String SEPARATOR = ".";

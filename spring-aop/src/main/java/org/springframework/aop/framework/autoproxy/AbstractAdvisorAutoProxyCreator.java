@@ -28,8 +28,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Generic auto proxy creator that builds AOP proxies for specific beans
- * based on detected Advisors for each bean.
+ * AbstractAdvisorAutoProxyCreator：基于Advisor的自动代理
+ * Generic auto proxy creator that builds AOP proxies for specific beans based on detected Advisors for each bean.
  *
  * <p>Subclasses may override the {@link #findCandidateAdvisors()} method to
  * return a custom list of Advisors applying to any object. Subclasses can
@@ -54,7 +54,6 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	@Nullable
 	private BeanFactoryAdvisorRetrievalHelper advisorRetrievalHelper;
 
-
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		super.setBeanFactory(beanFactory);
@@ -72,9 +71,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 
 	@Override
 	@Nullable
-	protected Object[] getAdvicesAndAdvisorsForBean(
-			Class<?> beanClass, String beanName, @Nullable TargetSource targetSource) {
-
+	protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, @Nullable TargetSource targetSource) {
 		List<Advisor> advisors = findEligibleAdvisors(beanClass, beanName);
 		if (advisors.isEmpty()) {
 			return DO_NOT_PROXY;
@@ -120,9 +117,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @return the List of applicable Advisors
 	 * @see ProxyCreationContext#getCurrentProxiedBeanName()
 	 */
-	protected List<Advisor> findAdvisorsThatCanApply(
-			List<Advisor> candidateAdvisors, Class<?> beanClass, String beanName) {
-
+	protected List<Advisor> findAdvisorsThatCanApply(List<Advisor> candidateAdvisors, Class<?> beanClass, String beanName) {
 		ProxyCreationContext.setCurrentProxiedBeanName(beanName);
 		try {
 			return AopUtils.findAdvisorsThatCanApply(candidateAdvisors, beanClass);
