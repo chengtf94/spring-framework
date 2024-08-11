@@ -25,6 +25,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * AspectJPointcutAdvisor：基于切面的通知AspectJ实现
  * AspectJPointcutAdvisor that adapts an {@link AbstractAspectJAdvice}
  * to the {@link org.springframework.aop.PointcutAdvisor} interface.
  *
@@ -34,13 +35,18 @@ import org.springframework.util.Assert;
  */
 public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 
+	/**
+	 * 通知的AspectJ实现
+	 */
 	private final AbstractAspectJAdvice advice;
 
+	/**
+	 * 切点
+	 */
 	private final Pointcut pointcut;
 
 	@Nullable
 	private Integer order;
-
 
 	/**
 	 * Create a new AspectJPointcutAdvisor for the given advice.
@@ -52,7 +58,6 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 		this.pointcut = advice.buildSafePointcut();
 	}
 
-
 	public void setOrder(int order) {
 		this.order = order;
 	}
@@ -61,8 +66,7 @@ public class AspectJPointcutAdvisor implements PointcutAdvisor, Ordered {
 	public int getOrder() {
 		if (this.order != null) {
 			return this.order;
-		}
-		else {
+		} else {
 			return this.advice.getOrder();
 		}
 	}

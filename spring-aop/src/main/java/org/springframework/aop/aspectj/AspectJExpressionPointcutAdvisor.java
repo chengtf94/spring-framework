@@ -23,6 +23,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.lang.Nullable;
 
 /**
+ * AspectJExpressionPointcutAdvisor：基于切面的通知AspectJ表达式实现
  * Spring AOP Advisor that can be used for any AspectJ pointcut expression.
  *
  * @author Rob Harrop
@@ -31,6 +32,9 @@ import org.springframework.lang.Nullable;
 @SuppressWarnings("serial")
 public class AspectJExpressionPointcutAdvisor extends AbstractGenericPointcutAdvisor implements BeanFactoryAware {
 
+	/**
+	 * 基于AspectJ表达式的切点
+	 */
 	private final AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
 
 

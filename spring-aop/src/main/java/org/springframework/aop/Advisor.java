@@ -19,7 +19,10 @@ package org.springframework.aop;
 import org.aopalliance.aop.Advice;
 
 /**
- * Advisor：切面，包含一个切点与通知
+ * Advisor：切面接口 或 Advice容器接口，包含一个通知
+ * Base interface holding AOP <b>advice</b> (action to take at a joinpoint)
+ * and a filter determining the applicability of the advice (such as a pointcut).
+ * <i>This interface is not for use by Spring users, but to allow for commonality in support for different types of advice.</i>
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -32,7 +35,6 @@ public interface Advisor {
 	 * @since 5.0
 	 */
 	Advice EMPTY_ADVICE = new Advice() {};
-
 
 	/**
 	 * Return the advice part of this aspect. An advice may be an

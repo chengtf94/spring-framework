@@ -17,7 +17,7 @@
 package org.springframework.aop;
 
 /**
- * PointcutAdvisor：基于切点的切面
+ * PointcutAdvisor：基于切点的切面接口，包含一个切点与通知
  *
  * @author Rod Johnson
  */

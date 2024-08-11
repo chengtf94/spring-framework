@@ -26,7 +26,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 
 /**
- * AbstractPointcutAdvisor：PointcutAdvisor基类
+ * AbstractPointcutAdvisor：PointcutAdvisor抽象基类
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

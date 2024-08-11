@@ -28,6 +28,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * AbstractBeanFactoryPointcutAdvisor：基于切面的通知IoC容器实现
  * Abstract BeanFactory-based PointcutAdvisor that allows for any Advice
  * to be configured as reference to an Advice bean in a BeanFactory.
  *
@@ -43,9 +44,15 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcutAdvisor implements BeanFactoryAware {
 
+	/**
+	 * 通知Bean名称
+	 */
 	@Nullable
 	private String adviceBeanName;
 
+	/**
+	 * IoC容器
+	 */
 	@Nullable
 	private BeanFactory beanFactory;
 
@@ -116,8 +123,7 @@ public abstract class AbstractBeanFactoryPointcutAdvisor extends AbstractPointcu
 			advice = this.beanFactory.getBean(this.adviceBeanName, Advice.class);
 			this.advice = advice;
 			return advice;
-		}
-		else {
+		} else {
 			// No singleton guarantees from the factory -> let's lock locally but
 			// reuse the factory's singleton lock, just in case a lazy dependency
 			// of our advice bean happens to trigger the singleton lock implicitly...

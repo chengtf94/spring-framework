@@ -24,7 +24,7 @@ import org.springframework.aop.Pointcut;
 import org.springframework.lang.Nullable;
 
 /**
- * DefaultPointcutAdvisor：默认基于切面的通知
+ * DefaultPointcutAdvisor：基于切面的通知默认实现
  *
  * @author Rod Johnson
  * @author Juergen Hoeller

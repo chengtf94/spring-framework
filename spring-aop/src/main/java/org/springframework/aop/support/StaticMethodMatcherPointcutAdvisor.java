@@ -26,6 +26,7 @@ import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 
 /**
+ * StaticMethodMatcherPointcutAdvisor：基于切面的通知静态方法实现
  * Convenient base class for Advisors that are also static pointcuts.
  * Serializable if Advice and subclass are.
  *

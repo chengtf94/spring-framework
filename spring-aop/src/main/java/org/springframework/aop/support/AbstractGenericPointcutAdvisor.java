@@ -19,7 +19,7 @@ package org.springframework.aop.support;
 import org.aopalliance.aop.Advice;
 
 /**
- * AbstractGenericPointcutAdvisor：通用PointcutAdvisor基类
+ * AbstractGenericPointcutAdvisor：通用PointcutAdvisor抽象基类
  *
  * @author Juergen Hoeller
  * @since 2.0
