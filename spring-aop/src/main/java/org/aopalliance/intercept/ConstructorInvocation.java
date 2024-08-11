@@ -21,11 +21,9 @@ import java.lang.reflect.Constructor;
 import javax.annotation.Nonnull;
 
 /**
- * Description of an invocation to a constructor, given to an
- * interceptor upon constructor-call.
- *
- * <p>A constructor invocation is a joinpoint and can be intercepted
- * by a constructor interceptor.
+ * ConstructorInvocation：构造方法拦截器执行上下文
+ * Description of an invocation to a constructor, given to an interceptor upon constructor-call.
+ * <p>A constructor invocation is a joinpoint and can be intercepted by a constructor interceptor.
  *
  * @author Rod Johnson
  * @see ConstructorInterceptor

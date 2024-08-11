@@ -738,6 +738,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 
 
 	/**
+	 * CglibMethodInvocation：基于CGLib的MethodInvocation
 	 * Implementation of AOP Alliance MethodInvocation used by this AOP proxy.
 	 */
 	private static class CglibMethodInvocation extends ReflectiveMethodInvocation {

@@ -22,7 +22,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * Joinpoint：连接点
+ * Joinpoint：连接点/接入点
  *
  * @author Rod Johnson
  * @see Interceptor
@@ -30,9 +30,8 @@ import javax.annotation.Nullable;
 public interface Joinpoint {
 
 	/**
-	 * Proceed to the next interceptor in the chain.
-	 * <p>The implementation and the semantics of this method depends
-	 * on the actual joinpoint type (see the children interfaces).
+	 * 执行拦截器链上的下一个拦截器：Proceed to the next interceptor in the chain.
+	 * <p>The implementation and the semantics of this method depends on the actual joinpoint type (see the children interfaces).
 	 * @return see the children interfaces' proceed definition
 	 * @throws Throwable if the joinpoint throws an exception
 	 */
@@ -49,8 +48,7 @@ public interface Joinpoint {
 
 	/**
 	 * Return the static part of this joinpoint.
-	 * <p>The static part is an accessible object on which a chain of
-	 * interceptors is installed.
+	 * <p>The static part is an accessible object on which a chain of interceptors is installed.
 	 */
 	@Nonnull
 	AccessibleObject getStaticPart();

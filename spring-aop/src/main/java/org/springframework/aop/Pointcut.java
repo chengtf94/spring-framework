@@ -17,7 +17,7 @@
 package org.springframework.aop;
 
 /**
- * Pointcut：切点
+ * Pointcut：切点，也就是JoinPoint条件接口
  *
  * @author Rod Johnson
  * @see ClassFilter

@@ -21,7 +21,7 @@ import java.lang.reflect.Method;
 import javax.annotation.Nonnull;
 
 /**
- * MethodInvocation：方法调用
+ * MethodInvocation：方法拦截器执行上下文
  *
  * @author Rod Johnson
  * @see MethodInterceptor
@@ -30,8 +30,7 @@ public interface MethodInvocation extends Invocation {
 
 	/**
 	 * Get the method being called.
-	 * <p>This method is a friendly implementation of the
-	 * {@link Joinpoint#getStaticPart()} method (same result).
+	 * <p>This method is a friendly implementation of the {@link Joinpoint#getStaticPart()} method (same result).
 	 * @return the method being called
 	 */
 	@Nonnull

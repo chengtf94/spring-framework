@@ -27,18 +27,9 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Abstract base regular expression pointcut bean. JavaBean properties are:
- * <ul>
- * <li>pattern: regular expression for the fully-qualified method names to match.
- * The exact regexp syntax will depend on the subclass (e.g. Perl5 regular expressions)
- * <li>patterns: alternative property taking a String array of patterns.
- * The result will be the union of these patterns.
- * </ul>
- *
- * <p>Note: the regular expressions must be a match. For example,
- * {@code .*get.*} will match com.mycom.Foo.getBar().
- * {@code get.*} will not.
- *
+ * AbstractRegexpMethodPointcut：基于正则表达式的切面抽象基类
+ * Abstract base regular expression pointcut bean.
+ * <p>Note: the regular expressions must be a match. For example,{@code .*get.*} will match com.mycom.Foo.getBar(). {@code get.*} will not.
  * <p>This base class is serializable. Subclasses should declare all fields transient;
  * the {@link #initPatternRepresentation} method will be invoked again on deserialization.
  *
@@ -49,19 +40,19 @@ import org.springframework.util.StringUtils;
  * @see JdkRegexpMethodPointcut
  */
 @SuppressWarnings("serial")
-public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPointcut
+public abstract class AbstractRegexpMethodPointcut
+		extends StaticMethodMatcherPointcut
 		implements Serializable {
 
 	/**
-	 * Regular expressions to match.
+	 * 白名单：Regular expressions to match.
 	 */
 	private String[] patterns = new String[0];
 
 	/**
-	 * Regular expressions <strong>not</strong> to match.
+	 * 黑名单：Regular expressions <strong>not</strong> to match.
 	 */
 	private String[] excludedPatterns = new String[0];
-
 
 	/**
 	 * Convenience method when we have only a single pattern.
@@ -123,12 +114,6 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 		return this.excludedPatterns;
 	}
 
-
-	/**
-	 * Try to match the regular expression against the fully qualified name
-	 * of the target class as well as against the method's declaring class,
-	 * plus the name of the method.
-	 */
 	@Override
 	public boolean matches(Method method, Class<?> targetClass) {
 		return (matchesPattern(ClassUtils.getQualifiedMethodName(method, targetClass)) ||
@@ -156,7 +141,6 @@ public abstract class AbstractRegexpMethodPointcut extends StaticMethodMatcherPo
 		}
 		return false;
 	}
-
 
 	/**
 	 * Subclasses must implement this to initialize regexp pointcuts.

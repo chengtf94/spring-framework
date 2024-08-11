@@ -31,24 +31,8 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.lang.Nullable;
 
 /**
- * Spring's implementation of the AOP Alliance
- * {@link org.aopalliance.intercept.MethodInvocation} interface,
- * implementing the extended
- * {@link org.springframework.aop.ProxyMethodInvocation} interface.
- *
- * <p>Invokes the target object using reflection. Subclasses can override the
- * {@link #invokeJoinpoint()} method to change this behavior, so this is also
- * a useful base class for more specialized MethodInvocation implementations.
- *
- * <p>It is possible to clone an invocation, to invoke {@link #proceed()}
- * repeatedly (once per clone), using the {@link #invocableClone()} method.
- * It is also possible to attach custom attributes to the invocation,
- * using the {@link #setUserAttribute} / {@link #getUserAttribute} methods.
- *
- * <p><b>NOTE:</b> This class is considered internal and should not be
- * directly accessed. The sole reason for it being public is compatibility
- * with existing framework integrations (e.g. Pitchfork). For any other
- * purposes, use the {@link ProxyMethodInvocation} interface instead.
+ * ReflectiveMethodInvocation：基于反射的MethodInvocation，Spring's implementation of the AOP Alliance
+ * {@link org.aopalliance.intercept.MethodInvocation} interface, implementing the extended {@link org.springframework.aop.ProxyMethodInvocation} interface.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -91,9 +75,8 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	 */
 	private int currentInterceptorIndex = -1;
 
-
 	/**
-	 * Construct a new ReflectiveMethodInvocation with the given arguments.
+	 * 构造方法
 	 * @param proxy the proxy object that the invocation was made on
 	 * @param target the target object to invoke
 	 * @param method the method to invoke
@@ -108,7 +91,6 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 	protected ReflectiveMethodInvocation(
 			Object proxy, @Nullable Object target, Method method, @Nullable Object[] arguments,
 			@Nullable Class<?> targetClass, List<Object> interceptorsAndDynamicMethodMatchers) {
-
 		this.proxy = proxy;
 		this.target = target;
 		this.targetClass = targetClass;
@@ -116,7 +98,6 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		this.arguments = AopProxyUtils.adaptArgumentsIfNecessary(method, arguments);
 		this.interceptorsAndDynamicMethodMatchers = interceptorsAndDynamicMethodMatchers;
 	}
-
 
 	@Override
 	public final Object getProxy() {
@@ -154,7 +135,6 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		this.arguments = arguments;
 	}
 
-
 	@Override
 	@Nullable
 	public Object proceed() throws Throwable {
@@ -162,25 +142,20 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		if (this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() - 1) {
 			return invokeJoinpoint();
 		}
-
-		Object interceptorOrInterceptionAdvice =
-				this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptorIndex);
+		Object interceptorOrInterceptionAdvice = this.interceptorsAndDynamicMethodMatchers.get(++this.currentInterceptorIndex);
 		if (interceptorOrInterceptionAdvice instanceof InterceptorAndDynamicMethodMatcher) {
 			// Evaluate dynamic method matcher here: static part will already have
 			// been evaluated and found to match.
-			InterceptorAndDynamicMethodMatcher dm =
-					(InterceptorAndDynamicMethodMatcher) interceptorOrInterceptionAdvice;
+			InterceptorAndDynamicMethodMatcher dm = (InterceptorAndDynamicMethodMatcher) interceptorOrInterceptionAdvice;
 			Class<?> targetClass = (this.targetClass != null ? this.targetClass : this.method.getDeclaringClass());
 			if (dm.methodMatcher.matches(this.method, targetClass, this.arguments)) {
 				return dm.interceptor.invoke(this);
-			}
-			else {
+			} else {
 				// Dynamic matching failed.
 				// Skip this interceptor and invoke the next in the chain.
 				return proceed();
 			}
-		}
-		else {
+		} else {
 			// It's an interceptor, so we just invoke it: The pointcut will have
 			// been evaluated statically before this object was constructed.
 			return ((MethodInterceptor) interceptorOrInterceptionAdvice).invoke(this);

@@ -25,10 +25,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Convenient class for building up pointcuts.
- *
- * <p>All methods return {@code ComposablePointcut}, so we can use concise idioms
- * like in the following example.
+ * ComposablePointcut：Pointcut的组合实现，Convenient class for building up pointcuts.
+ * <p>All methods return {@code ComposablePointcut}, so we can use concise idioms like in the following example.
  *
  * <pre class="code">Pointcut pc = new ComposablePointcut()
  *                      .union(classFilter)
@@ -42,61 +40,38 @@ import org.springframework.util.Assert;
  * @see Pointcuts
  */
 public class ComposablePointcut implements Pointcut, Serializable {
-
-	/** use serialVersionUID from Spring 1.2 for interoperability. */
 	private static final long serialVersionUID = -2743223737633663832L;
 
 	private ClassFilter classFilter;
 
 	private MethodMatcher methodMatcher;
 
-
 	/**
-	 * Create a default ComposablePointcut, with {@code ClassFilter.TRUE}
-	 * and {@code MethodMatcher.TRUE}.
+	 * 构造方法
 	 */
 	public ComposablePointcut() {
 		this.classFilter = ClassFilter.TRUE;
 		this.methodMatcher = MethodMatcher.TRUE;
 	}
 
-	/**
-	 * Create a ComposablePointcut based on the given Pointcut.
-	 * @param pointcut the original Pointcut
-	 */
 	public ComposablePointcut(Pointcut pointcut) {
 		Assert.notNull(pointcut, "Pointcut must not be null");
 		this.classFilter = pointcut.getClassFilter();
 		this.methodMatcher = pointcut.getMethodMatcher();
 	}
 
-	/**
-	 * Create a ComposablePointcut for the given ClassFilter,
-	 * with {@code MethodMatcher.TRUE}.
-	 * @param classFilter the ClassFilter to use
-	 */
 	public ComposablePointcut(ClassFilter classFilter) {
 		Assert.notNull(classFilter, "ClassFilter must not be null");
 		this.classFilter = classFilter;
 		this.methodMatcher = MethodMatcher.TRUE;
 	}
 
-	/**
-	 * Create a ComposablePointcut for the given MethodMatcher,
-	 * with {@code ClassFilter.TRUE}.
-	 * @param methodMatcher the MethodMatcher to use
-	 */
 	public ComposablePointcut(MethodMatcher methodMatcher) {
 		Assert.notNull(methodMatcher, "MethodMatcher must not be null");
 		this.classFilter = ClassFilter.TRUE;
 		this.methodMatcher = methodMatcher;
 	}
 
-	/**
-	 * Create a ComposablePointcut for the given ClassFilter and MethodMatcher.
-	 * @param classFilter the ClassFilter to use
-	 * @param methodMatcher the MethodMatcher to use
-	 */
 	public ComposablePointcut(ClassFilter classFilter, MethodMatcher methodMatcher) {
 		Assert.notNull(classFilter, "ClassFilter must not be null");
 		Assert.notNull(methodMatcher, "MethodMatcher must not be null");
@@ -104,9 +79,8 @@ public class ComposablePointcut implements Pointcut, Serializable {
 		this.methodMatcher = methodMatcher;
 	}
 
-
 	/**
-	 * Apply a union with the given ClassFilter.
+	 * 并集：Apply a union with the given ClassFilter.
 	 * @param other the ClassFilter to apply a union with
 	 * @return this composable pointcut (for call chaining)
 	 */
@@ -116,7 +90,7 @@ public class ComposablePointcut implements Pointcut, Serializable {
 	}
 
 	/**
-	 * Apply an intersection with the given ClassFilter.
+	 * 交集：Apply an intersection with the given ClassFilter.
 	 * @param other the ClassFilter to apply an intersection with
 	 * @return this composable pointcut (for call chaining)
 	 */
@@ -126,7 +100,7 @@ public class ComposablePointcut implements Pointcut, Serializable {
 	}
 
 	/**
-	 * Apply a union with the given MethodMatcher.
+	 * 并集：Apply a union with the given MethodMatcher.
 	 * @param other the MethodMatcher to apply a union with
 	 * @return this composable pointcut (for call chaining)
 	 */
@@ -136,7 +110,7 @@ public class ComposablePointcut implements Pointcut, Serializable {
 	}
 
 	/**
-	 * Apply an intersection with the given MethodMatcher.
+	 * 交集：Apply an intersection with the given MethodMatcher.
 	 * @param other the MethodMatcher to apply an intersection with
 	 * @return this composable pointcut (for call chaining)
 	 */
@@ -146,7 +120,7 @@ public class ComposablePointcut implements Pointcut, Serializable {
 	}
 
 	/**
-	 * Apply a union with the given Pointcut.
+	 * 并集：Apply a union with the given Pointcut.
 	 * <p>Note that for a Pointcut union, methods will only match if their
 	 * original ClassFilter (from the originating Pointcut) matches as well.
 	 * MethodMatchers and ClassFilters from different Pointcuts will never
@@ -155,14 +129,13 @@ public class ComposablePointcut implements Pointcut, Serializable {
 	 * @return this composable pointcut (for call chaining)
 	 */
 	public ComposablePointcut union(Pointcut other) {
-		this.methodMatcher = MethodMatchers.union(
-				this.methodMatcher, this.classFilter, other.getMethodMatcher(), other.getClassFilter());
+		this.methodMatcher = MethodMatchers.union(this.methodMatcher, this.classFilter, other.getMethodMatcher(), other.getClassFilter());
 		this.classFilter = ClassFilters.union(this.classFilter, other.getClassFilter());
 		return this;
 	}
 
 	/**
-	 * Apply an intersection with the given Pointcut.
+	 * 交集：Apply an intersection with the given Pointcut.
 	 * @param other the Pointcut to apply an intersection with
 	 * @return this composable pointcut (for call chaining)
 	 */
