@@ -28,8 +28,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * {@link AspectJAwareAdvisorAutoProxyCreator} subclass that processes all AspectJ
- * annotation aspects in the current application context, as well as Spring Advisors.
+ * AnnotationAwareAspectJAutoProxyCreator：基于AspectJ注解驱动的自动动态代理
+ * {@link AspectJAwareAdvisorAutoProxyCreator} subclass that processes all AspectJ annotation aspects in the current application context,
+ * as well as Spring Advisors.
  *
  * <p>Any AspectJ annotated classes will automatically be recognized, and their
  * advice applied if Spring AOP's proxy-based model is capable of applying it.
