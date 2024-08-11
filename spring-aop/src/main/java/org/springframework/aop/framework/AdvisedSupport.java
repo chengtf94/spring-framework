@@ -43,7 +43,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 
 /**
- * AdvisedSupport：AOP代理配置管理基础类
+ * AdvisedSupport：AOP代理对象 配置管理器
  * Base class for AOP proxy configuration managers.
  * These are not themselves AOP proxies, but subclasses of this class are
  * normally factories from which AOP proxy instances are obtained directly.
@@ -56,22 +56,20 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	private static final long serialVersionUID = 2651364800145442165L;
 
 	/**
-	 * Canonical TargetSource when there's no target, and behavior is
-	 * supplied by the advisors.
+	 * 目标源：Canonical TargetSource when there's no target, and behavior is supplied by the advisors.
 	 */
 	public static final TargetSource EMPTY_TARGET_SOURCE = EmptyTargetSource.INSTANCE;
 
-
-	/** 目标对象：Package-protected to allow direct access for efficiency. */
+	/** 目标对象来源：Package-protected to allow direct access for efficiency. */
 	TargetSource targetSource = EMPTY_TARGET_SOURCE;
 
 	/** Whether the Advisors are already filtered for the specific target class. */
 	private boolean preFiltered = false;
 
-	/** The AdvisorChainFactory to use. */
+	/** 切面链工厂：The AdvisorChainFactory to use. */
 	AdvisorChainFactory advisorChainFactory = new DefaultAdvisorChainFactory();
 
-	/** Cache with Method as key and advisor chain List as value. */
+	/** 方法切面链缓存Map：Cache with Method as key and advisor chain List as value. */
 	private transient Map<MethodCacheKey, List<Object>> methodCache;
 
 	/**
@@ -117,17 +115,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	}
 
 	/**
-	 * Set a target class to be proxied, indicating that the proxy
-	 * should be castable to the given class.
-	 * <p>Internally, an {@link org.springframework.aop.target.EmptyTargetSource}
-	 * for the given target class will be used. The kind of proxy needed
-	 * will be determined on actual creation of the proxy.
-	 * <p>This is a replacement for setting a "targetSource" or "target",
-	 * for the case where we want a proxy based on a target class
-	 * (which can be an interface or a concrete class) without having
-	 * a fully capable TargetSource available.
-	 * @see #setTargetSource
-	 * @see #setTarget
+	 * Set a target class to be proxied, indicating that the proxy should be castable to the given class.
 	 */
 	public void setTargetClass(@Nullable Class<?> targetClass) {
 		this.targetSource = EmptyTargetSource.forClass(targetClass);
