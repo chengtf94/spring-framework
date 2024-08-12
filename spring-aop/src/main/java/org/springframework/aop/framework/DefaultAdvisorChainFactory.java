@@ -51,8 +51,10 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 	@Override
 	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Advised config, Method method, @Nullable Class<?> targetClass) {
 
+		// 根据AOP中配置创建通知器链的集合
 		// This is somewhat tricky... We have to process introductions first,
 		// but we need to preserve order in the ultimate list.
+		// 获取AdvisorAdapterRegistry对象，单例对象
 		AdvisorAdapterRegistry registry = GlobalAdvisorAdapterRegistry.getInstance();
 		Advisor[] advisors = config.getAdvisors();
 		List<Object> interceptorList = new ArrayList<>(advisors.length);
@@ -61,10 +63,13 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 
 		for (Advisor advisor : advisors) {
 			if (advisor instanceof PointcutAdvisor) {
+				// AOP配置对通知已经过滤或者当前切⼊点的类过滤器匹配⽬标类
 				// Add it conditionally.
 				PointcutAdvisor pointcutAdvisor = (PointcutAdvisor) advisor;
 				if (config.isPreFiltered() || pointcutAdvisor.getPointcut().getClassFilter().matches(actualClass)) {
+					// 获取advisor切点的⽅法匹配器
 					MethodMatcher mm = pointcutAdvisor.getPointcut().getMethodMatcher();
+					// ⽬标类⽅法匹配切点
 					boolean match;
 					if (mm instanceof IntroductionAwareMethodMatcher) {
 						if (hasIntroductions == null) {
@@ -75,14 +80,17 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 						match = mm.matches(method, actualClass);
 					}
 					if (match) {
+						// 获取advisor中的⽅法拦截器列表
 						MethodInterceptor[] interceptors = registry.getInterceptors(advisor);
 						if (mm.isRuntime()) {
+							// 若⽅法匹配器是运⾏时动态匹配的，将⽅法拦截器和⽅法匹配器封装后添加到返回的通知器集合中
 							// Creating a new object instance in the getInterceptors() method
 							// isn't a problem as we normally cache created chains.
 							for (MethodInterceptor interceptor : interceptors) {
 								interceptorList.add(new InterceptorAndDynamicMethodMatcher(interceptor, mm));
 							}
 						} else {
+							// 将⽅法拦截器添加到返回的通知器集合中
 							interceptorList.addAll(Arrays.asList(interceptors));
 						}
 					}
