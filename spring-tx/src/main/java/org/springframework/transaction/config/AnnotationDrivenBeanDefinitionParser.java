@@ -126,8 +126,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				Object eleSource = parserContext.extractSource(element);
 
 				// Create the TransactionAttributeSource definition.
-				RootBeanDefinition sourceDef = new RootBeanDefinition(
-						"org.springframework.transaction.annotation.AnnotationTransactionAttributeSource");
+				RootBeanDefinition sourceDef = new RootBeanDefinition("org.springframework.transaction.annotation.AnnotationTransactionAttributeSource");
 				sourceDef.setSource(eleSource);
 				sourceDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 				String sourceName = parserContext.getReaderContext().registerWithGeneratedName(sourceDef);
@@ -158,6 +157,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 				parserContext.registerComponent(compositeDef);
 			}
 		}
+
 	}
 
 }

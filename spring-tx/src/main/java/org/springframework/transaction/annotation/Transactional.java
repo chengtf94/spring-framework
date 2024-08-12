@@ -117,6 +117,7 @@ import org.springframework.transaction.TransactionDefinition;
 public @interface Transactional {
 
 	/**
+	 * transactionManager的别名
 	 * Alias for {@link #transactionManager}.
 	 * @see #transactionManager
 	 */
@@ -124,6 +125,7 @@ public @interface Transactional {
 	String value() default "";
 
 	/**
+	 * value的别名
 	 * A <em>qualifier</em> value for the specified transaction.
 	 * <p>May be used to determine the target transaction manager, matching the
 	 * qualifier value (or the bean name) of a specific
@@ -150,6 +152,7 @@ public @interface Transactional {
 	String[] label() default {};
 
 	/**
+	 * 传播行为
 	 * The transaction propagation type.
 	 * <p>Defaults to {@link Propagation#REQUIRED}.
 	 * @see org.springframework.transaction.interceptor.TransactionAttribute#getPropagationBehavior()
@@ -157,6 +160,7 @@ public @interface Transactional {
 	Propagation propagation() default Propagation.REQUIRED;
 
 	/**
+	 * 隔离级别：默认为数据库
 	 * The transaction isolation level.
 	 * <p>Defaults to {@link Isolation#DEFAULT}.
 	 * <p>Exclusively designed for use with {@link Propagation#REQUIRED} or
@@ -171,6 +175,7 @@ public @interface Transactional {
 	Isolation isolation() default Isolation.DEFAULT;
 
 	/**
+	 * 超时时间：默认为数据库
 	 * The timeout for this transaction (in seconds).
 	 * <p>Defaults to the default timeout of the underlying transaction system.
 	 * <p>Exclusively designed for use with {@link Propagation#REQUIRED} or
@@ -194,6 +199,7 @@ public @interface Transactional {
 	String timeoutString() default "";
 
 	/**
+	 * 是否为只读事务：默认为非只读
 	 * A boolean flag that can be set to {@code true} if the transaction is
 	 * effectively read-only, allowing for corresponding optimizations at runtime.
 	 * <p>Defaults to {@code false}.
@@ -208,9 +214,9 @@ public @interface Transactional {
 	boolean readOnly() default false;
 
 	/**
+	 * 需要回滚的异常类
 	 * Defines zero (0) or more exception {@linkplain Class classes}, which must be
-	 * subclasses of {@link Throwable}, indicating which exception types must cause
-	 * a transaction rollback.
+	 * subclasses of {@link Throwable}, indicating which exception types must cause a transaction rollback.
 	 * <p>By default, a transaction will be rolled back on {@link RuntimeException}
 	 * and {@link Error} but not on checked exceptions (business exceptions). See
 	 * {@link org.springframework.transaction.interceptor.DefaultTransactionAttribute#rollbackOn(Throwable)}
@@ -227,9 +233,9 @@ public @interface Transactional {
 	Class<? extends Throwable>[] rollbackFor() default {};
 
 	/**
+	 * 需要回滚的异常类名
 	 * Defines zero (0) or more exception name patterns (for exceptions which must be a
-	 * subclass of {@link Throwable}), indicating which exception types must cause
-	 * a transaction rollback.
+	 * subclass of {@link Throwable}), indicating which exception types must cause a transaction rollback.
 	 * <p>See the {@linkplain Transactional class-level javadocs} for further details
 	 * on rollback rule semantics, patterns, and warnings regarding possible
 	 * unintentional matches.
@@ -240,6 +246,7 @@ public @interface Transactional {
 	String[] rollbackForClassName() default {};
 
 	/**
+	 * 不回滚的异常类
 	 * Defines zero (0) or more exception {@link Class Classes}, which must be
 	 * subclasses of {@link Throwable}, indicating which exception types must
 	 * <b>not</b> cause a transaction rollback.
@@ -255,6 +262,7 @@ public @interface Transactional {
 	Class<? extends Throwable>[] noRollbackFor() default {};
 
 	/**
+	 * 不回滚的异常类名
 	 * Defines zero (0) or more exception name patterns (for exceptions which must be a
 	 * subclass of {@link Throwable}) indicating which exception types must <b>not</b>
 	 * cause a transaction rollback.
