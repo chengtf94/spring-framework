@@ -92,12 +92,7 @@ public abstract class AbstractFallbackTransactionAttributeSource
 
 
 	/**
-	 * Determine the transaction attribute for this method invocation.
-	 * <p>Defaults to the class's transaction attribute if no method attribute is found.
-	 * @param method the method for the current invocation (never {@code null})
-	 * @param targetClass the target class for this invocation (may be {@code null})
-	 * @return a TransactionAttribute for this method, or {@code null} if the method
-	 * is not transactional
+	 * 先从拦截的方法上找@Transactional注解，如果方法上没有的话，再从方法所在的类上找，如果类上还没有的话尝试从接口或者父类上找
 	 */
 	@Override
 	@Nullable
@@ -106,7 +101,7 @@ public abstract class AbstractFallbackTransactionAttributeSource
 			return null;
 		}
 
-		// First, see if we have a cached value.
+		// 查询缓存：First, see if we have a cached value.
 		Object cacheKey = getCacheKey(method, targetClass);
 		TransactionAttribute cached = this.attributeCache.get(cacheKey);
 		if (cached != null) {
@@ -118,15 +113,13 @@ public abstract class AbstractFallbackTransactionAttributeSource
 			else {
 				return cached;
 			}
-		}
-		else {
-			// We need to work it out.
+		} else {
+			// 真正的执行解析：We need to work it out.
 			TransactionAttribute txAttr = computeTransactionAttribute(method, targetClass);
-			// Put it in the cache.
+			// 写入缓存：Put it in the cache.
 			if (txAttr == null) {
 				this.attributeCache.put(cacheKey, NULL_TRANSACTION_ATTRIBUTE);
-			}
-			else {
+			} else {
 				String methodIdentification = ClassUtils.getQualifiedMethodName(method, targetClass);
 				if (txAttr instanceof DefaultTransactionAttribute) {
 					DefaultTransactionAttribute dta = (DefaultTransactionAttribute) txAttr;
@@ -163,27 +156,31 @@ public abstract class AbstractFallbackTransactionAttributeSource
 	 */
 	@Nullable
 	protected TransactionAttribute computeTransactionAttribute(Method method, @Nullable Class<?> targetClass) {
-		// Don't allow non-public methods, as configured.
+
+		//  默认情况下allowPublicMethodsOnly为true，这意味着@Transactional如果放在非public方法上不会生效
+		//  Don't allow non-public methods, as configured.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
 			return null;
 		}
 
+		// method是接口中的方法，specificMethod是具体实现类的方法
 		// The method may be on an interface, but we need attributes from the target class.
 		// If the target class is null, the method will be unchanged.
 		Method specificMethod = AopUtils.getMostSpecificMethod(method, targetClass);
 
-		// First try is the method in the target class.
+		// #1 先在目标类方法上找：First try is the method in the target class.
 		TransactionAttribute txAttr = findTransactionAttribute(specificMethod);
 		if (txAttr != null) {
 			return txAttr;
 		}
 
-		// Second try is the transaction attribute on the target class.
+		// #2 在目标类上找：Second try is the transaction attribute on the target class.
 		txAttr = findTransactionAttribute(specificMethod.getDeclaringClass());
 		if (txAttr != null && ClassUtils.isUserLevelMethod(method)) {
 			return txAttr;
 		}
 
+		// #3 降级到接口、接口中的方法上找这个注解
 		if (specificMethod != method) {
 			// Fallback is to look at the original method.
 			txAttr = findTransactionAttribute(method);

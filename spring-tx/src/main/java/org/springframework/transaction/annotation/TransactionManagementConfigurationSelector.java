@@ -23,10 +23,8 @@ import org.springframework.transaction.config.TransactionManagementConfigUtils;
 import org.springframework.util.ClassUtils;
 
 /**
- * TransactionManagementConfigurationSelector：
  * Selects which implementation of {@link AbstractTransactionManagementConfiguration}
- * should be used based on the value of {@link EnableTransactionManagement#mode} on the
- * importing {@code @Configuration} class.
+ * should be used based on the value of {@link EnableTransactionManagement#mode} on the importing {@code @Configuration} class.
  *
  * @author Chris Beams
  * @author Juergen Hoeller
@@ -39,10 +37,8 @@ import org.springframework.util.ClassUtils;
 public class TransactionManagementConfigurationSelector extends AdviceModeImportSelector<EnableTransactionManagement> {
 
 	/**
-	 * Returns {@link ProxyTransactionManagementConfiguration} or
-	 * {@code AspectJ(Jta)TransactionManagementConfiguration} for {@code PROXY}
-	 * and {@code ASPECTJ} values of {@link EnableTransactionManagement#mode()},
-	 * respectively.
+	 * Returns {@link ProxyTransactionManagementConfiguration} or {@code AspectJ(Jta)TransactionManagementConfiguration}
+	 * for {@code PROXY} and {@code ASPECTJ} values of {@link EnableTransactionManagement#mode()}, respectively.
 	 */
 	@Override
 	protected String[] selectImports(AdviceMode adviceMode) {

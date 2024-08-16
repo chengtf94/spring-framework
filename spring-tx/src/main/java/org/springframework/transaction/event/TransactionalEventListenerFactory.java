@@ -35,7 +35,6 @@ public class TransactionalEventListenerFactory implements EventListenerFactory, 
 
 	private int order = 50;
 
-
 	public void setOrder(int order) {
 		this.order = order;
 	}

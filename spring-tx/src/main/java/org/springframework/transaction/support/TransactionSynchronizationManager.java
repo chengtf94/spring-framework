@@ -30,36 +30,11 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Central delegate that manages resources and transaction synchronizations per thread.
- * To be used by resource management code but not by typical application code.
- *
- * <p>Supports one resource per key without overwriting, that is, a resource needs
- * to be removed before a new one can be set for the same key.
- * Supports a list of transaction synchronizations if synchronization is active.
- *
- * <p>Resource management code should check for thread-bound resources, e.g. JDBC
- * Connections or Hibernate Sessions, via {@code getResource}. Such code is
- * normally not supposed to bind resources to threads, as this is the responsibility
- * of transaction managers. A further option is to lazily bind on first use if
- * transaction synchronization is active, for performing transactions that span
- * an arbitrary number of resources.
- *
- * <p>Transaction synchronization must be activated and deactivated by a transaction
- * manager via {@link #initSynchronization()} and {@link #clearSynchronization()}.
- * This is automatically supported by {@link AbstractPlatformTransactionManager},
- * and thus by all standard Spring transaction managers, such as
- * {@link org.springframework.transaction.jta.JtaTransactionManager} and
- * {@link org.springframework.jdbc.datasource.DataSourceTransactionManager}.
- *
- * <p>Resource management code should only register synchronizations when this
- * manager is active, which can be checked via {@link #isSynchronizationActive};
- * it should perform immediate resource cleanup else. If transaction synchronization
- * isn't active, there is either no current transaction, or the transaction manager
- * doesn't support transaction synchronization.
- *
- * <p>Synchronization is for example used to always return the same resources
- * within a JTA transaction, e.g. a JDBC Connection or a Hibernate Session for
- * any given DataSource or SessionFactory, respectively.
+ * TransactionSynchronizationManager：事务同步管理器，用于事务资源的同步、行为的同步
+ * 1）资源的同步：在一个事务中我们往往会一次执行多个SQL（如果是单条的SQL实际上没有必要开启事务），为了保证事务所有的SQL都能够使用一个数据库连接，
+ * 这个时候我们需要将数据库连接跟事务进行同步，这个时候数据库连接就是跟这个事务同步的一个资源。
+ * 2）行为的同步：还是以数据库连接为例子，在事务开启之前我们需要先获取一个数据库连接，同样的在事务提交时我们需要将连接关闭
+ * （不一定是真正的关闭，如果是连接池只是归还到连接池中），这个时候关闭连接这个行为也需要跟事务进行同步。
  *
  * @author Juergen Hoeller
  * @since 02.06.2003
@@ -73,23 +48,35 @@ import org.springframework.util.Assert;
  */
 public abstract class TransactionSynchronizationManager {
 
-	private static final ThreadLocal<Map<Object, Object>> resources =
-			new NamedThreadLocal<>("Transactional resources");
+	/**
+	 * 同步的资源：也就是JDBC连接的同步，用于保证事务所有的SQL都能够使用同一个数据库连接
+	 */
+	private static final ThreadLocal<Map<Object, Object>> resources = new NamedThreadLocal<>("Transactional resources");
 
-	private static final ThreadLocal<Set<TransactionSynchronization>> synchronizations =
-			new NamedThreadLocal<>("Transaction synchronizations");
+	/**
+	 * 行为的同步
+	 */
+	private static final ThreadLocal<Set<TransactionSynchronization>> synchronizations = new NamedThreadLocal<>("Transaction synchronizations");
 
-	private static final ThreadLocal<String> currentTransactionName =
-			new NamedThreadLocal<>("Current transaction name");
+	/**
+	 * 事务的名称
+	 */
+	private static final ThreadLocal<String> currentTransactionName = new NamedThreadLocal<>("Current transaction name");
 
-	private static final ThreadLocal<Boolean> currentTransactionReadOnly =
-			new NamedThreadLocal<>("Current transaction read-only status");
+	/**
+	 * 事务是否被标记成只读
+	 */
+	private static final ThreadLocal<Boolean> currentTransactionReadOnly = new NamedThreadLocal<>("Current transaction read-only status");
 
-	private static final ThreadLocal<Integer> currentTransactionIsolationLevel =
-			new NamedThreadLocal<>("Current transaction isolation level");
+	/**
+	 * 事务的隔离级别
+	 */
+	private static final ThreadLocal<Integer> currentTransactionIsolationLevel = new NamedThreadLocal<>("Current transaction isolation level");
 
-	private static final ThreadLocal<Boolean> actualTransactionActive =
-			new NamedThreadLocal<>("Actual transaction active");
+	/**
+	 * 是否真实开启了事务
+	 */
+	private static final ThreadLocal<Boolean> actualTransactionActive = new NamedThreadLocal<>("Actual transaction active");
 
 
 	//-------------------------------------------------------------------------

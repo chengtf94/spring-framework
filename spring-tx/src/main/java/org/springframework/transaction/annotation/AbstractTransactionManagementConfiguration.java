@@ -55,14 +55,17 @@ public abstract class AbstractTransactionManagementConfiguration implements Impo
 
 	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
-		this.enableTx = AnnotationAttributes.fromMap(
-				importMetadata.getAnnotationAttributes(EnableTransactionManagement.class.getName()));
+		// 将EnableTransactionManagement注解中的属性对存入到Map中，AnnotationAttributes实际上就是个Map
+		this.enableTx = AnnotationAttributes.fromMap(importMetadata.getAnnotationAttributes(EnableTransactionManagement.class.getName()));
 		if (this.enableTx == null) {
-			throw new IllegalArgumentException(
-					"@EnableTransactionManagement is not present on importing class " + importMetadata.getClassName());
+			throw new IllegalArgumentException("@EnableTransactionManagement is not present on importing class "
+					+ importMetadata.getClassName());
 		}
 	}
 
+	/**
+	 * 通过TransactionManagementConfigurer向容器中注册一个事务管理器：一般不会这么使用，更多的是通过@Bean的方式直接注册
+	 */
 	@Autowired(required = false)
 	void setConfigurers(Collection<TransactionManagementConfigurer> configurers) {
 		if (CollectionUtils.isEmpty(configurers)) {
@@ -75,7 +78,9 @@ public abstract class AbstractTransactionManagementConfiguration implements Impo
 		this.txManager = configurer.annotationDrivenTransactionManager();
 	}
 
-
+	/**
+	 * 向容器中注册一个TransactionalEventListenerFactory：处理@TransactionalEventListener注解
+	 */
 	@Bean(name = TransactionManagementConfigUtils.TRANSACTIONAL_EVENT_LISTENER_FACTORY_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public static TransactionalEventListenerFactory transactionalEventListenerFactory() {

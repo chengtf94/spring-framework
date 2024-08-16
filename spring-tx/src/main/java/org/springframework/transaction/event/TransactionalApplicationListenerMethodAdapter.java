@@ -45,7 +45,8 @@ import org.springframework.util.Assert;
  * @see TransactionalApplicationListener
  * @see TransactionalApplicationListenerAdapter
  */
-public class TransactionalApplicationListenerMethodAdapter extends ApplicationListenerMethodAdapter
+public class TransactionalApplicationListenerMethodAdapter
+		extends ApplicationListenerMethodAdapter
 		implements TransactionalApplicationListener<ApplicationEvent> {
 
 	private final TransactionPhase transactionPhase;
@@ -53,7 +54,6 @@ public class TransactionalApplicationListenerMethodAdapter extends ApplicationLi
 	private final boolean fallbackExecution;
 
 	private final List<SynchronizationCallback> callbacks = new CopyOnWriteArrayList<>();
-
 
 	/**
 	 * Construct a new TransactionalApplicationListenerMethodAdapter.
