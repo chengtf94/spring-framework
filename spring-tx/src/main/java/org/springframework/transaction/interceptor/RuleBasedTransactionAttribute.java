@@ -23,11 +23,7 @@ import java.util.List;
 import org.springframework.lang.Nullable;
 
 /**
- * TransactionAttribute implementation that works out whether a given exception
- * should cause transaction rollback by applying a number of rollback rules,
- * both positive and negative. If no custom rollback rules apply, this attribute
- * behaves like DefaultTransactionAttribute (rolling back on runtime exceptions).
- *
+ * RuleBasedTransactionAttribute：在@Transactional中可以定义事务的属性，实际上就会被封装到RuleBasedTransactionAttribute中
  * <p>{@link TransactionAttributeEditor} creates objects of this class.
  *
  * @author Rod Johnson

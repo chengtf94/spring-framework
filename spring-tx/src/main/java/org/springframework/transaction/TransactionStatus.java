@@ -20,16 +20,6 @@ import java.io.Flushable;
 
 /**
  * TransactionStatus：事务状态接口
- * Representation of an ongoing {@link PlatformTransactionManager} transaction.
- * Extends the common {@link TransactionExecution} interface.
- *
- * <p>Transactional code can use this to retrieve status information,
- * and to programmatically request a rollback (instead of throwing
- * an exception that causes an implicit rollback).
- *
- * <p>Includes the {@link SavepointManager} interface to provide access
- * to savepoint management facilities. Note that savepoint management
- * is only available if supported by the underlying transaction manager.
  *
  * @author Juergen Hoeller
  * @since 27.03.2003
@@ -41,25 +31,15 @@ import java.io.Flushable;
 public interface TransactionStatus extends TransactionExecution, SavepointManager, Flushable {
 
 	/**
-	 * Return whether this transaction internally carries a savepoint,
-	 * that is, has been created as nested transaction based on a savepoint.
-	 * <p>This method is mainly here for diagnostic purposes, alongside
-	 * {@link #isNewTransaction()}. For programmatic handling of custom
-	 * savepoints, use the operations provided by {@link SavepointManager}.
-	 * @see #isNewTransaction()
-	 * @see #createSavepoint()
-	 * @see #rollbackToSavepoint(Object)
-	 * @see #releaseSavepoint(Object)
+	 * 判断当前事务是否设置了保存点：Return whether this transaction internally carries a savepoint,
 	 */
 	boolean hasSavepoint();
 
 	/**
-	 * Flush the underlying session to the datastore, if applicable:
-	 * for example, all affected Hibernate/JPA sessions.
-	 * <p>This is effectively just a hint and may be a no-op if the underlying
-	 * transaction manager does not have a flush concept. A flush signal may
-	 * get applied to the primary resource or to transaction synchronizations,
-	 * depending on the underlying resource.
+	 * 刷新会话：对于Hibernate/jpa而言就是调用了其session/entityManager的flush方法
+	 * Flush the underlying session to the datastore, if applicable: for example, all affected Hibernate/JPA sessions.
+	 * <p>This is effectively just a hint and may be a no-op if the underlying transaction manager does not have a flush concept.
+	 * A flush signal may get applied to the primary resource or to transaction synchronizations, depending on the underlying resource.
 	 */
 	@Override
 	void flush();

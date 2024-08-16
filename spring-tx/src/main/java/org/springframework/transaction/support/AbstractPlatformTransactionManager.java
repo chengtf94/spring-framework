@@ -37,41 +37,10 @@ import org.springframework.transaction.TransactionSuspensionNotSupportedExceptio
 import org.springframework.transaction.UnexpectedRollbackException;
 
 /**
+ * AbstractPlatformTransactionManager：事务管理器抽象基类
  * Abstract base class that implements Spring's standard transaction workflow,
  * serving as basis for concrete platform transaction managers like
  * {@link org.springframework.transaction.jta.JtaTransactionManager}.
- *
- * <p>This base class provides the following workflow handling:
- * <ul>
- * <li>determines if there is an existing transaction;
- * <li>applies the appropriate propagation behavior;
- * <li>suspends and resumes transactions if necessary;
- * <li>checks the rollback-only flag on commit;
- * <li>applies the appropriate modification on rollback
- * (actual rollback or setting rollback-only);
- * <li>triggers registered synchronization callbacks
- * (if transaction synchronization is active).
- * </ul>
- *
- * <p>Subclasses have to implement specific template methods for specific
- * states of a transaction, e.g.: begin, suspend, resume, commit, rollback.
- * The most important of them are abstract and must be provided by a concrete
- * implementation; for the rest, defaults are provided, so overriding is optional.
- *
- * <p>Transaction synchronization is a generic mechanism for registering callbacks
- * that get invoked at transaction completion time. This is mainly used internally
- * by the data access support classes for JDBC, Hibernate, JPA, etc when running
- * within a JTA transaction: They register resources that are opened within the
- * transaction for closing at transaction completion time, allowing e.g. for reuse
- * of the same Hibernate Session within the transaction. The same mechanism can
- * also be leveraged for custom synchronization needs in an application.
- *
- * <p>The state of this class is serializable, to allow for serializing the
- * transaction strategy along with proxies that carry a transaction interceptor.
- * It is up to subclasses if they wish to make their state to be serializable too.
- * They should implement the {@code java.io.Serializable} marker interface in
- * that case, and potentially a private {@code readObject()} method (according
- * to Java serialization rules) if they need to restore any transient state.
  *
  * @author Juergen Hoeller
  * @since 28.03.2003
