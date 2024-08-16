@@ -35,75 +35,7 @@ import org.springframework.transaction.support.TransactionSynchronizationUtils;
 import org.springframework.util.Assert;
 
 /**
- * {@link org.springframework.transaction.PlatformTransactionManager} implementation
- * for a single JDBC {@link javax.sql.DataSource}. This class is capable of working
- * in any environment with any JDBC driver, as long as the setup uses a
- * {@code javax.sql.DataSource} as its {@code Connection} factory mechanism.
- * Binds a JDBC {@code Connection} from the specified {@code DataSource} to the
- * current thread, potentially allowing for one thread-bound {@code Connection}
- * per {@code DataSource}.
- *
- * <p><b>Note: The {@code DataSource} that this transaction manager operates on
- * needs to return independent {@code Connection}s.</b> The {@code Connection}s
- * typically come from a connection pool but the {@code DataSource} must not return
- * specifically scoped or constrained {@code Connection}s. This transaction manager
- * will associate {@code Connection}s with thread-bound transactions, according
- * to the specified propagation behavior. It assumes that a separate, independent
- * {@code Connection} can be obtained even during an ongoing transaction.
- *
- * <p>Application code is required to retrieve the JDBC {@code Connection} via
- * {@link DataSourceUtils#getConnection(DataSource)} instead of a standard
- * EE-style {@link DataSource#getConnection()} call. Spring classes such as
- * {@link org.springframework.jdbc.core.JdbcTemplate} use this strategy implicitly.
- * If not used in combination with this transaction manager, the
- * {@link DataSourceUtils} lookup strategy behaves exactly like the native
- * {@code DataSource} lookup; it can thus be used in a portable fashion.
- *
- * <p>Alternatively, you can allow application code to work with the standard
- * EE-style lookup pattern {@link DataSource#getConnection()}, for example
- * for legacy code that is not aware of Spring at all. In that case, define a
- * {@link TransactionAwareDataSourceProxy} for your target {@code DataSource},
- * and pass that proxy {@code DataSource} to your DAOs which will automatically
- * participate in Spring-managed transactions when accessing it.
- *
- * <p>Supports custom isolation levels, and timeouts which get applied as
- * appropriate JDBC statement timeouts. To support the latter, application code
- * must either use {@link org.springframework.jdbc.core.JdbcTemplate}, call
- * {@link DataSourceUtils#applyTransactionTimeout} for each created JDBC
- * {@code Statement}, or go through a {@link TransactionAwareDataSourceProxy}
- * which will create timeout-aware JDBC {@code Connection}s and {@code Statement}s
- * automatically.
- *
- * <p>Consider defining a {@link LazyConnectionDataSourceProxy} for your target
- * {@code DataSource}, pointing both this transaction manager and your DAOs to it.
- * This will lead to optimized handling of "empty" transactions, i.e. of transactions
- * without any JDBC statements executed. A {@code LazyConnectionDataSourceProxy} will
- * not fetch an actual JDBC {@code Connection} from the target {@code DataSource}
- * until a {@code Statement} gets executed, lazily applying the specified transaction
- * settings to the target {@code Connection}.
- *
- * <p>This transaction manager supports nested transactions via the JDBC 3.0
- * {@link java.sql.Savepoint} mechanism. The
- * {@link #setNestedTransactionAllowed "nestedTransactionAllowed"} flag defaults
- * to "true", since nested transactions will work without restrictions on JDBC
- * drivers that support savepoints (such as the Oracle JDBC driver).
- *
- * <p>This transaction manager can be used as a replacement for the
- * {@link org.springframework.transaction.jta.JtaTransactionManager} in the single
- * resource case, as it does not require a container that supports JTA, typically
- * in combination with a locally defined JDBC {@code DataSource} (e.g. a Hikari
- * connection pool). Switching between this local strategy and a JTA environment
- * is just a matter of configuration!
- *
- * <p>As of 4.3.4, this transaction manager triggers flush callbacks on registered
- * transaction synchronizations (if synchronization is generally active), assuming
- * resources operating on the underlying JDBC {@code Connection}. This allows for
- * setup analogous to {@code JtaTransactionManager}, in particular with respect to
- * lazily registered ORM resources (e.g. a Hibernate {@code Session}).
- *
- * <p><b>NOTE: As of 5.3, {@link org.springframework.jdbc.support.JdbcTransactionManager}
- * is available as an extended subclass which includes commit/rollback exception
- * translation, aligned with {@link org.springframework.jdbc.core.JdbcTemplate}.</b>
+ * DataSourceTransactionManager：基于Spring JDBC 或 MyBatis 时使用
  *
  * @author Juergen Hoeller
  * @since 02.05.2003
@@ -118,19 +50,23 @@ import org.springframework.util.Assert;
  * @see org.springframework.jdbc.support.JdbcTransactionManager
  */
 @SuppressWarnings("serial")
-public class DataSourceTransactionManager extends AbstractPlatformTransactionManager
+public class DataSourceTransactionManager
+		extends AbstractPlatformTransactionManager
 		implements ResourceTransactionManager, InitializingBean {
 
+	/**
+	 * JDBC数据源
+	 */
 	@Nullable
 	private DataSource dataSource;
 
+	/**
+	 *
+	 */
 	private boolean enforceReadOnly = false;
 
-
 	/**
-	 * Create a new {@code DataSourceTransactionManager} instance.
-	 * A {@code DataSource} has to be set to be able to use it.
-	 * @see #setDataSource
+	 * 构造方法
 	 */
 	public DataSourceTransactionManager() {
 		setNestedTransactionAllowed(true);
@@ -146,24 +82,15 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		afterPropertiesSet();
 	}
 
+	@Override
+	public void afterPropertiesSet() {
+		if (getDataSource() == null) {
+			throw new IllegalArgumentException("Property 'dataSource' is required");
+		}
+	}
 
 	/**
-	 * Set the JDBC {@code DataSource} that this instance should manage transactions for.
-	 * <p>This will typically be a locally defined {@code DataSource}, for example a
-	 * Hikari connection pool. Alternatively, you can also manage transactions for a
-	 * non-XA {@code DataSource} fetched from JNDI. For an XA {@code DataSource},
-	 * use {@link org.springframework.transaction.jta.JtaTransactionManager} instead.
-	 * <p>The {@code DataSource} specified here should be the target {@code DataSource}
-	 * to manage transactions for, not a {@link TransactionAwareDataSourceProxy}.
-	 * Only data access code may work with {@code TransactionAwareDataSourceProxy} while
-	 * the transaction manager needs to work on the underlying target {@code DataSource}.
-	 * If there is nevertheless a {@code TransactionAwareDataSourceProxy} passed in,
-	 * it will be unwrapped to extract its target {@code DataSource}.
-	 * <p><b>The {@code DataSource} passed in here needs to return independent
-	 * {@code Connection}s.</b> The {@code Connection}s typically come from a
-	 * connection pool but the {@code DataSource} must not return specifically
-	 * scoped or constrained {@code Connection}s, just possibly lazily fetched.
-	 * @see LazyConnectionDataSourceProxy
+	 * 设置JDBC数据源
 	 */
 	public void setDataSource(@Nullable DataSource dataSource) {
 		if (dataSource instanceof TransactionAwareDataSourceProxy) {
@@ -171,26 +98,16 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			// for its underlying target DataSource, else data access code won't see
 			// properly exposed transactions (i.e. transactions for the target DataSource).
 			this.dataSource = ((TransactionAwareDataSourceProxy) dataSource).getTargetDataSource();
-		}
-		else {
+		} else {
 			this.dataSource = dataSource;
 		}
 	}
 
-	/**
-	 * Return the JDBC {@code DataSource} that this instance manages transactions for.
-	 */
 	@Nullable
 	public DataSource getDataSource() {
 		return this.dataSource;
 	}
 
-	/**
-	 * Obtain the {@code DataSource} for actual use.
-	 * @return the DataSource (never {@code null})
-	 * @throws IllegalStateException in case of no DataSource set
-	 * @since 5.0
-	 */
 	protected DataSource obtainDataSource() {
 		DataSource dataSource = getDataSource();
 		Assert.state(dataSource != null, "No DataSource set");
@@ -198,8 +115,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	}
 
 	/**
-	 * Specify whether to enforce the read-only nature of a transaction
-	 * (as indicated by {@link TransactionDefinition#isReadOnly()})
+	 * Specify whether to enforce the read-only nature of a transaction (as indicated by {@link TransactionDefinition#isReadOnly()})
 	 * through an explicit statement on the transactional connection:
 	 * "SET TRANSACTION READ ONLY" as understood by Oracle, MySQL and Postgres.
 	 * <p>The exact treatment, including any SQL statement executed on the connection,
@@ -220,22 +136,13 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	}
 
 	/**
-	 * Return whether to enforce the read-only nature of a transaction
-	 * through an explicit statement on the transactional connection.
+	 * Return whether to enforce the read-only nature of a transaction through an explicit statement on the transactional connection.
 	 * @since 4.3.7
 	 * @see #setEnforceReadOnly
 	 */
 	public boolean isEnforceReadOnly() {
 		return this.enforceReadOnly;
 	}
-
-	@Override
-	public void afterPropertiesSet() {
-		if (getDataSource() == null) {
-			throw new IllegalArgumentException("Property 'dataSource' is required");
-		}
-	}
-
 
 	@Override
 	public Object getResourceFactory() {
@@ -246,8 +153,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	protected Object doGetTransaction() {
 		DataSourceTransactionObject txObject = new DataSourceTransactionObject();
 		txObject.setSavepointAllowed(isNestedTransactionAllowed());
-		ConnectionHolder conHolder =
-				(ConnectionHolder) TransactionSynchronizationManager.getResource(obtainDataSource());
+		ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(obtainDataSource());
 		txObject.setConnectionHolder(conHolder, false);
 		return txObject;
 	}

@@ -158,8 +158,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 
 	/**
 	 * Set whether nested transactions are allowed. Default is "false".
-	 * <p>Typically initialized with an appropriate default by the
-	 * concrete transaction manager subclass.
+	 * <p>Typically initialized with an appropriate default by the concrete transaction manager subclass.
 	 */
 	public final void setNestedTransactionAllowed(boolean nestedTransactionAllowed) {
 		this.nestedTransactionAllowed = nestedTransactionAllowed;
